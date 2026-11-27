@@ -1914,12 +1914,12 @@ export function ThemeManage() {
                     const active = draft.routePremiumEffect === effectKey;
                     const label =
                       effectKey === "beam"
-                        ? tx("霓虹跑框", "霓虹跑框", "Neon Beam")
+                        ? tx("黑金跑框", "黑金跑框", "Obsidian Neon")
                         : effectKey === "holo"
-                          ? tx("全息闪卡", "全息閃卡", "Holo Prism")
+                          ? tx("全息闪卡", "全息閃卡", "SSR Holo")
                           : effectKey === "aurora"
-                            ? tx("极光脉冲", "極光脈衝", "Aurora")
-                            : tx("柔和流光", "柔和流光", "Soft Sheen");
+                            ? tx("极光流彩", "極光流彩", "Vivid Aurora")
+                            : tx("冰晶流光", "冰晶流光", "Crystal Sheen");
                     return (
                       <button
                         key={effectKey}

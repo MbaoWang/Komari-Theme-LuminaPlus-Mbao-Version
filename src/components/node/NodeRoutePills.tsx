@@ -13,23 +13,97 @@ import {
 
 export function CarrierLogoIcon({
   carrier,
-  size = 11,
+  size = 13,
 }: {
   carrier: RouteCarrierKey;
   size?: number;
 }) {
   if (carrier === "ct") {
-    // 中國電信：雙弧線經典輪廓（專為小尺寸高對比簡化）
+    // 中國電信：標誌性雙「C」交錯飛翔弧線（直弧 + 橫展飛弧）
     return (
-      <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden>
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
         <path
-          d="M12.6 4.5C11.3 3.2 9.5 2.5 7.5 2.7C4.4 3 2.3 5.5 2.6 8.6C2.9 11.4 5.3 13.4 8.3 13.3C10.3 13.2 12 12.2 13 10.6"
+          d="M15.9 15.6C15.3 18.2 14.1 20.6 12.1 21.2C10.5 21.7 9.4 19.7 9.1 16.6C8.7 12.8 9.2 7.8 11.4 4.1C12.3 2.5 14.1 2.5 15.1 4.2"
           stroke="currentColor"
-          strokeWidth="2.1"
+          strokeWidth="2.35"
           strokeLinecap="round"
         />
         <path
-          d="M4.6 8.3C6.1 6.3 9.2 5.7 13.2 7.2"
+          d="M8.5 5.4C4.9 6.6 2.3 8.7 2.4 11.2C2.5 13.2 5.4 14.1 9.4 13.7C14.5 13.2 20.2 10.8 21.5 7.7C22.2 6.0 20.6 4.6 17.8 4.2"
+          stroke="currentColor"
+          strokeWidth="2.25"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+
+  if (carrier === "cu") {
+    // 中國聯通：標誌性紅結（交織雙斜環＋左右耳環）
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M10.7 7.8L13.3 5.2C15.1 3.4 18.0 5.9 16.0 8.0L8.2 15.8C6.1 17.9 9.1 20.4 11.0 18.5L13.2 16.3"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M13.3 7.8L10.7 5.2C8.9 3.4 6.0 5.9 8.0 8.0L15.8 15.8C17.9 17.9 14.9 20.4 13.0 18.5L10.8 16.3"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M8.0 13.5L5.4 10.9C3.8 9.3 1.9 10.8 2.1 12.4C2.3 14.0 4.0 14.9 5.4 13.5L8.0 10.9"
+          stroke="currentColor"
+          strokeWidth="1.85"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M16.0 10.5L18.6 13.1C20.2 14.7 22.1 13.2 21.9 11.6C21.7 10.0 20.0 9.1 18.6 10.5L16.0 13.1"
+          stroke="currentColor"
+          strokeWidth="1.85"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  if (carrier === "cm") {
+    // 中國移動：標誌性圓形流動波紋球徽標
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M3.4 8.2C7.4 3.1 12.0 2.2 15.2 4.1C17.6 5.5 19.6 7.8 21.0 9.7"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+        />
+        <path
+          d="M6.2 10.6C9.7 6.5 13.0 5.9 15.8 7.8C17.8 9.2 19.6 11.0 20.8 12.3"
+          stroke="currentColor"
+          strokeWidth="1.85"
+          strokeLinecap="round"
+        />
+        <path
+          d="M2.5 9.6C6.1 14.1 8.4 15.4 10.2 13.7C11.7 12.3 12.7 10.2 14.2 9.2C15.9 8.2 18.4 10.3 21.5 14.4"
+          stroke="currentColor"
+          strokeWidth="1.95"
+          strokeLinecap="round"
+        />
+        <path
+          d="M17.8 13.4C14.3 17.5 11.0 18.1 8.2 16.2C6.2 14.8 4.4 13.0 3.2 11.7"
+          stroke="currentColor"
+          strokeWidth="1.85"
+          strokeLinecap="round"
+        />
+        <path
+          d="M20.6 15.8C16.6 20.9 12.0 21.8 8.8 19.9C6.4 18.5 4.4 16.2 3.0 14.3"
           stroke="currentColor"
           strokeWidth="1.9"
           strokeLinecap="round"
@@ -38,59 +112,12 @@ export function CarrierLogoIcon({
     );
   }
 
-  if (carrier === "cu") {
-    // 中國聯通：幾何簡化中國結徽標
-    return (
-      <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden>
-        <path
-          d="M8 2.2L11.2 5.4L8 8.6L4.8 5.4L8 2.2Z"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M8 7.4L11.2 10.6L8 13.8L4.8 10.6L8 7.4Z"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M2.6 8L5.3 5.3M13.4 8L10.7 5.3M2.6 8L5.3 10.7M13.4 8L10.7 10.7"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-      </svg>
-    );
-  }
-
-  if (carrier === "cm") {
-    // 中國移動：雙向環抱訊號弧線
-    return (
-      <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden>
-        <path
-          d="M2.6 9.8C3.5 5.4 7.5 3 11.8 4.2"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <path
-          d="M13.4 6.2C12.5 10.6 8.5 13 4.2 11.8"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <circle cx="8" cy="8" r="1.7" fill="currentColor" />
-      </svg>
-    );
-  }
-
   // 國際互聯 IX：地球經緯線
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden>
-      <circle cx="8" cy="8" r="5.6" stroke="currentColor" strokeWidth="1.6" />
-      <ellipse cx="8" cy="8" rx="2.7" ry="5.6" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M2.6 8H13.4" stroke="currentColor" strokeWidth="1.4" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="2" />
+      <ellipse cx="12" cy="12" rx="4.2" ry="8.5" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M3.8 12H20.2" stroke="currentColor" strokeWidth="1.7" />
     </svg>
   );
 }
@@ -210,7 +237,7 @@ export const NodeRoutePills = memo(function NodeRoutePills({
           {badgeStyle === "logo" ? (
             <CarrierLogoIcon
               carrier={route.carrier}
-              size={isDenseFour ? 10.5 : 11.5}
+              size={isDenseFour ? 12.5 : 13.5}
             />
           ) : (
             shortLabel
