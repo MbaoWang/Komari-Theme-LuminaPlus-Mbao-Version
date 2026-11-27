@@ -1,5 +1,6 @@
 import { Save } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
+import { useI18n } from "@/i18n";
 
 export function ThemeConfigSaveFooter({
   saving,
@@ -14,6 +15,7 @@ export function ThemeConfigSaveFooter({
   onClose: () => void;
   onSave: () => Promise<boolean>;
 }) {
+  const { tx } = useI18n();
   return (
     <footer className="multi-ping-config-footer">
       {saveError ? (
@@ -25,12 +27,16 @@ export function ThemeConfigSaveFooter({
         </span>
       ) : (
         <span className="multi-ping-config-footer-hint text-[11px] text-[var(--text-tertiary)]">
-          这里的修改会和其他主题设置一起保存。
+          {tx(
+            "这里的修改会和其他主题设置一起保存。",
+            "這裡的修改會與其他主題設定一起儲存。",
+            "Changes here are saved together with other theme settings.",
+          )}
         </span>
       )}
       <div className="multi-ping-config-footer-actions flex items-center gap-2">
         <button type="button" onClick={onClose} className="theme-manage-button">
-          关闭
+          {tx("关闭", "關閉", "Close")}
         </button>
         <button
           type="button"
@@ -39,7 +45,9 @@ export function ThemeConfigSaveFooter({
           className="theme-manage-button is-primary"
         >
           {saving ? <Spinner size={14} /> : <Save size={14} />}
-          {saving ? "保存中" : "保存设置"}
+          {saving
+            ? tx("保存中", "儲存中", "Saving")
+            : tx("保存设置", "儲存設定", "Save Settings")}
         </button>
       </div>
     </footer>

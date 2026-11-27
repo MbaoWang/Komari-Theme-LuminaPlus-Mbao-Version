@@ -1,3 +1,5 @@
+import { zhStatic } from "@/i18n";
+
 export type OverviewRatingKind = "traffic" | "bandwidth" | "asset";
 
 export interface OverviewRating {
@@ -15,14 +17,14 @@ const DEFAULT_LABELS: Record<OverviewRatingKind, readonly string[]> = {
 };
 
 export function getDefaultOverviewRatingLabelText(kind: OverviewRatingKind) {
-  return DEFAULT_LABELS[kind].join(",");
+  return DEFAULT_LABELS[kind].map((label) => zhStatic(label)).join(",");
 }
 
 export function normalizeOverviewRatingLabels(
   kind: OverviewRatingKind,
   customLabels: string | null | undefined,
 ) {
-  const fallback = DEFAULT_LABELS[kind];
+  const fallback = DEFAULT_LABELS[kind].map((label) => zhStatic(label));
   const custom = String(customLabels ?? "")
     .split(",")
     .map((label) => label.trim())

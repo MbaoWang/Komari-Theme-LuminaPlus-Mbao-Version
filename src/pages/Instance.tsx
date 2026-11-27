@@ -1,4 +1,5 @@
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { zhStatic } from "@/i18n";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import "uplot/dist/uPlot.min.css";
@@ -132,18 +133,18 @@ export function Instance() {
       <div className="flex flex-col gap-5 py-2">
         <Link to="/" className="instance-page-back">
           <ChevronLeft size={14} />
-          返回
+          {zhStatic("返回")}
         </Link>
         <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
           {message ? (
             <>
               <div className="text-[15px] font-semibold text-[var(--text-primary)]">
-                {storeStatus.hydrated ? "实例不存在" : "暂时无法加载实例"}
+                {storeStatus.hydrated ? zhStatic("实例不存在") : zhStatic("暂时无法加载实例")}
               </div>
               <p className="text-[13px] text-[var(--text-secondary)]">{message}</p>
             </>
           ) : (
-            <Spinner size={24} label="正在加载实例" />
+            <Spinner size={24} label={zhStatic("正在加载实例")} />
           )}
         </div>
       </div>
@@ -157,7 +158,7 @@ export function Instance() {
         className="instance-page-back"
       >
         <ChevronLeft size={14} />
-        返回
+        {zhStatic("返回")}
       </Link>
       <InstanceDetails uuid={uuid} onNodeReady={alignCharts} />
       <div ref={chartControlsRef} className="instance-chart-controls">
@@ -170,7 +171,7 @@ export function Instance() {
               startTransition(() => setChartType("load"));
             }}
           >
-            负载
+            {zhStatic("负载")}
           </button>
           {showPingChart && (
             <button
@@ -193,7 +194,7 @@ export function Instance() {
                 startTransition(() => setChartType("ip"));
               }}
             >
-              IP 信息
+              {zhStatic("IP 信息")}
             </button>
           )}
         </div>

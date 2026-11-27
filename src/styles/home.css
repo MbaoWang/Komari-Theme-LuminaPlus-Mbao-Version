@@ -1538,10 +1538,19 @@ html.home-filter-sorting * {
   font-weight: 600;
 }
 
+.home-search-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
 .home-status-pills {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  height: 36px;
   padding: 3px;
   border-radius: 12px;
   border: 1px solid var(--hairline);

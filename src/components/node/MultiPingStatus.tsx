@@ -1,4 +1,5 @@
 import { memo, useState } from "react";
+import { zhStatic } from "@/i18n";
 import { clsx } from "clsx";
 import { useMetricColorsVersion } from "@/hooks/useMetricColors";
 import { usePreferences } from "@/hooks/usePreferences";
@@ -77,10 +78,10 @@ const MultiPingMetricRow = memo(function MultiPingMetricRow({
       data-assigned={line.isAssigned ? "true" : "false"}
       title={
         isUnassigned
-          ? `${line.taskName} · 后台未绑定该服务器`
-          : `${line.taskName} · 延迟 ${latencyLabel} · 丢包 ${lossLabel}${
+          ? zhStatic(`${line.taskName} · 后台未绑定该服务器`)
+          : zhStatic(`${line.taskName} · 延迟 ${latencyLabel} · 丢包 ${lossLabel}${
               staleError ? " · 刷新失败，显示上次数据" : ""
-            }`
+            }`)
       }
     >
       <div
@@ -92,7 +93,7 @@ const MultiPingMetricRow = memo(function MultiPingMetricRow({
         {metric === "latency" && (
           <span className="multi-ping-name-wrap">
             <span className="multi-ping-name">{line.taskName}</span>
-            {isUnassigned && <span className="multi-ping-unassigned">未绑定</span>}
+            {isUnassigned && <span className="multi-ping-unassigned">{zhStatic("未绑定")}</span>}
           </span>
         )}
         <strong
@@ -145,7 +146,7 @@ const MultiPingMetricColumn = memo(function MultiPingMetricColumn({
   return (
     <div
       className="multi-ping-metric-column"
-      aria-label={metric === "latency" ? "延迟" : "丢包"}
+      aria-label={metric === "latency" ? zhStatic("延迟") : zhStatic("丢包")}
     >
       {lines.map((line) => (
         <MultiPingMetricRow
@@ -177,7 +178,7 @@ export const MultiPingStatus = memo(function MultiPingStatus({
     <div
       className={clsx("multi-ping-status", `is-${density}`, className)}
       role="group"
-      aria-label="三网延迟与丢包"
+      aria-label={zhStatic("三网延迟与丢包")}
     >
       <div className="multi-ping-columns">
         <MultiPingMetricColumn

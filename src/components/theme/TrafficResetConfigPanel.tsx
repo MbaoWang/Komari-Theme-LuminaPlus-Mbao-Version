@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { zhStatic } from "@/i18n";
 import { CalendarDays, Search, X } from "lucide-react";
 import { ThemeConfigSaveFooter } from "@/components/theme/ThemeConfigSaveFooter";
 import type { AdminClient } from "@/types/komari";
 import { getTrafficResetDisplay } from "@/utils/trafficReset";
 
 const DAY_OPTIONS = [
-  <option key="default" value="">跟随账单日</option>,
+  <option key="default" value="">{zhStatic("跟随账单日")}</option>,
   ...Array.from({ length: 31 }, (_, index) => (
-    <option key={index + 1} value={index + 1}>每月 {index + 1} 日</option>
+    <option key={index + 1} value={index + 1}>{zhStatic("每月")} {index + 1} {zhStatic("日")}</option>
   )),
 ];
 
@@ -87,16 +88,16 @@ export function TrafficResetConfigPanel({
       <header className="multi-ping-config-header">
         <div>
           <h2 id="traffic-reset-title" className="flex items-center gap-2 text-[18px] font-semibold">
-            <CalendarDays size={18} />流量重置日
+            <CalendarDays size={18} />{zhStatic("流量重置日")}
           </h2>
           <p id="traffic-reset-description" className="mt-2 text-[12px] text-[var(--text-secondary)]">
-            此设置用于首页流量重置日期提示，请与服务器 Agent 的实际重置日保持一致。
+            {zhStatic("此设置用于首页流量重置日期提示，请与服务器 Agent 的实际重置日保持一致。")}
           </p>
           <p className="mt-1 text-[11px] text-[var(--text-tertiary)]">
-            已自定义 {customCount} 台，其余跟随账单日（到期日的每月几号）。不足该日取月末。
+            {zhStatic("已自定义")} {customCount} {zhStatic("台，其余跟随账单日（到期日的每月几号）。不足该日取月末。")}
           </p>
         </div>
-        <button type="button" onClick={onClose} className="multi-ping-config-icon-button" aria-label="关闭重置日配置">
+        <button type="button" onClick={onClose} className="multi-ping-config-icon-button" aria-label={zhStatic("关闭重置日配置")}>
           <X size={18} />
         </button>
       </header>
@@ -108,20 +109,20 @@ export function TrafficResetConfigPanel({
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="搜索名称 / UUID / 分组"
-              aria-label="搜索重置日服务器"
+              placeholder={zhStatic("搜索名称 / UUID / 分组")}
+              aria-label={zhStatic("搜索重置日服务器")}
               className="min-w-0 flex-1 bg-transparent text-[13px] outline-none"
             />
           </label>
           <select
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
-            aria-label="重置日配置状态"
+            aria-label={zhStatic("重置日配置状态")}
             className="surface-inset px-3 py-2 text-[13px]"
           >
-            <option value="all">全部</option>
-            <option value="custom">已自定义</option>
-            <option value="default">跟随账单日</option>
+            <option value="all">{zhStatic("全部")}</option>
+            <option value="custom">{zhStatic("已自定义")}</option>
+            <option value="default">{zhStatic("跟随账单日")}</option>
           </select>
         </div>
 
@@ -133,10 +134,10 @@ export function TrafficResetConfigPanel({
               disabled={filtered.length === 0}
               onChange={(event) => setSelected(new Set(event.target.checked ? filtered.map((client) => client.uuid) : []))}
             />
-            全选当前结果
+            {zhStatic("全选当前结果")}
           </label>
-          <span className="text-[var(--text-tertiary)]">已选 {selectedClients.length} 台</span>
-          <select value={batchDay} onChange={(event) => setBatchDay(event.target.value)} aria-label="批量重置日" className="surface-inset px-3 py-2">
+          <span className="text-[var(--text-tertiary)]">{zhStatic("已选")} {selectedClients.length} {zhStatic("台")}</span>
+          <select value={batchDay} onChange={(event) => setBatchDay(event.target.value)} aria-label={zhStatic("批量重置日")} className="surface-inset px-3 py-2">
             {DAY_OPTIONS}
           </select>
           <button
@@ -148,15 +149,15 @@ export function TrafficResetConfigPanel({
             }}
             className="theme-manage-button is-compact"
           >
-            应用到所选
+            {zhStatic("应用到所选")}
           </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4">
           <div className="traffic-reset-row traffic-reset-columns text-[11px] text-[var(--text-tertiary)]" aria-hidden="true">
-            <span /><span>服务器</span><span>重置日设置</span><span>当前生效规则</span><span>下次重置</span>
+            <span /><span>{zhStatic("服务器")}</span><span>{zhStatic("重置日设置")}</span><span>{zhStatic("当前生效规则")}</span><span>{zhStatic("下次重置")}</span>
           </div>
-          <ul aria-label="服务器重置日配置">
+          <ul aria-label={zhStatic("服务器重置日配置")}>
             {filtered.map((client) => {
               const customDay = days[client.uuid];
               const reset = getTrafficResetDisplay(client.expired_at, now, customDay);
@@ -166,7 +167,7 @@ export function TrafficResetConfigPanel({
                   <input
                     type="checkbox"
                     checked={selected.has(client.uuid)}
-                    aria-label={`选择 ${name}`}
+                    aria-label={zhStatic(`选择 ${name}`)}
                     onChange={(event) => {
                       const next = new Set(selected);
                       if (event.target.checked) next.add(client.uuid);
@@ -183,13 +184,13 @@ export function TrafficResetConfigPanel({
                   <select
                     value={customDay ?? ""}
                     onChange={(event) => applyDay([client.uuid], event.target.value)}
-                    aria-label={`${name} 重置日`}
+                    aria-label={zhStatic(`${name} 重置日`)}
                     className="surface-inset min-w-0 px-2 py-2"
                   >
                     {DAY_OPTIONS}
                   </select>
                   <span className="traffic-reset-rule text-[var(--text-secondary)]">
-                    {reset ? `每月 ${reset.day} 日 · ${customDay != null ? "自定义" : "账单日"}` : "无有效账单日"}
+                    {reset ? zhStatic(`每月 ${reset.day} 日 · ${customDay != null ? "自定义" : "账单日"}`) : zhStatic("无有效账单日")}
                   </span>
                   <span className="traffic-reset-preview tabular" title={reset?.title}>
                     {reset?.date ?? "—"}
@@ -199,7 +200,7 @@ export function TrafficResetConfigPanel({
               );
             })}
           </ul>
-          {filtered.length === 0 && <p className="py-10 text-center text-[13px] text-[var(--text-tertiary)]">没有匹配的服务器。</p>}
+          {filtered.length === 0 && <p className="py-10 text-center text-[13px] text-[var(--text-tertiary)]">{zhStatic("没有匹配的服务器。")}</p>}
         </div>
       </div>
 

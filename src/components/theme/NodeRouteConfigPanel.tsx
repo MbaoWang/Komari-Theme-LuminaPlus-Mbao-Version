@@ -214,24 +214,20 @@ export function NodeRouteConfigPanel({
                   className="w-full bg-transparent text-[13px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
                 />
               </label>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="multi-ping-config-filters" aria-label={tx("配置状态筛选", "設定狀態篩選", "Filter by status")}>
                 {(
                   [
-                    ["all", tx(`全部 (${clients.length})`, `全部 (${clients.length})`, `All (${clients.length})`)],
-                    ["configured", tx(`已配置 (${configuredCount})`, `已設定 (${configuredCount})`, `Set (${configuredCount})`)],
-                    ["unconfigured", tx(`未配置 (${clients.length - configuredCount})`, `未設定 (${clients.length - configuredCount})`, `Unset (${clients.length - configuredCount})`)],
+                    ["all", tx(`全部 ${clients.length}`, `全部 ${clients.length}`, `All ${clients.length}`)],
+                    ["configured", tx(`已配置 ${configuredCount}`, `已設定 ${configuredCount}`, `Set ${configuredCount}`)],
+                    ["unconfigured", tx(`未配置 ${clients.length - configuredCount}`, `未設定 ${clients.length - configuredCount}`, `Unset ${clients.length - configuredCount}`)],
                   ] as const
                 ).map(([value, label]) => (
                   <button
                     key={value}
                     type="button"
+                    aria-pressed={filter === value}
                     onClick={() => setFilter(value)}
-                    className={clsx(
-                      "rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors",
-                      filter === value
-                        ? "bg-[var(--accent-500)] text-white"
-                        : "bg-[var(--fill-tertiary)] text-[var(--text-secondary)]",
-                    )}
+                    className={clsx(filter === value && "is-active")}
                   >
                     {label}
                   </button>
@@ -239,179 +235,218 @@ export function NodeRouteConfigPanel({
               </div>
             </div>
 
-            <div className="multi-ping-config-list">
-              {filteredClients.map((client) => {
-                const active = selectedClient?.uuid === client.uuid;
-                const configured = isConfigured(routesMap, client.uuid);
-                return (
-                  <button
-                    key={client.uuid}
-                    type="button"
-                    onClick={() => {
-                      setSelectedUuid(client.uuid);
-                      setMobileEditorOpen(true);
-                    }}
-                    className={clsx("multi-ping-config-node-item", active && "is-active")}
-                  >
-                    <div className="flex min-w-0 items-center gap-2">
-                      <Flag region={client.region} size={13} />
-                      <span className="truncate text-[13px] font-medium text-[var(--text-primary)]">
-                        {client.name}
+            <div className="multi-ping-config-node-list">
+              <div
+                className="multi-ping-config-node-list-window"
+                style={{ height: filteredClients.length * 64 }}
+              >
+                {filteredClients.map((client, index) => {
+                  const active = selectedClient?.uuid === client.uuid;
+                  const configured = isConfigured(routesMap, client.uuid);
+                  const summary = configured
+                    ? ROUTE_CARRIER_KEYS.map((carrier) => {
+                        const lbl = routesMap[client.uuid]?.[carrier]?.label?.trim();
+                        return lbl ? `${getCarrierShortLabel(carrier, resolvedLanguage)}:${lbl}` : "";
+                      })
+                        .filter(Boolean)
+                        .join(" · ")
+                    : tx("未配置回程线路", "未設定回程線路", "No routes configured");
+                  return (
+                    <button
+                      key={client.uuid}
+                      type="button"
+                      onClick={() => {
+                        setSelectedUuid(client.uuid);
+                        setMobileEditorOpen(true);
+                      }}
+                      className={clsx("multi-ping-config-node", active && "is-active")}
+                      style={{ transform: `translateY(${index * 64}px)` }}
+                      aria-posinset={index + 1}
+                      aria-setsize={filteredClients.length}
+                    >
+                      <Flag region={client.region} size={15} />
+                      <span className="min-w-0 flex-1 text-left">
+                        <span className="block truncate text-[13px] font-medium text-[var(--text-primary)]">
+                          {client.name || client.uuid}
+                        </span>
+                        <span className="mt-1 block truncate text-[11px] text-[var(--text-tertiary)]">
+                          {summary}
+                        </span>
                       </span>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1.5">
-                      {configured && <Check size={14} className="text-[var(--status-success)]" />}
-                      <ChevronRight size={14} className="text-[var(--text-tertiary)]" />
-                    </div>
-                  </button>
-                );
-              })}
+                      {configured ? (
+                        <span className="multi-ping-config-status">
+                          <Check size={12} />
+                          {tx("已配置", "已設定", "Set")}
+                        </span>
+                      ) : (
+                        <ChevronRight size={15} className="text-[var(--text-tertiary)]" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {filteredClients.length === 0 && (
+                <div className="px-4 py-8 text-center text-[12px] text-[var(--text-tertiary)]">
+                  {tx("没有匹配的实例。", "沒有符合的實例。", "No matching nodes.")}
+                </div>
+              )}
             </div>
           </aside>
 
-          <div className={clsx("multi-ping-config-editor", !mobileEditorOpen && "is-mobile-hidden")}>
+          <main className={clsx("multi-ping-config-editor", mobileEditorOpen && "is-mobile-open")}>
             {selectedClient ? (
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setMobileEditorOpen(false)}
-                      className="multi-ping-config-mobile-back"
-                    >
-                      <ArrowLeft size={14} />
-                      {tx("列表", "列表", "List")}
-                    </button>
-                    <Flag region={selectedClient.region} size={16} />
-                    <span className="truncate text-[15px] font-semibold text-[var(--text-primary)]">
-                      {selectedClient.name}
-                    </span>
-                  </div>
+              <>
+                <div className="multi-ping-config-editor-head">
                   <button
                     type="button"
-                    onClick={clearSelected}
-                    className="rounded-lg border border-[var(--hairline)] px-2.5 py-1 text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    onClick={() => setMobileEditorOpen(false)}
+                    className="multi-ping-config-mobile-back"
                   >
-                    {tx("清空本节点", "清空本節點", "Clear node")}
+                    <ArrowLeft size={15} />
+                    {tx("实例列表", "實例列表", "Node list")}
                   </button>
-                </div>
-
-                {/* 即時效果預覽 */}
-                <div className="surface-inset flex flex-col gap-2 p-3">
-                  <div className="text-[11px] font-semibold text-[var(--text-tertiary)]">
-                    {tx("卡片效果预览", "卡片效果預覽", "Live Preview")}
-                  </div>
-                  {previewPills.length > 0 ? (
-                    <NodeRoutePills
-                      routes={previewPills}
-                      premiumIcon={premiumIcon}
-                      density="compact"
-                    />
-                  ) : (
-                    <div className="text-[12px] text-[var(--text-tertiary)]">
-                      {tx(
-                        "尚未配置任何线路；也支持在 Komari 后台节点标签中直接填写 ct:CN2 GIA;cu:9929;cm:CMIN2;ix:BGP",
-                        "尚未設定任何線路；也支援在 Komari 後台節點標籤中直接填寫 ct:CN2 GIA;cu:9929;cm:CMIN2;ix:BGP",
-                        "No routes set yet. You can also write ct:CN2 GIA;cu:9929;cm:CMIN2;ix:BGP in Komari node tags.",
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* 一鍵三網同線快捷按鈕 */}
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[11px] font-medium text-[var(--text-tertiary)]">
-                    {tx("三网同线快填：", "三網同線快填：", "Quick fill CT/CU/CM:")}
-                  </span>
-                  {["CN2 GIA", "CMIN2", "AS9929", "AS4837", "CMI", "163"].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => applyAllThree(preset)}
-                      className="rounded-md border border-[var(--hairline)] bg-[var(--surface-a)] px-2 py-0.5 text-[11px] font-semibold text-[var(--text-secondary)] hover:border-[var(--accent-500)] hover:text-[var(--text-primary)]"
-                    >
-                      {preset}
-                    </button>
-                  ))}
-                </div>
-
-                <datalist id="lumina-route-presets">
-                  {COMMON_ROUTE_PRESETS.map((preset) => (
-                    <option key={preset} value={preset} />
-                  ))}
-                </datalist>
-
-                <div className="grid gap-3">
-                  {ROUTE_CARRIER_KEYS.map((carrier) => {
-                    const entry = selectedConfig[carrier];
-                    const shortLabel = getCarrierShortLabel(carrier, resolvedLanguage);
-                    const fullLabel = getCarrierFullLabel(carrier, resolvedLanguage);
-                    return (
-                      <div
-                        key={carrier}
-                        className="surface-inset flex flex-col gap-2 p-3 sm:flex-row sm:items-center"
-                      >
-                        <div className="flex min-w-[108px] items-center gap-2">
-                          <span
-                            className="node-route-carrier"
-                            style={{
-                              background:
-                                carrier === "ct"
-                                  ? "#2563eb"
-                                  : carrier === "cu"
-                                    ? "#e11d48"
-                                    : carrier === "cm"
-                                      ? "#0d9488"
-                                      : "#64748b",
-                            }}
-                          >
-                            {shortLabel}
-                          </span>
-                          <span className="text-[13px] font-medium text-[var(--text-primary)]">
-                            {fullLabel}
-                          </span>
-                        </div>
-                        <input
-                          type="text"
-                          list="lumina-route-presets"
-                          value={entry?.label ?? ""}
-                          onChange={(event) =>
-                            updateCarrier(carrier, { label: event.target.value })
-                          }
-                          placeholder={
-                            carrier === "ix"
-                              ? tx("选填，例如 BGP / Tier1", "選填，例如 BGP / Tier1", "Optional, e.g. BGP")
-                              : tx("例如 CN2 GIA / 9929 / CMIN2 / 163", "例如 CN2 GIA / 9929 / CMIN2 / 163", "e.g. CN2 GIA / 9929 / CMIN2")
-                          }
-                          className="h-9 flex-1 rounded-lg border border-[var(--hairline)] bg-[var(--surface-a)] px-2.5 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-500)]"
-                        />
-                        <select
-                          value={entry?.tier ?? "auto"}
-                          onChange={(event) =>
-                            updateCarrier(carrier, {
-                              tier: event.target.value as RouteTierSetting,
-                            })
-                          }
-                          disabled={!entry?.label.trim()}
-                          aria-label={tx("线路等级", "線路等級", "Route tier")}
-                          className="h-9 rounded-lg border border-[var(--hairline)] bg-[var(--surface-a)] px-2 text-[12px] text-[var(--text-primary)] outline-none disabled:opacity-50"
-                        >
-                          <option value="auto">{tx("自动识别等级", "自動識別等級", "Auto tier")}</option>
-                          <option value="premium">{tx("精品（发光）", "精品（發光）", "Premium (Glow)")}</option>
-                          <option value="optimized">{tx("优化（着色）", "優化（著色）", "Optimized")}</option>
-                          <option value="standard">{tx("普通（素面）", "普通（素面）", "Standard")}</option>
-                        </select>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <Flag region={selectedClient.region} size={20} />
+                      <div className="min-w-0">
+                        <h3 className="truncate text-[17px] font-semibold text-[var(--text-primary)]">
+                          {selectedClient.name || selectedClient.uuid}
+                        </h3>
+                        <p className="mt-1 break-all text-[11px] text-[var(--text-tertiary)]">
+                          {[selectedClient.group, selectedClient.region, selectedClient.uuid]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
                       </div>
-                    );
-                  })}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={clearSelected}
+                      className="theme-manage-button shrink-0"
+                    >
+                      {tx("清空本节点", "清空本節點", "Clear node")}
+                    </button>
+                  </div>
                 </div>
-              </div>
+
+                <div className="multi-ping-config-editor-content">
+                  {/* 即時效果預覽 */}
+                  <div className="surface-inset flex flex-col gap-2 px-4 py-3">
+                    <div className="text-[11px] font-semibold text-[var(--text-tertiary)]">
+                      {tx("卡片效果预览", "卡片效果預覽", "Live Preview")}
+                    </div>
+                    {previewPills.length > 0 ? (
+                      <NodeRoutePills
+                        routes={previewPills}
+                        premiumIcon={premiumIcon}
+                        density="compact"
+                      />
+                    ) : (
+                      <div className="text-[12px] text-[var(--text-tertiary)]">
+                        {tx(
+                          "尚未配置任何线路；也支持在 Komari 后台节点标签中直接填写 ct:CN2 GIA;cu:9929;cm:CMIN2;ix:BGP",
+                          "尚未設定任何線路；也支援在 Komari 後台節點標籤中直接填寫 ct:CN2 GIA;cu:9929;cm:CMIN2;ix:BGP",
+                          "No routes set yet. You can also write ct:CN2 GIA;cu:9929;cm:CMIN2;ix:BGP in Komari node tags.",
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 一鍵三網同線快捷按鈕 */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[12px] font-medium text-[var(--text-tertiary)]">
+                      {tx("三网同线快填：", "三網同線快填：", "Quick fill CT/CU/CM:")}
+                    </span>
+                    {["CN2 GIA", "CMIN2", "AS9929", "AS4837", "CMI", "163"].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => applyAllThree(preset)}
+                        className="route-preset-chip"
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+
+                  <datalist id="lumina-route-presets">
+                    {COMMON_ROUTE_PRESETS.map((preset) => (
+                      <option key={preset} value={preset} />
+                    ))}
+                  </datalist>
+
+                  <div className="grid gap-3">
+                    {ROUTE_CARRIER_KEYS.map((carrier) => {
+                      const entry = selectedConfig[carrier];
+                      const shortLabel = getCarrierShortLabel(carrier, resolvedLanguage);
+                      const fullLabel = getCarrierFullLabel(carrier, resolvedLanguage);
+                      return (
+                        <div
+                          key={carrier}
+                          className="surface-inset flex flex-col gap-2 p-3 sm:flex-row sm:items-center"
+                        >
+                          <div className="flex min-w-[108px] items-center gap-2">
+                            <span
+                              className="node-route-carrier"
+                              style={{
+                                background:
+                                  carrier === "ct"
+                                    ? "#2563eb"
+                                    : carrier === "cu"
+                                      ? "#e11d48"
+                                      : carrier === "cm"
+                                        ? "#0d9488"
+                                        : "#64748b",
+                              }}
+                            >
+                              {shortLabel}
+                            </span>
+                            <span className="text-[13px] font-medium text-[var(--text-primary)]">
+                              {fullLabel}
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            list="lumina-route-presets"
+                            value={entry?.label ?? ""}
+                            onChange={(event) =>
+                              updateCarrier(carrier, { label: event.target.value })
+                            }
+                            placeholder={
+                              carrier === "ix"
+                                ? tx("选填，例如 BGP / Tier1", "選填，例如 BGP / Tier1", "Optional, e.g. BGP")
+                                : tx("例如 CN2 GIA / 9929 / CMIN2 / 163", "例如 CN2 GIA / 9929 / CMIN2 / 163", "e.g. CN2 GIA / 9929 / CMIN2")
+                            }
+                            className="h-9 flex-1 rounded-lg border border-[var(--hairline)] bg-[var(--surface-a)] px-2.5 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-500)]"
+                          />
+                          <select
+                            value={entry?.tier ?? "auto"}
+                            onChange={(event) =>
+                              updateCarrier(carrier, {
+                                tier: event.target.value as RouteTierSetting,
+                              })
+                            }
+                            disabled={!entry?.label.trim()}
+                            aria-label={tx("线路等级", "線路等級", "Route tier")}
+                            className="h-9 rounded-lg border border-[var(--hairline)] bg-[var(--surface-a)] px-2 text-[12px] text-[var(--text-primary)] outline-none disabled:opacity-50"
+                          >
+                            <option value="auto">{tx("自动识别等级", "自動識別等級", "Auto tier")}</option>
+                            <option value="premium">{tx("精品（发光）", "精品（發光）", "Premium (Glow)")}</option>
+                            <option value="optimized">{tx("优化（着色）", "優化（著色）", "Optimized")}</option>
+                            <option value="standard">{tx("普通（素面）", "普通（素面）", "Standard")}</option>
+                          </select>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
             ) : (
               <div className="flex h-full items-center justify-center text-[13px] text-[var(--text-tertiary)]">
                 {tx("没有可配置的节点", "沒有可設定的節點", "No nodes available")}
               </div>
             )}
-          </div>
+          </main>
         </div>
 
         <ThemeConfigSaveFooter

@@ -1,3 +1,4 @@
+import { zhStatic } from "@/i18n";
 import {
   useCallback,
   useEffect,
@@ -224,7 +225,7 @@ export function NodeTodayTrafficPopover({
         ref={triggerRef}
         type="button"
         className="node-traffic-trigger"
-        aria-label="今日流量与峰值"
+        aria-label={zhStatic("今日流量与峰值")}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={handleClick}
@@ -241,7 +242,7 @@ export function NodeTodayTrafficPopover({
             ref={popoverRef}
             className="node-traffic-popover"
             role="dialog"
-            aria-label="今日流量与峰值"
+            aria-label={zhStatic("今日流量与峰值")}
             tabIndex={-1}
             style={
               position
@@ -273,13 +274,13 @@ function TodayTrafficPopoverBody({ traffic }: { traffic: NodeTodayTrafficView })
   } = traffic;
 
   if (isPending && !stat) {
-    return <div className="node-traffic-popover-empty">正在加载今日流量…</div>;
+    return <div className="node-traffic-popover-empty">{zhStatic("正在加载今日流量…")}</div>;
   }
 
   if (isError && !stat) {
     return (
       <div className="node-traffic-popover-error">
-        <span>今日流量加载失败</span>
+        <span>{zhStatic("今日流量加载失败")}</span>
         <button
           type="button"
           className={`node-traffic-popover-retry${isFetching ? " is-spinning" : ""}`}
@@ -288,7 +289,7 @@ function TodayTrafficPopoverBody({ traffic }: { traffic: NodeTodayTrafficView })
           aria-busy={isFetching}
         >
           <RefreshCw size={11} strokeWidth={2.3} />
-          重试
+          {zhStatic("重试")}
         </button>
       </div>
     );
@@ -300,7 +301,7 @@ function TodayTrafficPopoverBody({ traffic }: { traffic: NodeTodayTrafficView })
         {isError && (
           <TrafficRefreshError isFetching={isFetching} refetch={refetch} />
         )}
-        <div className="node-traffic-popover-empty">今日暂无采样数据</div>
+        <div className="node-traffic-popover-empty">{zhStatic("今日暂无采样数据")}</div>
       </>
     );
   }
@@ -311,28 +312,28 @@ function TodayTrafficPopoverBody({ traffic }: { traffic: NodeTodayTrafficView })
         <TrafficRefreshError isFetching={isFetching} refetch={refetch} />
       )}
       <div className="node-traffic-popover-head">
-        <span>今日流量</span>
+        <span>{zhStatic("今日流量")}</span>
         {source === "records" && (
-          <span className="node-traffic-popover-badge">兼容模式</span>
+          <span className="node-traffic-popover-badge">{zhStatic("兼容模式")}</span>
         )}
       </div>
       <div className="node-traffic-popover-rows">
         <PopoverRow
           icon={<ArrowUp size={12} strokeWidth={2.4} />}
-          label="上行"
+          label={zhStatic("上行")}
           value={formatBytes(stat.trafficUp)}
         />
         <PopoverRow
           icon={<ArrowDown size={12} strokeWidth={2.4} />}
-          label="下行"
+          label={zhStatic("下行")}
           value={formatBytes(stat.trafficDown)}
         />
       </div>
-      <div className="node-traffic-popover-head is-peak">峰值速度</div>
+      <div className="node-traffic-popover-head is-peak">{zhStatic("峰值速度")}</div>
       <div className="node-traffic-popover-rows">
         <PopoverRow
           icon={<ArrowUp size={12} strokeWidth={2.4} />}
-          label="上行"
+          label={zhStatic("上行")}
           value={formatByteRateLabel(stat.peakUp)}
           note={
             stat.peakUp > 0 && stat.peakUpAt != null
@@ -342,7 +343,7 @@ function TodayTrafficPopoverBody({ traffic }: { traffic: NodeTodayTrafficView })
         />
         <PopoverRow
           icon={<ArrowDown size={12} strokeWidth={2.4} />}
-          label="下行"
+          label={zhStatic("下行")}
           value={formatByteRateLabel(stat.peakDown)}
           note={
             stat.peakDown > 0 && stat.peakDownAt != null
@@ -353,11 +354,11 @@ function TodayTrafficPopoverBody({ traffic }: { traffic: NodeTodayTrafficView })
       </div>
       <div className="node-traffic-popover-foot">
         <span>
-          {source === "records" ? "按记录采样" : "按 5 分钟采样"} · 更新{" "}
+          {source === "records" ? zhStatic("按记录采样") : zhStatic("按 5 分钟采样")} {zhStatic("· 更新")}{" "}
           {formatClockTime(dataUpdatedAt)}
         </span>
         <Link to="/traffic" className="node-traffic-popover-link">
-          明细
+          {zhStatic("明细")}
         </Link>
       </div>
     </>
@@ -373,15 +374,15 @@ function TrafficRefreshError({
 }) {
   return (
     <div className="node-traffic-popover-error is-stale" role="alert">
-      <span>更新失败，当前为缓存数据</span>
+      <span>{zhStatic("更新失败，当前为缓存数据")}</span>
       <button
         type="button"
         className={`node-traffic-popover-retry${isFetching ? " is-spinning" : ""}`}
         onClick={() => void refetch()}
         disabled={isFetching}
         aria-busy={isFetching}
-        aria-label="重试更新今日流量"
-        title="重试"
+        aria-label={zhStatic("重试更新今日流量")}
+        title={zhStatic("重试")}
       >
         <RefreshCw size={11} strokeWidth={2.3} />
       </button>

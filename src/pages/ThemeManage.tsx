@@ -28,7 +28,13 @@ import {
   Wallpaper,
 } from "lucide-react";
 import { clsx } from "clsx";
-import { useI18n } from "@/i18n";
+import {
+  LANGUAGE_OPTIONS,
+  useI18n,
+  zhStatic,
+  type LanguagePreference,
+} from "@/i18n";
+import { setVisitorRefreshInterval } from "@/hooks/useRefreshInterval";
 import { InstancePanel } from "@/components/instance/InstancePanel";
 import { MultiPingNodeConfigPanel } from "@/components/theme/MultiPingNodeConfigPanel";
 import { MerchantLinkConfigPanel } from "@/components/theme/MerchantLinkConfigPanel";
@@ -223,7 +229,7 @@ function summarizeNodes(
   uuids: string[],
   clientsById: Map<string, AdminClient>,
 ) {
-  if (uuids.length === 0) return "未绑定节点";
+  if (uuids.length === 0) return zhStatic("未绑定节点");
   const names = uuids.map((uuid) => clientsById.get(uuid)?.name || uuid);
   const summary = names.join("、");
   return summary.length > 92 ? `${summary.slice(0, 92)}...` : summary;
@@ -453,11 +459,12 @@ const ToggleRow = memo(function ToggleRow({
   checked: boolean;
   onPatch: (key: BooleanDraftKey, value: boolean) => void;
 }) {
+  const { zh } = useI18n();
   return (
     <label className="surface-inset flex items-center justify-between gap-3 px-4 py-3">
       <span className="min-w-0">
-        <span className="block text-[13px] font-medium text-[var(--text-primary)]">{title}</span>
-        <span className="mt-1 block text-[11px] text-[var(--text-tertiary)]">{desc}</span>
+        <span className="block text-[13px] font-medium text-[var(--text-primary)]">{zh(title)}</span>
+        <span className="mt-1 block text-[11px] text-[var(--text-tertiary)]">{zh(desc)}</span>
       </span>
       <input
         type="checkbox"
@@ -516,7 +523,7 @@ const TaskBindingSection = memo(function TaskBindingSection({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">
-              {task.name || `任务 #${task.id}`}
+              {task.name || zhStatic(`任务 #${task.id}`)}
             </h3>
             <span className="rounded-full border border-[var(--hairline)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
               {task.type || "icmp"}
@@ -530,10 +537,10 @@ const TaskBindingSection = memo(function TaskBindingSection({
           </div>
           <div className="mt-2 text-[12px] text-[var(--text-secondary)]">
             <span className="font-medium text-[var(--text-primary)]">
-              已绑定 {assigned.length} 个节点
+              {zhStatic("已绑定")} {assigned.length} {zhStatic("个节点")}
             </span>
             <span className="mx-2 text-[var(--text-tertiary)]">·</span>
-            <span title={task.target || ""}>{task.target || "未填写目标"}</span>
+            <span title={task.target || ""}>{task.target || zhStatic("未填写目标")}</span>
           </div>
           <p className="mt-2 text-[12px] text-[var(--text-tertiary)]" title={assignedSummary}>
             {assignedSummary}
@@ -556,7 +563,7 @@ const TaskBindingSection = memo(function TaskBindingSection({
               }}
               className="theme-manage-button is-compact"
             >
-              {allVisibleSelectableAssigned ? "已全选可用" : "全选可用"}
+              {allVisibleSelectableAssigned ? zhStatic("已全选可用") : zhStatic("全选可用")}
             </button>
           )}
           {assigned.length > 0 && (
@@ -571,7 +578,7 @@ const TaskBindingSection = memo(function TaskBindingSection({
               }}
               className="theme-manage-button is-compact is-danger"
             >
-              清空节点
+              {zhStatic("清空节点")}
             </button>
           )}
           <button
@@ -580,7 +587,7 @@ const TaskBindingSection = memo(function TaskBindingSection({
             onClick={() => onToggleExpand(task.id)}
             className="theme-manage-button is-compact"
           >
-            {expanded ? "收起节点" : "编辑节点"}
+            {expanded ? zhStatic("收起节点") : zhStatic("编辑节点")}
           </button>
         </div>
       </div>
@@ -592,8 +599,8 @@ const TaskBindingSection = memo(function TaskBindingSection({
             <input
               value={nodeSearch}
               onChange={(event) => onNodeSearch(event.target.value)}
-              placeholder="搜索节点名称 / UUID / 分组 / 地区"
-              aria-label="搜索节点"
+              placeholder={zhStatic("搜索节点名称 / UUID / 分组 / 地区")}
+              aria-label={zhStatic("搜索节点")}
               className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[var(--text-tertiary)]"
             />
           </label>
@@ -631,7 +638,7 @@ const TaskBindingSection = memo(function TaskBindingSection({
                       </span>
                     </div>
                     <div className="mt-1 text-[11px] text-[var(--text-tertiary)]">
-                      {subtitle || client.region || "未设置分组"}
+                      {subtitle || client.region || zhStatic("未设置分组")}
                     </div>
                   </div>
                 </label>
@@ -671,7 +678,7 @@ const PremiumList = memo(function PremiumList({
         const entry = costPremiums[client.uuid];
         const detail = detailByUuid.get(client.uuid);
         const referenceLabel = rateLoading
-          ? "计算中"
+          ? zhStatic("计算中")
           : detail
             ? detail.counted
               ? formatCnyMoney(detail.remainingCny)
@@ -693,7 +700,7 @@ const PremiumList = memo(function PremiumList({
               </span>
               <span
                 className="shrink-0 text-[11px] text-[var(--text-tertiary)]"
-                title="该节点当前剩余价值（按账单周期折算，不含溢价）"
+                title={zhStatic("该节点当前剩余价值（按账单周期折算，不含溢价）")}
               >
                 {referenceLabel}
               </span>
@@ -710,11 +717,11 @@ const PremiumList = memo(function PremiumList({
                   }}
                   title={
                     entry.paidCny != null
-                      ? "溢价 = 收购价 − 收购日剩余价值；该折算基准已经固化"
-                      : "旧格式：直接记录的溢价，填写收购价后自动升级"
+                      ? zhStatic("溢价 = 收购价 − 收购日剩余价值；该折算基准已经固化")
+                      : zhStatic("旧格式：直接记录的溢价，填写收购价后自动升级")
                   }
                 >
-                  溢价 {formatSignedCny(entry.amount)}
+                  {zhStatic("溢价")} {formatSignedCny(entry.amount)}
                 </span>
               )}
             </div>
@@ -730,13 +737,13 @@ const PremiumList = memo(function PremiumList({
                   if (event.target.validity.badInput) return;
                   onPatchPaid(client.uuid, event.target.value);
                 }}
-                placeholder="收购价"
+                placeholder={zhStatic("收购价")}
                 disabled={!canCompute}
-                aria-label={`${client.name} 的收购价`}
+                aria-label={zhStatic(`${client.name} 的收购价`)}
                 title={
                   canCompute
-                    ? "实际收购价（人民币），留空即清除记录"
-                    : "该节点已忽略或汇率缺失，无法折算剩余价值"
+                    ? zhStatic("实际收购价（人民币），留空即清除记录")
+                    : zhStatic("该节点已忽略或汇率缺失，无法折算剩余价值")
                 }
                 className="surface-inset w-24 px-2 py-1 text-right text-[13px] outline-none disabled:opacity-45"
               />
@@ -748,11 +755,11 @@ const PremiumList = memo(function PremiumList({
                 // 与收购价同门槛:汇率/基准未就绪时 patchPremiumAcquiredAt 无法回算,
                 // 放开输入只会被静默丢弃(受控值弹回旧日期)。
                 disabled={!entry || !canCompute}
-                aria-label={`${client.name} 的收购日期`}
+                aria-label={zhStatic(`${client.name} 的收购日期`)}
                 title={
                   canCompute
-                    ? "收购日期：修改后会按当前价格、周期、到期日和汇率回算该日剩余价值，重新计算并固化溢价"
-                    : "该节点已忽略或汇率缺失，无法折算剩余价值"
+                    ? zhStatic("收购日期：修改后会按当前价格、周期、到期日和汇率回算该日剩余价值，重新计算并固化溢价")
+                    : zhStatic("该节点已忽略或汇率缺失，无法折算剩余价值")
                 }
                 className="surface-inset w-[8.75rem] px-2 py-1 text-[12px] outline-none disabled:opacity-45"
               />
@@ -801,10 +808,10 @@ const MultiPingNodeConfigControl = memo(function MultiPingNodeConfigControl({
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-[12px] font-medium text-[var(--text-primary)]">
             <SlidersHorizontal size={14} />
-            按服务器覆盖
+            {zhStatic("按服务器覆盖")}
           </div>
           <p className="mt-1 text-[11px] text-[var(--text-tertiary)]">
-            已单独配置 {configuredNodeCount} / {clients.length} 台服务器
+            {zhStatic("已单独配置")} {configuredNodeCount} / {clients.length} {zhStatic("台服务器")}
           </p>
         </div>
         <button
@@ -814,7 +821,7 @@ const MultiPingNodeConfigControl = memo(function MultiPingNodeConfigControl({
           className="theme-manage-button is-compact"
         >
           <SlidersHorizontal size={13} />
-          配置服务器探测点
+          {zhStatic("配置服务器探测点")}
         </button>
       </div>
 
@@ -870,10 +877,10 @@ const MerchantLinkConfigControl = memo(function MerchantLinkConfigControl({
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-[12px] font-medium text-[var(--text-primary)]">
             <Store size={14} />
-            按服务器配置商家官网
+            {zhStatic("按服务器配置商家官网")}
           </div>
           <p className="mt-1 text-[11px] text-[var(--text-tertiary)]">
-            {configuredNodeCount} / {clients.length} 台已配置；卡片入口当前{enabled ? "显示" : "隐藏"}
+            {configuredNodeCount} / {clients.length} {zhStatic("台已配置；卡片入口当前")}{enabled ? zhStatic("显示") : zhStatic("隐藏")}
           </p>
         </div>
         <button
@@ -883,7 +890,7 @@ const MerchantLinkConfigControl = memo(function MerchantLinkConfigControl({
           className="theme-manage-button is-compact"
         >
           <Store size={13} />
-          配置商家链接
+          {zhStatic("配置商家链接")}
         </button>
       </div>
 
@@ -979,7 +986,7 @@ const NodeRouteConfigControl = memo(function NodeRouteConfigControl({
 });
 
 export function ThemeManage() {
-  const { resolvedLanguage, tx } = useI18n();
+  const { language, setLanguage, resolvedLanguage, tx, zh } = useI18n();
   const isMobileViewport = useMediaQuery(MOBILE_VIEWPORT_QUERY, true);
   const now = useHourlyClock();
   const adminEntryPath = useAdminEntryPath();
@@ -1473,9 +1480,10 @@ export function ThemeManage() {
       };
       delete nextSettings.homepagePingTask;
       await saveThemeSettings(config.theme, nextSettings);
+      setVisitorRefreshInterval(null);
       await queryClient.invalidateQueries({ queryKey: ["public"] });
       if (editVersionRef.current === submittedEditVersion) {
-        setMessage("主题设置已保存");
+        setMessage(tx("主题设置已保存", "主題設定已儲存", "Theme settings saved"));
         return true;
       }
       return false;
@@ -1487,7 +1495,11 @@ export function ThemeManage() {
         setAccessRevoked(true);
         return false;
       }
-      setError(saveError instanceof Error ? saveError.message : "保存失败");
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : tx("保存失败", "儲存失敗", "Save failed"),
+      );
       return false;
     } finally {
       savingDraftRef.current = null;
@@ -1514,10 +1526,10 @@ export function ThemeManage() {
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
         <div role="alert" className="space-y-2">
           <div className="text-[15px] font-semibold text-[var(--text-primary)]">
-            无法读取主题配置
+            {zhStatic("无法读取主题配置")}
           </div>
           <p className="max-w-[32rem] text-[13px] text-[var(--text-secondary)]">
-            {configError instanceof Error ? configError.message : "请稍后重试。"}
+            {configError instanceof Error ? configError.message : zhStatic("请稍后重试。")}
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-2">
@@ -1526,10 +1538,10 @@ export function ThemeManage() {
             onClick={() => void refetchConfig()}
             className="control-button px-4 py-2 text-[13px] font-medium"
           >
-            重试
+            {zhStatic("重试")}
           </button>
           <Link to="/" className="control-button px-4 py-2 text-[13px] font-medium">
-            返回首页
+            {zhStatic("返回首页")}
           </Link>
         </div>
       </div>
@@ -1644,21 +1656,21 @@ export function ThemeManage() {
         <div className="theme-masthead-main">
           <div className="theme-masthead-headings">
             <span className="theme-masthead-kicker">
-              {tx("LUMINAPLUS · 主题控制台", "LUMINAPLUS · 主題控制台", "LUMINAPLUS · CONSOLE")}
+              {tx("LUMINAPLUS MBAO · 主题控制台", "LUMINAPLUS MBAO · 主題控制台", "LUMINAPLUS MBAO · CONSOLE")}
             </span>
             <h1 className="theme-masthead-title">{tx("主题设置", "主題設定", "Theme Settings")}</h1>
             <p className="theme-masthead-desc">
               {tx(
-                "集中调整 LuminaPlus 的展示偏好、三网回程与首页延迟绑定；保存后立即应用到当前站点。",
-                "集中調整 LuminaPlus 的顯示偏好、三網回程與首頁延遲綁定；儲存後立即套用到目前站點。",
-                "Configure LuminaPlus appearance, return routes, currency, and Ping bindings.",
+                "集中调整 LuminaPlus-Mbao 的展示偏好、三网回程与首页延迟绑定；保存后立即应用到当前站点。",
+                "集中調整 LuminaPlus-Mbao 的顯示偏好、三網回程與首頁延遲綁定；儲存後立即套用到目前站點。",
+                "Configure LuminaPlus-Mbao appearance, return routes, currency, and Ping bindings.",
               )}
             </p>
           </div>
           <dl className="theme-masthead-meta">
             <div>
               <dt>{tx("主题", "主題", "Theme")}</dt>
-              <dd>{config?.theme || "Komari-Theme-LuminaPlus"}</dd>
+              <dd>{config?.theme || "LuminaPlus-Mbao"}</dd>
             </div>
             <div>
               <dt>{tx("已绑定 Ping", "已綁定 Ping", "Ping Bindings")}</dt>
@@ -1714,11 +1726,11 @@ export function ThemeManage() {
             {tx("增强", "增強", "Plus")}
           </>
         }
-        title={tx("品牌 LOGO、币别、刷新与三网回程", "品牌 LOGO、幣別、刷新與三網回程", "Logo, Currency, Refresh & Return Routes")}
+        title={tx("品牌 LOGO、语言、币别、刷新与三网回程", "品牌 LOGO、語言、幣別、刷新與三網回程", "Logo, Language, Currency, Refresh & Return Routes")}
         description={tx(
-          "调整左上角站点 LOGO、资产默认显示币别、实时状态轮询间隔、三网回程路由样式与实用工具开关。",
-          "調整左上角站點 LOGO、資產預設顯示幣別、即時狀態輪詢間隔、三網回程路由樣式與實用工具開關。",
-          "Customize brand logo, default asset currency, refresh frequency, return route pills, and utility toggles.",
+          "调整左上角站点 LOGO、界面语言、资产默认显示币别、实时状态轮询间隔、三网回程路由样式与实用工具开关。",
+          "調整左上角站點 LOGO、介面語言、資產預設顯示幣別、即時狀態輪詢間隔、三網回程路由樣式與實用工具開關。",
+          "Customize brand logo, interface language, default asset currency, refresh frequency, return route pills, and utility toggles.",
         )}
         aside={<Sparkles size={16} />}
       >
@@ -1748,6 +1760,43 @@ export function ThemeManage() {
                 className="h-8 rounded-lg border border-[var(--hairline)] bg-[var(--surface-a)] px-2.5 text-[12px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-500)] disabled:opacity-50"
               />
             </label>
+          </div>
+
+          <div className="surface-inset flex flex-col gap-2 px-4 py-3">
+            <span className="text-[13px] font-medium text-[var(--text-primary)]">
+              {tx("界面语言（本机浏览器偏好）", "介面語言（本機瀏覽器偏好）", "Interface Language (This Browser)")}
+            </span>
+            <span className="text-[11px] text-[var(--text-tertiary)]">
+              {tx(
+                "默认自动跟随访客浏览器语言（简体 / 繁体 / English），选择后立即生效，无需保存。",
+                "預設自動跟隨訪客瀏覽器語言（簡體 / 繁體 / English），選擇後立即生效，無需儲存。",
+                "Follows browser language by default (zh-CN / zh-TW / English). Takes effect immediately.",
+              )}
+            </span>
+            <div className="instance-segmented is-scrollable pt-0.5">
+              {LANGUAGE_OPTIONS.map((option: LanguagePreference) => {
+                const active = language === option;
+                const label =
+                  option === "auto"
+                    ? tx("跟随浏览器", "跟隨瀏覽器", "Auto (Browser)")
+                    : option === "zh-TW"
+                      ? zhStatic("繁體中文")
+                      : option === "zh-CN"
+                        ? zhStatic("简体中文")
+                        : "English";
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    data-active={active ? "true" : "false"}
+                    aria-pressed={active}
+                    onClick={() => setLanguage(option)}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
@@ -1786,26 +1835,21 @@ export function ThemeManage() {
               </span>
               <span className="text-[11px] text-[var(--text-tertiary)]">
                 {tx(
-                  "默认 2 秒；访客也可以在首页右上角快捷栏自行调整或暂停。",
-                  "預設 2 秒；訪客也可以在首頁右上角快捷列自行調整或暫停。",
-                  "Default 2s. Visitors can override or pause in floating controls.",
+                  "默认 2 秒；点击下方选项切换并保存后对全站生效。",
+                  "預設 2 秒；點擊下方選項切換並儲存後對全站生效。",
+                  "Default 2s. Click an interval below and save to apply site-wide.",
                 )}
               </span>
-              <div className="flex flex-wrap gap-1.5 pt-0.5">
+              <div className="instance-segmented is-scrollable pt-0.5">
                 {REFRESH_INTERVAL_OPTIONS.map((ms: RefreshIntervalOption) => {
                   const active = draft.refreshIntervalMs === ms;
                   return (
                     <button
                       key={ms}
                       type="button"
-                      onClick={() => patch("refreshIntervalMs", ms)}
+                      data-active={active ? "true" : "false"}
                       aria-pressed={active}
-                      className={clsx(
-                        "rounded-lg border px-2.5 py-1 text-[12px] font-semibold transition-colors",
-                        active
-                          ? "border-[var(--accent-500)] bg-[color-mix(in_srgb,var(--accent-500)_14%,var(--surface-a))] text-[var(--accent-500)]"
-                          : "border-[var(--hairline)] bg-[var(--surface-a)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
-                      )}
+                      onClick={() => patch("refreshIntervalMs", ms)}
                     >
                       {ms === 0 ? tx("暂停", "暫停", "Paused") : `${ms / 1000}s`}
                     </button>
@@ -1838,7 +1882,7 @@ export function ThemeManage() {
                     {tx("自定义精品线路右侧显示的发光小图标。", "自訂精品線路右側顯示的發光小圖示。", "Choose the glowing icon shown on premium routes.")}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="instance-segmented is-scrollable">
                   {ROUTE_PREMIUM_ICONS.map((iconKey) => {
                     const active = draft.routePremiumIcon === iconKey;
                     const label =
@@ -1855,14 +1899,10 @@ export function ThemeManage() {
                       <button
                         key={iconKey}
                         type="button"
-                        onClick={() => patch("routePremiumIcon", iconKey)}
+                        data-active={active ? "true" : "false"}
                         aria-pressed={active}
-                        className={clsx(
-                          "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold transition-colors",
-                          active
-                            ? "border-[var(--accent-500)] bg-[color-mix(in_srgb,var(--accent-500)_14%,var(--surface-a))] text-[var(--accent-500)]"
-                            : "border-[var(--hairline)] bg-[var(--surface-a)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
-                        )}
+                        onClick={() => patch("routePremiumIcon", iconKey)}
+                        className="inline-flex items-center justify-center gap-1.5"
                       >
                         <RoutePremiumBadgeIcon icon={iconKey} size={13} />
                         <span>{label}</span>
@@ -1915,9 +1955,9 @@ export function ThemeManage() {
       </InstancePanel>
 
       <InstancePanel
-        kicker={<><span className="instance-panel-kicker-num">01</span>外观</>}
-        title="默认外观"
-        description="为首次访问或尚未手动切换外观的用户设置默认显示模式；后续仍可在首页右上角按需切换。"
+        kicker={<><span className="instance-panel-kicker-num">01</span>{zhStatic("外观")}</>}
+        title={zhStatic("默认外观")}
+        description={zhStatic("为首次访问或尚未手动切换外观的用户设置默认显示模式；后续仍可在首页右上角按需切换。")}
         aside={<LayoutTemplate size={16} />}
       >
         <div className="instance-segmented is-scrollable">
@@ -1931,26 +1971,26 @@ export function ThemeManage() {
               className="inline-flex items-center justify-center gap-2"
             >
               <Icon size={14} />
-              <span>{label}</span>
+              <span>{zh(label)}</span>
             </button>
           ))}
         </div>
       </InstancePanel>
 
       <InstancePanel
-        kicker={<><span className="instance-panel-kicker-num">02</span>视图</>}
-        title="默认卡片视图"
-        description="分别设置桌面端与移动端的默认卡片尺寸；首页右上角按钮只临时切换当前设备的显示。"
+        kicker={<><span className="instance-panel-kicker-num">02</span>{zhStatic("视图")}</>}
+        title={zhStatic("默认卡片视图")}
+        description={zhStatic("分别设置桌面端与移动端的默认卡片尺寸；首页右上角按钮只临时切换当前设备的显示。")}
         aside={<LayoutGrid size={16} />}
       >
         <div className="grid gap-4 md:grid-cols-2">
           <div className="surface-inset flex min-w-0 flex-col gap-3 px-4 py-4">
             <div>
               <div className="text-[13px] font-semibold text-[var(--text-primary)]">
-                桌面端默认
+                {zhStatic("桌面端默认")}
               </div>
               <div className="mt-1 text-[11px] text-[var(--text-tertiary)]">
-                适用于宽度大于 720px 的浏览器窗口。
+                {zhStatic("适用于宽度大于 720px 的浏览器窗口。")}
               </div>
             </div>
             <div className="instance-segmented is-scrollable">
@@ -1964,7 +2004,7 @@ export function ThemeManage() {
                   className="inline-flex items-center justify-center gap-2"
                 >
                   <Icon size={14} />
-                  <span>{label}</span>
+                  <span>{zh(label)}</span>
                 </button>
               ))}
             </div>
@@ -1972,10 +2012,10 @@ export function ThemeManage() {
           <div className="surface-inset flex min-w-0 flex-col gap-3 px-4 py-4">
             <div>
               <div className="text-[13px] font-semibold text-[var(--text-primary)]">
-                移动端默认
+                {zhStatic("移动端默认")}
               </div>
               <div className="mt-1 text-[11px] text-[var(--text-tertiary)]">
-                适用于宽度小于等于 720px 的手机或窄屏窗口。
+                {zhStatic("适用于宽度小于等于 720px 的手机或窄屏窗口。")}
               </div>
             </div>
             <div className="instance-segmented is-scrollable">
@@ -1989,7 +2029,7 @@ export function ThemeManage() {
                   className="inline-flex items-center justify-center gap-2"
                 >
                   <Icon size={14} />
-                  <span>{label}</span>
+                  <span>{zh(label)}</span>
                 </button>
               ))}
             </div>
@@ -1998,28 +2038,28 @@ export function ThemeManage() {
       </InstancePanel>
 
       <InstancePanel
-        kicker={<><span className="instance-panel-kicker-num">03</span>背景</>}
-        title="背景与透明度"
+        kicker={<><span className="instance-panel-kicker-num">03</span>{zhStatic("背景")}</>}
+        title={zhStatic("背景与透明度")}
         description={isMobileViewport
-          ? "为站点设置背景图或桌面视频，并调节卡片不透明度。"
-          : "为站点设置背景图、桌面视频或首页地图，并调节卡片不透明度。"}
+          ? zhStatic("为站点设置背景图或桌面视频，并调节卡片不透明度。")
+          : zhStatic("为站点设置背景图、桌面视频或首页地图，并调节卡片不透明度。")}
         aside={<Wallpaper size={16} />}
       >
         <div className="flex flex-col gap-4">
           <ToggleRow
             field="enableBackgroundImage"
-            title="启用自定义背景"
+            title={zhStatic("启用自定义背景")}
             desc={isMobileViewport
-              ? "关闭后不加载背景图或视频，下方 URL 配置会保留。"
-              : "关闭后不加载背景图或视频，下方 URL 配置会保留；地图背景由独立开关控制。"}
+              ? zhStatic("关闭后不加载背景图或视频，下方 URL 配置会保留。")
+              : zhStatic("关闭后不加载背景图或视频，下方 URL 配置会保留；地图背景由独立开关控制。")}
             checked={draft.enableBackgroundImage}
             onPatch={patch}
           />
           {!isMobileViewport && (
             <ToggleRow
               field="enableMapBackground"
-              title="启用桌面地图背景"
-              desc="默认关闭，仅桌面端生效。大幅节点地图铺在首页内容下方，总览和实例卡片覆盖其上。总览独立排列为两行，每行与一张实例卡等宽，可在下方自行调整卡片不透明度。"
+              title={zhStatic("启用桌面地图背景")}
+              desc={zhStatic("默认关闭，仅桌面端生效。大幅节点地图铺在首页内容下方，总览和实例卡片覆盖其上。总览独立排列为两行，每行与一张实例卡等宽，可在下方自行调整卡片不透明度。")}
               checked={draft.enableMapBackground}
               onPatch={patch}
             />
@@ -2028,15 +2068,15 @@ export function ThemeManage() {
           <div className="surface-inset flex flex-col gap-3 px-4 py-4">
             <ToggleRow
               field="enableAmbientEffect"
-              title="启用背景动效"
-              desc="默认关闭；开启后在页面上轻量渲染所选氛围效果，不影响点击和滚动。"
+              title={zhStatic("启用背景动效")}
+              desc={zhStatic("默认关闭；开启后在页面上轻量渲染所选氛围效果，不影响点击和滚动。")}
               checked={draft.enableAmbientEffect}
               onPatch={patch}
             />
             <label className="flex min-w-0 flex-col gap-2">
               <span className="inline-flex items-center gap-2 text-[12px] font-medium text-[var(--text-secondary)]">
                 <Sparkles size={14} />
-                动效选择
+                {zhStatic("动效选择")}
               </span>
               <select
                 value={draft.ambientEffect}
@@ -2046,18 +2086,18 @@ export function ThemeManage() {
               >
                 {AMBIENT_EFFECT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
-                    {option.label}
+                    {zh(option.label)}
                   </option>
                 ))}
               </select>
               <span className="text-[11px] leading-relaxed text-[var(--text-tertiary)]">
-                关闭总开关时保留当前选择且不创建渲染层；移动端会自动降低粒子数量，系统减少动态效果时停止播放。
+                {zhStatic("关闭总开关时保留当前选择且不创建渲染层；移动端会自动降低粒子数量，系统减少动态效果时停止播放。")}
               </span>
             </label>
           </div>
 
           <div className="surface-inset flex flex-col gap-3 px-4 py-4">
-            <div className="text-[13px] font-semibold text-[var(--text-primary)]">桌面端背景类型</div>
+            <div className="text-[13px] font-semibold text-[var(--text-primary)]">{zhStatic("桌面端背景类型")}</div>
             <div className="instance-segmented">
               {BACKGROUND_MEDIA_TYPE_OPTIONS.map(({ value, label, icon: Icon }) => (
                 <button
@@ -2069,7 +2109,7 @@ export function ThemeManage() {
                   className="inline-flex items-center justify-center gap-2"
                 >
                   <Icon size={14} />
-                  <span>{label}</span>
+                  <span>{zh(label)}</span>
                 </button>
               ))}
             </div>
@@ -2078,7 +2118,7 @@ export function ThemeManage() {
           <div className="grid gap-4 md:grid-cols-2">
             <label className="flex min-w-0 flex-col gap-2">
               <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-                桌面端背景图
+                {zhStatic("桌面端背景图")}
               </span>
               <input
                 value={draft.backgroundImage}
@@ -2087,21 +2127,21 @@ export function ThemeManage() {
                 className="surface-inset w-full px-3 py-2 text-[13px] outline-none"
               />
               <span className="text-[11px] text-[var(--text-tertiary)]">
-                留空则不显示背景图；可用 <code>浅色图|深色图</code> 分别设置两种外观。
+                {zhStatic("留空则不显示背景图；可用")} <code>{zhStatic("浅色图|深色图")}</code> {zhStatic("分别设置两种外观。")}
               </span>
             </label>
             <label className="flex min-w-0 flex-col gap-2">
               <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-                移动端背景图
+                {zhStatic("移动端背景图")}
               </span>
               <input
                 value={draft.backgroundImageMobile}
                 onChange={(event) => patch("backgroundImageMobile", event.target.value)}
-                placeholder="留空则沿用桌面端背景图"
+                placeholder={zhStatic("留空则沿用桌面端背景图")}
                 className="surface-inset w-full px-3 py-2 text-[13px] outline-none"
               />
               <span className="text-[11px] text-[var(--text-tertiary)]">
-                屏宽不超过 720px 时生效；同样支持 <code>浅色图|深色图</code>。
+                {zhStatic("屏宽不超过 720px 时生效；同样支持")} <code>{zhStatic("浅色图|深色图")}</code>。
               </span>
             </label>
           </div>
@@ -2110,7 +2150,7 @@ export function ThemeManage() {
             <div className="grid gap-4 md:grid-cols-2">
               <label className="flex min-w-0 flex-col gap-2">
                 <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-                  浅色模式视频
+                  {zhStatic("浅色模式视频")}
                 </span>
                 <input
                   value={draft.backgroundVideo}
@@ -2122,25 +2162,25 @@ export function ThemeManage() {
                 {backgroundVideoLightInvalid && (
                   <span className="text-[12px] text-[var(--status-offline)]">
                     {backgroundVideoLightMalformed
-                      ? "请输入 HTTP(S) 或以 / 开头的站内视频直链"
-                      : `视频模式需要浅色视频地址，可使用 ${DEFAULT_BACKGROUND_VIDEO_URL}`}
+                      ? zhStatic("请输入 HTTP(S) 或以 / 开头的站内视频直链")
+                      : zhStatic(`视频模式需要浅色视频地址，可使用 ${DEFAULT_BACKGROUND_VIDEO_URL}`)}
                   </span>
                 )}
               </label>
               <label className="flex min-w-0 flex-col gap-2">
                 <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-                  深色模式视频（可选）
+                  {zhStatic("深色模式视频（可选）")}
                 </span>
                 <input
                   value={draft.backgroundVideoDark}
                   onChange={(event) => patch("backgroundVideoDark", event.target.value)}
-                  placeholder="留空则沿用浅色模式视频"
+                  placeholder={zhStatic("留空则沿用浅色模式视频")}
                   aria-invalid={backgroundVideoDarkInvalid}
                   className="surface-inset w-full px-3 py-2 text-[13px] outline-none"
                 />
                 {backgroundVideoDarkInvalid && (
                   <span className="text-[12px] text-[var(--status-offline)]">
-                    请输入 HTTP(S) 或以 / 开头的站内视频直链
+                    {zhStatic("请输入 HTTP(S) 或以 / 开头的站内视频直链")}
                   </span>
                 )}
               </label>
@@ -2149,7 +2189,7 @@ export function ThemeManage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="surface-inset flex flex-col gap-3 px-4 py-4">
-              <div className="text-[13px] font-semibold text-[var(--text-primary)]">缩放方式</div>
+              <div className="text-[13px] font-semibold text-[var(--text-primary)]">{zhStatic("缩放方式")}</div>
               <div className="instance-segmented is-scrollable">
                 {BACKGROUND_SIZE_OPTIONS.map(({ value, label }) => (
                   <button
@@ -2159,13 +2199,13 @@ export function ThemeManage() {
                     aria-pressed={draftBgAlignment.size === value}
                     onClick={() => setBgSize(value)}
                   >
-                    {label}
+                    {zh(label)}
                   </button>
                 ))}
               </div>
             </div>
             <div className="surface-inset flex flex-col gap-3 px-4 py-4">
-              <div className="text-[13px] font-semibold text-[var(--text-primary)]">对齐位置</div>
+              <div className="text-[13px] font-semibold text-[var(--text-primary)]">{zhStatic("对齐位置")}</div>
               <div className="instance-segmented is-scrollable">
                 {BACKGROUND_POSITION_OPTIONS.map(({ value, label }) => (
                   <button
@@ -2175,7 +2215,7 @@ export function ThemeManage() {
                     aria-pressed={draftBgAlignment.position === value}
                     onClick={() => setBgPosition(value)}
                   >
-                    {label}
+                    {zh(label)}
                   </button>
                 ))}
               </div>
@@ -2185,7 +2225,7 @@ export function ThemeManage() {
           <div className="surface-inset flex flex-col gap-3 px-4 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span className="text-[13px] font-semibold text-[var(--text-primary)]">
-                卡片不透明度
+                {zhStatic("卡片不透明度")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <input
@@ -2202,47 +2242,47 @@ export function ThemeManage() {
                     if (!Number.isFinite(next)) return;
                     patch("surfaceOpacity", Math.min(100, Math.max(0, Math.round(next))));
                   }}
-                  aria-label="卡片不透明度百分比"
+                  aria-label={zhStatic("卡片不透明度百分比")}
                   className="surface-inset w-20 px-3 py-2 text-right text-[13px] tabular outline-none"
                 />
                 <span className="text-[13px] font-medium text-[var(--text-tertiary)]">%</span>
               </span>
             </div>
             <span className="text-[11px] leading-relaxed text-[var(--text-tertiary)]">
-              输入 0–100 的整数。100 = 完全不透明（与默认主题一致），数值越低卡片越通透、越能透出自定义背景。
+              {zhStatic("输入 0–100 的整数。100 = 完全不透明（与默认主题一致），数值越低卡片越通透、越能透出自定义背景。")}
               {hasBackgroundMedia
-                ? " 低于 95 时会自动在背景上叠加可读性遮罩，保证文字清晰；卡片本身保持纯半透明。"
+                ? zhStatic(" 低于 95 时会自动在背景上叠加可读性遮罩，保证文字清晰；卡片本身保持纯半透明。")
                 : !isMobileViewport && draft.enableMapBackground
-                  ? " 已启用地图背景，保存后生效。"
+                  ? zhStatic(" 已启用地图背景，保存后生效。")
                   : isMobileViewport
-                    ? " 需先设置自定义背景后才会生效。"
-                    : " 需先设置自定义背景或开启地图背景后才会生效。"}
+                    ? zhStatic(" 需先设置自定义背景后才会生效。")
+                    : zhStatic(" 需先设置自定义背景或开启地图背景后才会生效。")}
             </span>
           </div>
         </div>
       </InstancePanel>
 
       <InstancePanel
-        kicker={<><span className="instance-panel-kicker-num">04</span>首页</>}
-        title="首页巡检"
-        description="控制首页顶部总览、分组筛选和节点排序方式；适合节点较多时快速查看状态。"
+        kicker={<><span className="instance-panel-kicker-num">04</span>{zhStatic("首页")}</>}
+        title={zhStatic("首页巡检")}
+        description={zhStatic("控制首页顶部总览、分组筛选和节点排序方式；适合节点较多时快速查看状态。")}
         aside={<ListFilter size={16} />}
       >
         <div className="mb-4 grid gap-3 md:grid-cols-2">
           <ToggleRow
             field="enableHomeHeaderAutoHide"
-            title="定时隐藏顶部信息"
-            desc="首页加载完成后，同时隐藏站点名称与右上角快捷设置；刷新页面后重新显示。"
+            title={zhStatic("定时隐藏顶部信息")}
+            desc={zhStatic("首页加载完成后，同时隐藏站点名称与右上角快捷设置；刷新页面后重新显示。")}
             checked={draft.enableHomeHeaderAutoHide}
             onPatch={patch}
           />
           <div className="surface-inset flex items-center justify-between gap-3 px-4 py-3">
             <span className="min-w-0">
               <span className="block text-[13px] font-medium text-[var(--text-primary)]">
-                显示时长
+                {zhStatic("显示时长")}
               </span>
               <span className="mt-1 block text-[11px] text-[var(--text-tertiary)]">
-                可设置 1–3600 秒，默认 10 秒。
+                {zhStatic("可设置 1–3600 秒，默认 10 秒。")}
               </span>
             </span>
             <span className="inline-flex shrink-0 items-center gap-1.5">
@@ -2261,10 +2301,10 @@ export function ThemeManage() {
                     normalizeHomeHeaderVisibleSeconds(event.target.value),
                   );
                 }}
-                aria-label="顶部信息显示时长（秒）"
+                aria-label={zhStatic("顶部信息显示时长（秒）")}
                 className="surface-inset w-20 px-3 py-2 text-right text-[13px] tabular outline-none disabled:opacity-45"
               />
-              <span className="text-[13px] font-medium text-[var(--text-tertiary)]">秒</span>
+              <span className="text-[13px] font-medium text-[var(--text-tertiary)]">{zhStatic("秒")}</span>
             </span>
           </div>
         </div>
@@ -2272,43 +2312,43 @@ export function ThemeManage() {
         <div className="grid gap-3 md:grid-cols-3">
           <ToggleRow
             field="showHomeOverview"
-            title="显示顶部总览"
-            desc="展示时间、在线数、地区、流量和速率。"
+            title={zhStatic("显示顶部总览")}
+            desc={zhStatic("展示时间、在线数、地区、流量和速率。")}
             checked={draft.showHomeOverview}
             onPatch={patch}
           />
           <ToggleRow
             field="showGroupTabs"
-            title="显示分组筛选"
-            desc="根据后端节点分组生成首页 Tab。"
+            title={zhStatic("显示分组筛选")}
+            desc={zhStatic("根据后端节点分组生成首页 Tab。")}
             checked={draft.showGroupTabs}
             onPatch={patch}
           />
           <ToggleRow
             field="showRegionBar"
-            title="显示地区筛选"
-            desc="按节点地区生成国旗筛选栏，点击某地区只看该地区节点。"
+            title={zhStatic("显示地区筛选")}
+            desc={zhStatic("按节点地区生成国旗筛选栏，点击某地区只看该地区节点。")}
             checked={draft.showRegionBar}
             onPatch={patch}
           />
           <ToggleRow
             field="showCardGroup"
-            title="卡片显示分组"
-            desc="关闭后卡片内不再显示节点分组名（不影响分组筛选栏与备注）。"
+            title={zhStatic("卡片显示分组")}
+            desc={zhStatic("关闭后卡片内不再显示节点分组名（不影响分组筛选栏与备注）。")}
             checked={draft.showCardGroup}
             onPatch={patch}
           />
           <ToggleRow
             field="enableHomeSort"
-            title="启用排序切换"
-            desc="首页显示排序控件，访客可临时切换排序方式（离线节点恒定置底）。"
+            title={zhStatic("启用排序切换")}
+            desc={zhStatic("首页显示排序控件，访客可临时切换排序方式（离线节点恒定置底）。")}
             checked={draft.enableHomeSort}
             onPatch={patch}
           />
           <ToggleRow
             field="hideAdminEntryWhenLoggedOut"
-            title="未登录时隐藏后台入口"
-            desc="仅隐藏访客看到的“后台登录”；/admin 仍可直接访问，登录后自动显示“管理”。"
+            title={zhStatic("未登录时隐藏后台入口")}
+            desc={zhStatic("仅隐藏访客看到的“后台登录”；/admin 仍可直接访问，登录后自动显示“管理”。")}
             checked={draft.hideAdminEntryWhenLoggedOut}
             onPatch={patch}
           />
@@ -2317,9 +2357,9 @@ export function ThemeManage() {
         <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.6fr)]">
           <div>
             <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-              <span className="text-[13px] font-medium text-[var(--text-primary)]">默认排序维度</span>
+              <span className="text-[13px] font-medium text-[var(--text-primary)]">{zhStatic("默认排序维度")}</span>
               <span className="text-[11px] text-[var(--text-tertiary)]">
-                首次访问时的初始排序；访客可临时切换。
+                {zhStatic("首次访问时的初始排序；访客可临时切换。")}
               </span>
             </div>
             <div className="instance-segmented is-scrollable">
@@ -2332,13 +2372,13 @@ export function ThemeManage() {
                   disabled={!draft.enableHomeSort}
                   onClick={() => patch("homeSortField", field)}
                 >
-                  {HOME_SORT_FIELD_LABELS[field]}
+                  {zh(HOME_SORT_FIELD_LABELS[field])}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <div className="mb-2 text-[13px] font-medium text-[var(--text-primary)]">默认方向</div>
+            <div className="mb-2 text-[13px] font-medium text-[var(--text-primary)]">{zhStatic("默认方向")}</div>
             <div className="instance-segmented">
               <button
                 type="button"
@@ -2347,7 +2387,7 @@ export function ThemeManage() {
                 disabled={!draft.enableHomeSort}
                 onClick={() => patch("homeSortDirection", "asc")}
               >
-                升序
+                {zhStatic("升序")}
               </button>
               <button
                 type="button"
@@ -2356,7 +2396,7 @@ export function ThemeManage() {
                 disabled={!draft.enableHomeSort}
                 onClick={() => patch("homeSortDirection", "desc")}
               >
-                降序
+                {zhStatic("降序")}
               </button>
             </div>
           </div>
@@ -2366,14 +2406,14 @@ export function ThemeManage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <span className="min-w-0">
               <span className="block text-[13px] font-semibold text-[var(--text-primary)]">
-                总览评级
+                {zhStatic("总览评级")}
               </span>
               <span className="mt-1 block text-[11px] text-[var(--text-tertiary)]">
-                在累计流量、实时带宽、资产概览右下角显示文字评级；名称用英文逗号分隔，只取前四个。
+                {zhStatic("在累计流量、实时带宽、资产概览右下角显示文字评级；名称用英文逗号分隔，只取前四个。")}
               </span>
             </span>
             <label className="inline-flex shrink-0 items-center gap-2 text-[12px] font-medium text-[var(--text-secondary)]">
-              <span>启用</span>
+              <span>{zhStatic("启用")}</span>
               <input
                 type="checkbox"
                 checked={draft.showOverviewRatings}
@@ -2390,7 +2430,7 @@ export function ThemeManage() {
               return (
                 <div key={field.key} className="flex min-w-0 flex-col gap-2">
                   <label className="flex items-center justify-between gap-2 text-[12px] font-medium text-[var(--text-secondary)]">
-                    <span>{field.title}</span>
+                    <span>{zh(field.title)}</span>
                     <input
                       type="checkbox"
                       checked={draft[field.toggleKey]}
@@ -2404,11 +2444,11 @@ export function ThemeManage() {
                     disabled={!ratingEnabled}
                     onChange={(event) => setRatingLabelDraft(field.key, event.target.value)}
                     placeholder={defaultLabel}
-                    aria-label={`${field.title}评级名称`}
+                    aria-label={zh(`${field.title}评级名称`)}
                     className="surface-inset w-full px-3 py-2 text-[13px] outline-none disabled:opacity-60"
                   />
                   <span className="text-[11px] text-[var(--text-tertiary)]">
-                    例如: {defaultLabel}
+                    {zhStatic("例如:")} {defaultLabel}
                   </span>
                 </div>
               );
@@ -2418,59 +2458,59 @@ export function ThemeManage() {
       </InstancePanel>
 
       <InstancePanel
-        kicker={<><span className="instance-panel-kicker-num">05</span>隐藏</>}
-        title="隐藏节点"
-        description="在此填写的节点会从首页彻底移除：不显示卡片，也不计入在线数、累计流量、实时带宽与资产等所有统计。对所有访客生效，清空即可恢复。"
+        kicker={<><span className="instance-panel-kicker-num">05</span>{zhStatic("隐藏")}</>}
+        title={zhStatic("隐藏节点")}
+        description={zhStatic("在此填写的节点会从首页彻底移除：不显示卡片，也不计入在线数、累计流量、实时带宽与资产等所有统计。对所有访客生效，清空即可恢复。")}
         aside={<EyeOff size={16} />}
       >
         <label className="flex min-w-0 flex-col gap-2">
           <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-            隐藏列表
+            {zhStatic("隐藏列表")}
           </span>
           <textarea
             value={draft.hiddenNodesText}
             onChange={(event) => patch("hiddenNodesText", event.target.value)}
-            placeholder="每行一个节点名称 / UUID，也可以用逗号分隔"
+            placeholder={zhStatic("每行一个节点名称 / UUID，也可以用逗号分隔")}
             className="surface-inset min-h-[112px] w-full resize-y px-3 py-2 text-[13px] outline-none"
           />
           <span className="text-[11px] text-[var(--text-tertiary)]">
-            已隐藏 {draftHiddenNodes.length} 个节点。按名称或 UUID 匹配，大小写不敏感。
+            {zhStatic("已隐藏")} {draftHiddenNodes.length} {zhStatic("个节点。按名称或 UUID 匹配，大小写不敏感。")}
           </span>
         </label>
       </InstancePanel>
 
       <InstancePanel
-        kicker={<><span className="instance-panel-kicker-num">06</span>卡片</>}
-        title="卡片显示项"
-        description="分别管理跨卡片视图的功能入口，以及小卡片专属的信息密度。"
+        kicker={<><span className="instance-panel-kicker-num">06</span>{zhStatic("卡片")}</>}
+        title={zhStatic("卡片显示项")}
+        description={zhStatic("分别管理跨卡片视图的功能入口，以及小卡片专属的信息密度。")}
         aside={<Rows3 size={16} />}
       >
         <div>
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <span className="text-[13px] font-medium text-[var(--text-primary)]">跨视图设置</span>
+            <span className="text-[13px] font-medium text-[var(--text-primary)]">{zhStatic("跨视图设置")}</span>
             <span className="text-[11px] text-[var(--text-tertiary)]">
-              适用于多个卡片尺寸，具体范围以每项说明为准。
+              {zhStatic("适用于多个卡片尺寸，具体范围以每项说明为准。")}
             </span>
           </div>
           <div className="mt-2 grid gap-3 md:grid-cols-2">
             <ToggleRow
               field="showTodayTrafficPopover"
-              title="显示今日流量悬浮窗"
-              desc="在大卡片、小卡片与迷你卡片标题旁显示入口；鼠标悬浮或点击可查看今日流量与峰值速度。默认开启。"
+              title={zhStatic("显示今日流量悬浮窗")}
+              desc={zhStatic("在大卡片、小卡片与迷你卡片标题旁显示入口；鼠标悬浮或点击可查看今日流量与峰值速度。默认开启。")}
               checked={draft.showTodayTrafficPopover}
               onPatch={patch}
             />
             <ToggleRow
               field="showMerchantLinks"
-              title="显示商家链接入口"
-              desc="在大卡片、小卡片与迷你卡片标题旁显示商家入口。默认关闭；与今日流量同时开启时位于其左侧。"
+              title={zhStatic("显示商家链接入口")}
+              desc={zhStatic("在大卡片、小卡片与迷你卡片标题旁显示商家入口。默认关闭；与今日流量同时开启时位于其左侧。")}
               checked={draft.showMerchantLinks}
               onPatch={patch}
             />
             <ToggleRow
               field="showConnections"
-              title="显示连接数（TCP/UDP）"
-              desc="在大卡片与小卡片展示实时 TCP / UDP 连接数；需被控端上报，未上报显示 0。默认关闭。"
+              title={zhStatic("显示连接数（TCP/UDP）")}
+              desc={zhStatic("在大卡片与小卡片展示实时 TCP / UDP 连接数；需被控端上报，未上报显示 0。默认关闭。")}
               checked={draft.showConnections}
               onPatch={patch}
             />
@@ -2491,30 +2531,30 @@ export function ThemeManage() {
 
         <div className="mt-4">
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <span className="text-[13px] font-medium text-[var(--text-primary)]">小卡片专属</span>
+            <span className="text-[13px] font-medium text-[var(--text-primary)]">{zhStatic("小卡片专属")}</span>
             <span className="text-[11px] text-[var(--text-tertiary)]">
-              控制小卡片中间信息块的密度；实时速率始终显示。
+              {zhStatic("控制小卡片中间信息块的密度；实时速率始终显示。")}
             </span>
           </div>
           <div className="mt-2 grid gap-3 md:grid-cols-2">
             <ToggleRow
               field="compactShowTrafficTotal"
-              title="显示累计流量"
-              desc="展示出站与入站累计流量。"
+              title={zhStatic("显示累计流量")}
+              desc={zhStatic("展示出站与入站累计流量。")}
               checked={draft.compactShowTrafficTotal}
               onPatch={patch}
             />
             <ToggleRow
               field="compactShowBilling"
-              title="显示费用到期"
-              desc="展示续费价格与剩余天数。"
+              title={zhStatic("显示费用到期")}
+              desc={zhStatic("展示续费价格与剩余天数。")}
               checked={draft.compactShowBilling}
               onPatch={patch}
             />
             <ToggleRow
               field="compactShowUptime"
-              title="显示在线时间"
-              desc="在小卡片流量栏右侧展示在线时长。默认开启。"
+              title={zhStatic("显示在线时间")}
+              desc={zhStatic("在小卡片流量栏右侧展示在线时长。默认开启。")}
               checked={draft.compactShowUptime}
               onPatch={patch}
             />
@@ -2523,12 +2563,12 @@ export function ThemeManage() {
       </InstancePanel>
 
       <InstancePanel
-        title="流量重置日"
-        description="按服务器设置每月重置日，未自定义的服务器继续按账单到期日推算。"
+        title={zhStatic("流量重置日")}
+        description={zhStatic("按服务器设置每月重置日，未自定义的服务器继续按账单到期日推算。")}
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="text-[13px] text-[var(--text-secondary)]">
-            已自定义 {sortedClients.filter((client) => draft.trafficResetDays[client.uuid] != null).length} 台，其余跟随账单日
+            {zhStatic("已自定义")} {sortedClients.filter((client) => draft.trafficResetDays[client.uuid] != null).length} {zhStatic("台，其余跟随账单日")}
           </span>
           <button
             type="button"
@@ -2536,7 +2576,7 @@ export function ThemeManage() {
             onClick={() => setTrafficResetOpen(true)}
             className="theme-manage-button"
           >
-            <SlidersHorizontal size={14} />配置重置日
+            <SlidersHorizontal size={14} />{zhStatic("配置重置日")}
           </button>
         </div>
         {trafficResetOpen && (
@@ -2555,37 +2595,37 @@ export function ThemeManage() {
       </InstancePanel>
 
       <InstancePanel
-        kicker={<><span className="instance-panel-kicker-num">07</span>花费</>}
-        title="服务器花费"
-        description="资产统计页（/assets）使用实时汇率计算年化总支出、月均支出与剩余价值；忽略列表中的节点不会计入费用。两个入口开关都关闭时，直接访问资产页也会跳回首页。"
+        kicker={<><span className="instance-panel-kicker-num">07</span>{zhStatic("花费")}</>}
+        title={zhStatic("服务器花费")}
+        description={zhStatic("资产统计页（/assets）使用实时汇率计算年化总支出、月均支出与剩余价值；忽略列表中的节点不会计入费用。两个入口开关都关闭时，直接访问资产页也会跳回首页。")}
         aside={<CircleDollarSign size={16} />}
       >
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
           <div className="flex flex-col gap-3">
             <ToggleRow
               field="showCostsToGuests"
-              title="向未登录访客公开费用"
-              desc="关闭后，续费价格、资产统计和价格排序仅登录管理员可见；到期时间仍正常显示。"
+              title={zhStatic("向未登录访客公开费用")}
+              desc={zhStatic("关闭后，续费价格、资产统计和价格排序仅登录管理员可见；到期时间仍正常显示。")}
               checked={draft.showCostsToGuests}
               onPatch={patch}
             />
             <ToggleRow
               field="showCostSummary"
-              title="显示资产页入口按钮"
-              desc="在首页资产概览卡右上角显示进入资产统计页的按钮。"
+              title={zhStatic("显示资产页入口按钮")}
+              desc={zhStatic("在首页资产概览卡右上角显示进入资产统计页的按钮。")}
               checked={draft.showCostSummary}
               onPatch={patch}
             />
             <ToggleRow
               field="showCostSummaryFloatingButton"
-              title="显示资产悬浮按钮"
-              desc="卡内入口不可用时（总览隐藏或其开关关闭），以悬浮按钮进入资产统计页。"
+              title={zhStatic("显示资产悬浮按钮")}
+              desc={zhStatic("卡内入口不可用时（总览隐藏或其开关关闭），以悬浮按钮进入资产统计页。")}
               checked={draft.showCostSummaryFloatingButton}
               onPatch={patch}
             />
             <label className="flex flex-col gap-2">
               <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-                实时汇率接口
+                {zhStatic("实时汇率接口")}
               </span>
               <input
                 value={draft.costRateApiUrl}
@@ -2596,19 +2636,19 @@ export function ThemeManage() {
               />
               {draftCostRateApiUrlInvalid && (
                 <span className="text-[12px] text-[var(--status-offline)]">
-                  请输入 http(s) 链接，保存后将回退默认接口
+                  {zhStatic("请输入 http(s) 链接，保存后将回退默认接口")}
                 </span>
               )}
             </label>
           </div>
           <label className="flex min-w-0 flex-col gap-2">
             <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-              忽略计费节点
+              {zhStatic("忽略计费节点")}
             </span>
             <textarea
               value={draft.costIgnoredText}
               onChange={(event) => patch("costIgnoredText", event.target.value)}
-              placeholder="每行一个节点名称 / UUID，也可以用逗号分隔"
+              placeholder={zhStatic("每行一个节点名称 / UUID，也可以用逗号分隔")}
               className="surface-inset min-h-[112px] w-full resize-y px-3 py-2 text-[13px] outline-none"
             />
           </label>
@@ -2616,9 +2656,9 @@ export function ThemeManage() {
       </InstancePanel>
 
       <InstancePanel
-        kicker={<><span className="instance-panel-kicker-num">08</span>溢价</>}
-        title="收购溢价"
-        description="填写实际收购价（人民币），系统使用当前价格、周期、到期日和汇率回算收购日的剩余价值，再固化溢价（收购价 − 收购日剩余价值，可正可负）。后续续费和汇率变化不会自动改写；主动修改收购日期时会重新计算并固化。收购日期同时用于溢价月摊与尚未摊销价值；免费节点的收购价全额记为溢价，留空即清除记录。"
+        kicker={<><span className="instance-panel-kicker-num">08</span>{zhStatic("溢价")}</>}
+        title={zhStatic("收购溢价")}
+        description={zhStatic("填写实际收购价（人民币），系统使用当前价格、周期、到期日和汇率回算收购日的剩余价值，再固化溢价（收购价 − 收购日剩余价值，可正可负）。后续续费和汇率变化不会自动改写；主动修改收购日期时会重新计算并固化。收购日期同时用于溢价月摊与尚未摊销价值；免费节点的收购价全额记为溢价，留空即清除记录。")}
         aside={
           <div className="text-[11px] text-[var(--text-tertiary)]">
             {clientsLoading ? "载入中" : `已设置 ${premiumConfiguredCount} 个节点`}
@@ -2631,8 +2671,8 @@ export function ThemeManage() {
             <input
               value={premiumSearch}
               onChange={(event) => setPremiumSearch(event.target.value)}
-              placeholder="搜索节点名称 / UUID / 分组 / 地区"
-              aria-label="搜索节点"
+              placeholder={zhStatic("搜索节点名称 / UUID / 分组 / 地区")}
+              aria-label={zhStatic("搜索节点")}
               className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[var(--text-tertiary)]"
             />
           </label>
@@ -2645,13 +2685,13 @@ export function ThemeManage() {
 
           {!clientsLoading && sortedClients.length === 0 && (
             <div className="theme-manage-empty-state">
-              <span>还没有任何节点。</span>
+              <span>{zhStatic("还没有任何节点。")}</span>
             </div>
           )}
 
           {!clientsLoading && sortedClients.length > 0 && filteredPremiumClients.length === 0 && (
             <div className="surface-inset px-4 py-5 text-[13px] text-[var(--text-secondary)]">
-              没有匹配的节点。
+              {zhStatic("没有匹配的节点。")}
             </div>
           )}
 
@@ -2670,19 +2710,19 @@ export function ThemeManage() {
       </InstancePanel>
 
       <InstancePanel
-        kicker={<><span className="instance-panel-kicker-num">09</span>延迟</>}
-        title="主页延迟检测"
+        kicker={<><span className="instance-panel-kicker-num">09</span>{zhStatic("延迟")}</>}
+        title={zhStatic("主页延迟检测")}
         description={
           <>
-            单线路模式为每个节点绑定一项 Ping 任务；开启三网模式后，大卡片和小卡片默认展示三项全局任务，也可以为每台服务器单独覆盖探测点。迷你卡片与列表仍显示节点的单线路绑定。
+            {zhStatic("单线路模式为每个节点绑定一项 Ping 任务；开启三网模式后，大卡片和小卡片默认展示三项全局任务，也可以为每台服务器单独覆盖探测点。迷你卡片与列表仍显示节点的单线路绑定。")}
             {" "}
-            如果当前还没有可用任务，请先前往
+            {zhStatic("如果当前还没有可用任务，请先前往")}
             {" "}
             <a href={adminPingHref} className="theme-manage-inline-link">
-              后台 Ping 管理
+              {zhStatic("后台 Ping 管理")}
             </a>
             {" "}
-            创建任务，再回来完成绑定。
+            {zhStatic("创建任务，再回来完成绑定。")}
           </>
         }
         aside={
@@ -2706,10 +2746,10 @@ export function ThemeManage() {
             <label className="flex items-start justify-between gap-4">
               <span className="min-w-0">
                 <span className="block text-[13px] font-medium text-[var(--text-primary)]">
-                  开启三网模式
+                  {zhStatic("开启三网模式")}
                 </span>
                 <span className="mt-1 block text-[11px] leading-relaxed text-[var(--text-tertiary)]">
-                  大卡片和小卡片使用三网延迟；未单独配置的服务器继承下面的全局默认线路。
+                  {zhStatic("大卡片和小卡片使用三网延迟；未单独配置的服务器继承下面的全局默认线路。")}
                 </span>
               </span>
               <input
@@ -2731,10 +2771,10 @@ export function ThemeManage() {
               <div className="mt-4 border-t border-[var(--hairline)] pt-4">
                 <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
                   <span className="text-[12px] font-medium text-[var(--text-primary)]">
-                    全局默认线路
+                    {zhStatic("全局默认线路")}
                   </span>
                   <span className="text-[11px] text-[var(--text-tertiary)]">
-                    按顺序显示在节点卡片中
+                    {zhStatic("按顺序显示在节点卡片中")}
                   </span>
                 </div>
                 <div className="grid gap-3 md:grid-cols-3">
@@ -2746,21 +2786,21 @@ export function ThemeManage() {
                       return (
                         <label key={slot} className="min-w-0">
                           <span className="mb-1.5 block text-[11px] font-medium text-[var(--text-secondary)]">
-                            线路 {slot + 1}
+                            {zhStatic("线路")} {slot + 1}
                           </span>
                           <select
                             value={selectedTaskId ?? ""}
                             onChange={(event) =>
                               patchMultiPingTask(slot, event.target.value)
                             }
-                            aria-label={`三网线路 ${slot + 1}`}
+                            aria-label={zhStatic(`三网线路 ${slot + 1}`)}
                             className="surface-inset w-full px-3 py-2 text-[13px] text-[var(--text-primary)] outline-none"
                           >
-                            <option value="">选择 Ping 任务</option>
+                            <option value="">{zhStatic("选择 Ping 任务")}</option>
                             {selectedTaskId != null &&
                               !sortedTasks.some((task) => task.id === selectedTaskId) && (
                                 <option value={selectedTaskId}>
-                                  任务 #{selectedTaskId}（当前不可用）
+                                  {zhStatic("任务 #")}{selectedTaskId}{zhStatic("（当前不可用）")}
                                 </option>
                               )}
                             {sortedTasks.map((task) => (
@@ -2772,7 +2812,7 @@ export function ThemeManage() {
                                   draft.homepageMultiPingTaskIds.includes(task.id)
                                 }
                               >
-                                {task.name || `任务 #${task.id}`}
+                                {task.name || zhStatic(`任务 #${task.id}`)}
                               </option>
                             ))}
                           </select>
@@ -2791,8 +2831,8 @@ export function ThemeManage() {
                   role={draftMultiPingInvalid ? "alert" : undefined}
                 >
                   {draftMultiPingInvalid
-                    ? "请选满 3 个不同的 Ping 任务后再保存。"
-                    : "未设置单独覆盖的服务器都会使用这三项任务。"}
+                    ? zhStatic("请选满 3 个不同的 Ping 任务后再保存。")
+                    : zhStatic("未设置单独覆盖的服务器都会使用这三项任务。")}
                 </p>
 
                 <MultiPingNodeConfigControl
@@ -2819,16 +2859,16 @@ export function ThemeManage() {
               <input
                 value={taskSearch}
                 onChange={(event) => setTaskSearch(event.target.value)}
-                placeholder="搜索 Ping 任务名称 / ID / 类型 / 目标"
-                aria-label="搜索 Ping 任务"
+                placeholder={zhStatic("搜索 Ping 任务名称 / ID / 类型 / 目标")}
+                aria-label={zhStatic("搜索 Ping 任务")}
                 className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[var(--text-tertiary)]"
               />
             </label>
             <div className="surface-inset flex items-center justify-between gap-3 px-3 py-2 text-[12px] text-[var(--text-secondary)]">
-              <span>首页绑定总数</span>
+              <span>{zhStatic("首页绑定总数")}</span>
               <strong className="text-[var(--text-primary)]">
                 {draft.enableHomepageMultiPing
-                  ? `${multiPingConfiguredNodeCount} 台单独覆盖`
+                  ? zhStatic(`${multiPingConfiguredNodeCount} 台单独覆盖`)
                   : `${assignedNodeCount} / ${sortedClients.length}`}
               </strong>
             </div>
@@ -2836,14 +2876,14 @@ export function ThemeManage() {
 
           {draft.enableHomepageMultiPing && (
             <div className="text-[11px] text-[var(--text-tertiary)]">
-              下方单线路绑定继续用于迷你卡片和列表；大卡片与小卡片使用上方三项任务。
+              {zhStatic("下方单线路绑定继续用于迷你卡片和列表；大卡片与小卡片使用上方三项任务。")}
             </div>
           )}
 
           <ToggleRow
             field="fakePingForUnbound"
-            title="未绑定探测点显示模拟延迟"
-            desc="用户主动开启后，未绑定单线路 Ping 任务的在线节点，以及三网模式中后台未绑定的探测点，都会显示前端生成的模拟数据（延迟 1-10ms、丢包 0%）。模拟数据仅用于视觉统一，不代表真实网络质量。"
+            title={zhStatic("未绑定探测点显示模拟延迟")}
+            desc={zhStatic("用户主动开启后，未绑定单线路 Ping 任务的在线节点，以及三网模式中后台未绑定的探测点，都会显示前端生成的模拟数据（延迟 1-10ms、丢包 0%）。模拟数据仅用于视觉统一，不代表真实网络质量。")}
             checked={draft.fakePingForUnbound}
             onPatch={patch}
           />
@@ -2856,16 +2896,16 @@ export function ThemeManage() {
 
           {noTasksYet && (
             <div className="theme-manage-empty-state">
-              <span>当前还没有可用于首页展示的 Ping 任务。</span>
+              <span>{zhStatic("当前还没有可用于首页展示的 Ping 任务。")}</span>
               <a href={adminPingHref} className="theme-manage-inline-link">
-                前往后台 Ping 管理创建任务
+                {zhStatic("前往后台 Ping 管理创建任务")}
               </a>
             </div>
           )}
 
           {noFilteredTaskMatch && (
             <div className="surface-inset px-4 py-5 text-[13px] text-[var(--text-secondary)]">
-              没有匹配的 Ping 任务。
+              {zhStatic("没有匹配的 Ping 任务。")}
             </div>
           )}
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useI18n, zhStatic } from "@/i18n";
 import {
   Cpu,
   MemoryStick,
@@ -41,6 +42,7 @@ const ICONS: Record<MetricColorKey, typeof Cpu> = {
 };
 
 export function MetricColorPicker({ hidden = false }: { hidden?: boolean }) {
+  const { zh } = useI18n();
   const {
     colors,
     darkDepth,
@@ -69,11 +71,11 @@ export function MetricColorPicker({ hidden = false }: { hidden?: boolean }) {
     <div
       className="metric-color-picker"
       role="group"
-      aria-label="卡片配色"
+      aria-label={zhStatic("卡片配色")}
       hidden={hidden}
     >
       <div className="metric-color-picker-head">
-        <span>配色自定义</span>
+        <span>{zhStatic("配色自定义")}</span>
         <button
           type="button"
           className="metric-color-reset-all"
@@ -83,14 +85,14 @@ export function MetricColorPicker({ hidden = false }: { hidden?: boolean }) {
           }}
           disabled={!hasAny}
         >
-          全部重置
+          {zhStatic("全部重置")}
         </button>
       </div>
-      {saveError && <div className="metric-color-error">保存失败（请确认已登录管理员）</div>}
+      {saveError && <div className="metric-color-error">{zhStatic("保存失败（请确认已登录管理员）")}</div>}
       <div className="metric-color-group">
-        <div className="metric-color-group-title">暗色背景</div>
+        <div className="metric-color-group-title">{zhStatic("暗色背景")}</div>
         <div className="dark-depth-control">
-          <div className="dark-depth-presets" role="group" aria-label="暗色深度预设">
+          <div className="dark-depth-presets" role="group" aria-label={zhStatic("暗色深度预设")}>
             {DARK_DEPTH_PRESETS.map((preset) => (
               <button
                 key={preset.value}
@@ -99,17 +101,17 @@ export function MetricColorPicker({ hidden = false }: { hidden?: boolean }) {
                 data-active={darkDepth === preset.value ? "true" : "false"}
                 data-depth={preset.value}
                 aria-pressed={darkDepth === preset.value}
-                title={preset.title}
+                title={zh(preset.title)}
                 onClick={() => setDarkDepth(preset.value)}
               >
                 <span className="dark-depth-preset-swatch" aria-hidden />
-                <span>{preset.label}</span>
+                <span>{zh(preset.label)}</span>
               </button>
             ))}
           </div>
           <label className="dark-depth-range">
             <span className="dark-depth-range-head">
-              <span>黑色程度</span>
+              <span>{zhStatic("黑色程度")}</span>
               <output>{darkDepth}%</output>
             </span>
             <input
@@ -118,18 +120,18 @@ export function MetricColorPicker({ hidden = false }: { hidden?: boolean }) {
               max="100"
               step="1"
               value={darkDepth}
-              aria-label="黑色程度"
+              aria-label={zhStatic("黑色程度")}
               onChange={(event) => setDarkDepth(Number(event.target.value))}
             />
           </label>
           {resolvedAppearance !== "dark" && (
-            <p className="dark-depth-hint">切换到深色模式后查看实际效果</p>
+            <p className="dark-depth-hint">{zhStatic("切换到深色模式后查看实际效果")}</p>
           )}
         </div>
       </div>
       {METRIC_COLOR_GROUPS.map((group) => (
         <div className="metric-color-group" key={group.id}>
-          <div className="metric-color-group-title">{group.label}</div>
+          <div className="metric-color-group-title">{zh(group.label)}</div>
           <div className="metric-color-list">
             {METRIC_COLOR_META.filter((item) => item.group === group.id).map(({ key, label }) => {
               const Icon = ICONS[key];
@@ -137,13 +139,13 @@ export function MetricColorPicker({ hidden = false }: { hidden?: boolean }) {
               return (
                 <div className="metric-color-row" key={key}>
                   <Icon size={14} className="metric-color-icon" />
-                  <span className="metric-color-name">{label}</span>
+                  <span className="metric-color-name">{zh(label)}</span>
                   <label className="metric-color-swatch" style={{ background: valueOf(key) }}>
                     <input
                       type="color"
                       value={valueOf(key)}
                       onChange={(event) => setColor(key, event.target.value)}
-                      aria-label={`${label} 颜色`}
+                      aria-label={zh(`${label} 颜色`)}
                     />
                   </label>
                   <button
@@ -154,8 +156,8 @@ export function MetricColorPicker({ hidden = false }: { hidden?: boolean }) {
                       refreshBase();
                     }}
                     disabled={!overridden}
-                    aria-label={`恢复 ${label} 默认色`}
-                    title="恢复默认"
+                    aria-label={zh(`恢复 ${label} 默认色`)}
+                    title={zhStatic("恢复默认")}
                   >
                     <RotateCcw size={13} />
                   </button>

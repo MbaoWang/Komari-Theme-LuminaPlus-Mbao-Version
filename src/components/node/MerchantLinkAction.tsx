@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+import { zhStatic } from "@/i18n";
 import { MerchantIcon } from "@/components/ui/MerchantIcon";
 import type { NodeMerchantLink } from "@/utils/merchantLinks";
 
@@ -24,8 +25,8 @@ export function MerchantLinkAction({
     return (
       <span
         className={clsx(className, "merchant-link-action is-disabled")}
-        title="未配置商家官网"
-        aria-label="未配置商家官网"
+        title={zhStatic("未配置商家官网")}
+        aria-label={zhStatic("未配置商家官网")}
       >
         {icon}
       </span>
@@ -38,8 +39,8 @@ export function MerchantLinkAction({
       target="_blank"
       rel="noopener noreferrer"
       className={clsx(className, "merchant-link-action")}
-      title="打开商家官网"
-      aria-label="在新标签页打开商家官网"
+      title={zhStatic("打开商家官网")}
+      aria-label={zhStatic("在新标签页打开商家官网")}
     >
       {icon}
     </a>

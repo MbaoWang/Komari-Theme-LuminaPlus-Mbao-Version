@@ -6,38 +6,28 @@ import {
   Eye,
   EyeOff,
   Grid3x3,
-  Languages,
   LayoutGrid,
   List,
   Monitor,
   Moon,
   Palette,
-  RefreshCw,
   Rows3,
   Settings,
   SlidersHorizontal,
   Sun,
-  Timer,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import {
-  LANGUAGE_OPTIONS,
-  useI18n,
-  type LanguagePreference,
-} from "@/i18n";
+import { useI18n } from "@/i18n";
 import { usePreferences } from "@/hooks/usePreferences";
 import { useViewMode } from "@/hooks/useViewMode";
 import { useNodeStoreStatus } from "@/hooks/useNode";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminEntryPath } from "@/hooks/useAdminEntryPath";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
-import { useRefreshInterval } from "@/hooks/useRefreshInterval";
 import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import {
-  REFRESH_INTERVAL_OPTIONS,
   shouldShowAdminEntry,
   type NodeViewMode,
-  type RefreshIntervalOption,
 } from "@/utils/themeSettings";
 import { clsx } from "clsx";
 
@@ -45,7 +35,7 @@ const MetricColorPicker = lazy(() =>
   import("./MetricColorPicker").then((module) => ({ default: module.MetricColorPicker })),
 );
 
-type ActivePopover = "none" | "colors" | "lang" | "refresh";
+type ActivePopover = "none" | "colors";
 
 const VIEW_MODE_ICONS: Record<NodeViewMode, typeof LayoutGrid> = {
   large: LayoutGrid,
@@ -65,10 +55,9 @@ export function FloatingControls({
 }: {
   onExpandedChange?: (expanded: boolean) => void;
 }) {
-  const { language, setLanguage, tx } = useI18n();
+  const { tx } = useI18n();
   const { appearance, setAppearance } = usePreferences();
   const { mode, nextMode, toggleMode } = useViewMode();
-  const { intervalMs, isPaused, setRefreshInterval, refreshNow } = useRefreshInterval();
   const { privacyMode, toggleAvailable, togglePrivacyMode } = usePrivacyMode();
   const { data: me } = useAuth();
   const adminEntryPath = useAdminEntryPath();
@@ -107,18 +96,6 @@ export function FloatingControls({
     if (value === "light") return tx("浅色", "淺色", "Light");
     if (value === "dark") return tx("深色", "深色", "Dark");
     return tx("跟随系统", "跟隨系統", "System");
-  };
-
-  const languageLabel = (pref: LanguagePreference) => {
-    if (pref === "auto") return tx("跟随浏览器", "跟隨瀏覽器", "Auto (Browser)");
-    if (pref === "zh-TW") return "繁體中文";
-    if (pref === "zh-CN") return "简体中文";
-    return "English";
-  };
-
-  const intervalLabel = (ms: RefreshIntervalOption) => {
-    if (ms === 0) return tx("暂停", "暫停", "Paused");
-    return tx(`${ms / 1000} 秒`, `${ms / 1000} 秒`, `${ms / 1000}s`);
   };
 
   useEffect(() => {
@@ -194,39 +171,6 @@ export function FloatingControls({
                   )}
                 >
                   <ViewIcon size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => togglePopover("lang")}
-                  aria-label={tx("语言切换", "語言切換", "Language")}
-                  aria-pressed={activePopover === "lang"}
-                  title={tx("语言切换", "語言切換", "Language")}
-                  tabIndex={hiddenTabIndex}
-                  className={clsx(
-                    "control-button grid h-9 w-9 place-items-center",
-                    (activePopover === "lang" || language !== "auto") &&
-                      "control-toggle is-active",
-                  )}
-                >
-                  <Languages size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => togglePopover("refresh")}
-                  aria-label={tx("刷新频率", "刷新頻率", "Refresh interval")}
-                  aria-pressed={activePopover === "refresh"}
-                  title={tx(
-                    `刷新频率：${intervalLabel(intervalMs)}`,
-                    `刷新頻率：${intervalLabel(intervalMs)}`,
-                    `Refresh: ${intervalLabel(intervalMs)}`,
-                  )}
-                  tabIndex={hiddenTabIndex}
-                  className={clsx(
-                    "control-button grid h-9 w-9 place-items-center",
-                    (activePopover === "refresh" || isPaused) && "control-toggle is-active",
-                  )}
-                >
-                  <Timer size={16} />
                 </button>
                 {toggleAvailable && (
                   <button
@@ -319,65 +263,6 @@ export function FloatingControls({
             )}
           </button>
         </div>
-
-        {!collapsed && activePopover === "lang" && (
-          <div className="floating-quick-popover" role="group" aria-label={tx("语言选择", "語言選擇", "Language")}>
-            <div className="floating-quick-popover-title">
-              {tx("界面语言", "介面語言", "Language")}
-            </div>
-            <div className="floating-quick-popover-grid">
-              {LANGUAGE_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  data-active={language === option ? "true" : "false"}
-                  className="floating-quick-popover-item"
-                  onClick={() => {
-                    setLanguage(option);
-                    setActivePopover("none");
-                  }}
-                >
-                  {languageLabel(option)}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {!collapsed && activePopover === "refresh" && (
-          <div className="floating-quick-popover" role="group" aria-label={tx("刷新频率", "刷新頻率", "Refresh interval")}>
-            <div className="floating-quick-popover-head">
-              <span className="floating-quick-popover-title">
-                {tx("实时刷新频率", "即時刷新頻率", "Refresh Interval")}
-              </span>
-              <button
-                type="button"
-                className="floating-quick-popover-action"
-                onClick={refreshNow}
-                title={tx("立即刷新一次", "立即刷新一次", "Refresh now")}
-              >
-                <RefreshCw size={12} />
-                <span>{tx("立即刷新", "立即刷新", "Refresh")}</span>
-              </button>
-            </div>
-            <div className="floating-quick-popover-grid is-compact">
-              {REFRESH_INTERVAL_OPTIONS.map((ms) => (
-                <button
-                  key={ms}
-                  type="button"
-                  data-active={intervalMs === ms ? "true" : "false"}
-                  className="floating-quick-popover-item"
-                  onClick={() => {
-                    setRefreshInterval(ms);
-                    setActivePopover("none");
-                  }}
-                >
-                  {intervalLabel(ms)}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
         {showColorPicker && colorsMounted && (
           <Suspense fallback={null}>

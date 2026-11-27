@@ -1,4 +1,5 @@
 import type { NodeInfo } from "@/types/komari";
+import { zhStatic } from "@/i18n";
 import { formatRenewalPrice } from "@/utils/billing";
 import { getExpireDaysRemaining, resolveExpireTimestamp } from "@/utils/format";
 
@@ -86,14 +87,14 @@ export function getRenewalReminders(
           currency: node.currency,
           billing_cycle: node.billing_cycle,
           expired_at: node.expired_at,
-        }) ?? "价格未设置",
+        }) ?? zhStatic("价格未设置", "Price unset"),
       autoRenewal: node.auto_renewal,
       tone: expired || critical ? "critical" : node.auto_renewal ? "success" : "warning",
       statusLabel: expired
-        ? "已过期"
+        ? zhStatic("已过期", "Expired")
         : node.auto_renewal
-          ? "自动续费已开启"
-          : "即将到期",
+          ? zhStatic("自动续费已开启", "Auto-renew ON")
+          : zhStatic("即将到期", "Expiring soon"),
     });
   }
 
@@ -103,9 +104,11 @@ export function getRenewalReminders(
 }
 
 export function formatRenewalReminderExpiry(daysRemaining: number) {
-  if (daysRemaining < 0) return `已过期 ${Math.abs(daysRemaining)} 天`;
-  if (daysRemaining === 0) return "今日到期";
-  return `${daysRemaining} 天后到期`;
+  if (daysRemaining < 0) {
+    return zhStatic(`已过期 ${Math.abs(daysRemaining)} 天`, `Expired ${Math.abs(daysRemaining)}d ago`);
+  }
+  if (daysRemaining === 0) return zhStatic("今日到期", "Expires today");
+  return zhStatic(`${daysRemaining} 天后到期`, `Expires in ${daysRemaining}d`);
 }
 
 export function getVisibleRenewalReminders(

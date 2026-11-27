@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { zhStatic } from "@/i18n";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Activity, Globe2, RadioTower, RefreshCw } from "lucide-react";
 import { InstancePanel } from "@/components/instance/InstancePanel";
@@ -32,7 +33,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="ip-info-row">
       <span>{label}</span>
-      <strong>{value || "暂无数据"}</strong>
+      <strong>{value || zhStatic("暂无数据")}</strong>
     </div>
   );
 }
@@ -88,8 +89,8 @@ export function IpInfoPanel({ lookups }: { lookups: IpInfoLookup[] }) {
   return (
     <InstancePanel
       className="ip-info-panel"
-      title="IP 信息"
-      description="地理与网络信息由 IP 信息插件提供；全球延迟按需检测。"
+      title={zhStatic("IP 信息")}
+      description={zhStatic("地理与网络信息由 IP 信息插件提供；全球延迟按需检测。")}
       aside={
         <div className="ip-info-panel-actions">
           <span className="ip-info-updated">
@@ -111,7 +112,7 @@ export function IpInfoPanel({ lookups }: { lookups: IpInfoLookup[] }) {
       }
     >
       {families.length > 1 && (
-        <div className="instance-segmented ip-info-family-switch" aria-label="IP 地址类型">
+        <div className="instance-segmented ip-info-family-switch" aria-label={zhStatic("IP 地址类型")}>
           {families.map((entry) => (
             <button
               key={entry.data.address.value}
@@ -145,7 +146,7 @@ export function IpInfoPanel({ lookups }: { lookups: IpInfoLookup[] }) {
 
       {refresh.isError ? (
         <p className="ip-info-refresh-error" role="status">
-          {refresh.error instanceof Error ? refresh.error.message : "刷新失败，请稍后再试。"}
+          {refresh.error instanceof Error ? refresh.error.message : zhStatic("刷新失败，请稍后再试。")}
         </p>
       ) : null}
       {refresh.isSuccess && refresh.data ? (
@@ -154,15 +155,15 @@ export function IpInfoPanel({ lookups }: { lookups: IpInfoLookup[] }) {
 
       <div className="ip-info-detail-grid">
         <section className="ip-info-section">
-          <h3><Globe2 size={15} />地理信息</h3>
-          <InfoRow label="位置" value={joinText([data.location.country, data.location.region, data.location.city])} />
+          <h3><Globe2 size={15} />{zhStatic("地理信息")}</h3>
+          <InfoRow label={zhStatic("位置")} value={joinText([data.location.country, data.location.region, data.location.city])} />
           <InfoRow
-            label="注册地"
+            label={zhStatic("注册地")}
             value={joinText([data.location.registered_country, data.location.registered_country_code])}
           />
-          <InfoRow label="时区" value={data.location.timezone ?? "暂无数据"} />
+          <InfoRow label={zhStatic("时区")} value={data.location.timezone ?? "暂无数据"} />
           <InfoRow
-            label="坐标"
+            label={zhStatic("坐标")}
             value={
               data.location.latitude == null || data.location.longitude == null
                 ? "暂无数据"
@@ -172,27 +173,27 @@ export function IpInfoPanel({ lookups }: { lookups: IpInfoLookup[] }) {
         </section>
 
         <section className="ip-info-section">
-          <h3><RadioTower size={15} />网络信息</h3>
+          <h3><RadioTower size={15} />{zhStatic("网络信息")}</h3>
           <InfoRow label="ASN" value={data.network.asn ?? "暂无数据"} />
-          <InfoRow label="运营商" value={data.network.operator ?? data.network.organization ?? "暂无数据"} />
-          <InfoRow label="网络类型" value={data.network.network_type ?? data.network.company_type ?? "暂无数据"} />
-          <InfoRow label="网段 / 主机名" value={joinText([data.network.route, data.network.domain])} />
+          <InfoRow label={zhStatic("运营商")} value={data.network.operator ?? data.network.organization ?? "暂无数据"} />
+          <InfoRow label={zhStatic("网络类型")} value={data.network.network_type ?? data.network.company_type ?? "暂无数据"} />
+          <InfoRow label={zhStatic("网段 / 主机名")} value={joinText([data.network.route, data.network.domain])} />
         </section>
       </div>
 
       <section className="ip-info-section ip-info-latency">
         <div className="ip-info-section-heading">
-          <h3><Activity size={15} />全球延迟检测</h3>
+          <h3><Activity size={15} />{zhStatic("全球延迟检测")}</h3>
           <span>
             {networkProfile.isPending
-              ? "检测中"
+              ? zhStatic("检测中")
               : profile
-                ? `${profile.data.latency.available_count}/${profile.data.latency.nodes.length} 个节点可用`
-                : "暂不可用"}
+                ? zhStatic(`${profile.data.latency.available_count}/${profile.data.latency.nodes.length} 个节点可用`)
+                : zhStatic("暂不可用")}
           </span>
         </div>
         {networkProfile.isPending ? (
-          <div className="ip-info-latency-grid" aria-label="正在检测全球延迟">
+          <div className="ip-info-latency-grid" aria-label={zhStatic("正在检测全球延迟")}>
             {Array.from({ length: 6 }, (_, index) => (
               <div className="ip-info-latency-card is-loading" key={index} />
             ))}
@@ -206,19 +207,19 @@ export function IpInfoPanel({ lookups }: { lookups: IpInfoLookup[] }) {
                 </span>
                 <strong>{node.name}</strong>
                 <small>{node.city}</small>
-                <b>{node.latency_ms == null ? (node.status === "timeout" ? "超时" : "—") : `${node.latency_ms}ms`}</b>
+                <b>{node.latency_ms == null ? (node.status === "timeout" ? zhStatic("超时") : "—") : `${node.latency_ms}ms`}</b>
               </div>
             ))}
           </div>
         ) : (
           <div className="ip-info-latency-empty">
-            全球节点暂时无法完成检测，请稍后再试。
+            {zhStatic("全球节点暂时无法完成检测，请稍后再试。")}
           </div>
         )}
         <div className="ip-info-latency-note">
-          <span>由 Net.Coffee 全球节点探测，结果缓存 1 小时</span>
+          <span>{zhStatic("由 Net.Coffee 全球节点探测，结果缓存 1 小时")}</span>
           {profile ? (
-            <span>{profile.meta.stale ? "缓存数据" : `更新于 ${formatUpdatedAt(profile.meta.updated_at)}`}</span>
+            <span>{profile.meta.stale ? zhStatic("缓存数据") : zhStatic(`更新于 ${formatUpdatedAt(profile.meta.updated_at)}`)}</span>
           ) : null}
         </div>
       </section>

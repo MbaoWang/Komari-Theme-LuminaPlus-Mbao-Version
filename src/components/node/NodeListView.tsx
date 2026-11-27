@@ -1,4 +1,5 @@
 import { memo, useCallback, useState } from "react";
+import { zhStatic } from "@/i18n";
 import { Link } from "react-router-dom";
 import { ArrowDown, ArrowUp, CircleDollarSign } from "lucide-react";
 import { clsx } from "clsx";
@@ -203,7 +204,7 @@ function ListLatency({
     <div
       className="node-list-latency"
       data-ping-state={state}
-      aria-label={`网络延迟 ${status.ariaText}`}
+      aria-label={zhStatic(`网络延迟 ${status.ariaText}`)}
     >
       <span
         className="node-list-latency-value tabular"
@@ -367,7 +368,7 @@ const NodeRow = memo(function NodeRow({ uuid, showCosts }: { uuid: string; showC
 
       <div
         className="node-list-cell col-traffic"
-        title={`剩余 ${traffic.remainingLabel} · ${traffic.detail}`}
+        title={zhStatic(`剩余 ${traffic.remainingLabel} · ${traffic.detail}`)}
       >
         <div className="node-list-traffic-rows">
           <StackLine icon={<ArrowUp size={11} strokeWidth={2.1} />} value={formatBytes(node.trafficUp)} />
@@ -403,16 +404,16 @@ export function NodeListView({ uuids, showCosts = true }: { uuids: string[]; sho
     <div className="node-list-scroll">
       <div className="node-list">
         <div className="node-list-row node-list-head" aria-hidden>
-          <div className="node-list-cell node-list-node">节点</div>
-          <div className="node-list-cell col-os">系统</div>
+          <div className="node-list-cell node-list-node">{zhStatic("节点")}</div>
+          <div className="node-list-cell col-os">{zhStatic("系统")}</div>
           <div className="node-list-cell col-metric">CPU</div>
-          <div className="node-list-cell col-metric">内存</div>
-          <div className="node-list-cell col-metric">磁盘</div>
-          <div className="node-list-cell col-load">负载</div>
-          <div className="node-list-cell col-live">实时</div>
-          <div className="node-list-cell col-traffic">流量</div>
-          <div className="node-list-cell col-net">网络</div>
-          <div className="node-list-cell col-life">在线 / 到期</div>
+          <div className="node-list-cell col-metric">{zhStatic("内存")}</div>
+          <div className="node-list-cell col-metric">{zhStatic("磁盘")}</div>
+          <div className="node-list-cell col-load">{zhStatic("负载")}</div>
+          <div className="node-list-cell col-live">{zhStatic("实时")}</div>
+          <div className="node-list-cell col-traffic">{zhStatic("流量")}</div>
+          <div className="node-list-cell col-net">{zhStatic("网络")}</div>
+          <div className="node-list-cell col-life">{zhStatic("在线 / 到期")}</div>
         </div>
         {uuids.map((uuid) => (
           <NodeRow key={uuid} uuid={uuid} showCosts={showCosts} />

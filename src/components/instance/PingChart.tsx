@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { zhStatic } from "@/i18n";
 import UplotReact from "uplot-react";
 import type uPlot from "uplot";
 import { Eye, EyeOff, RefreshCw } from "lucide-react";
@@ -507,14 +508,14 @@ export function PingChart({
   };
 
   if (isLoading) {
-    return <InstanceChartLoading title="Ping 图表" />;
+    return <InstanceChartLoading title={zhStatic("Ping 图表")} />;
   }
 
   if (isError && !data?.records.length) {
     return (
-      <InstancePanel title="Ping 图表">
+      <InstancePanel title={zhStatic("Ping 图表")}>
         <div className="instance-empty">
-          <span>延迟历史加载失败</span>
+          <span>{zhStatic("延迟历史加载失败")}</span>
           <button
             type="button"
             className="instance-toggle-button"
@@ -522,7 +523,7 @@ export function PingChart({
             disabled={isFetching}
             aria-busy={isFetching}
           >
-            {isFetching ? "重试中" : "重试"}
+            {isFetching ? zhStatic("重试中") : zhStatic("重试")}
           </button>
         </div>
       </InstancePanel>
@@ -531,23 +532,23 @@ export function PingChart({
 
   if (!data?.records.length) {
     return (
-      <InstancePanel title="Ping 图表">
-        <div className="instance-empty">暂无延迟记录</div>
+      <InstancePanel title={zhStatic("Ping 图表")}>
+        <div className="instance-empty">{zhStatic("暂无延迟记录")}</div>
       </InstancePanel>
     );
   }
 
   return (
-    <InstancePanel title="Ping 图表" description={coverageLabel ?? undefined}>
+    <InstancePanel title={zhStatic("Ping 图表")} description={coverageLabel ?? undefined}>
       <div className="instance-ping-toolbar">
-        <div className="instance-segmented instance-ping-metric-switch" aria-label="Ping 图表指标">
+        <div className="instance-segmented instance-ping-metric-switch" aria-label={zhStatic("Ping 图表指标")}>
           <button
             type="button"
             data-active={chartMetric === "latency" ? "true" : "false"}
             aria-pressed={chartMetric === "latency"}
             onClick={() => setChartMetric("latency")}
           >
-            延迟
+            {zhStatic("延迟")}
           </button>
           <button
             type="button"
@@ -555,26 +556,26 @@ export function PingChart({
             aria-pressed={chartMetric === "loss"}
             onClick={() => setChartMetric("loss")}
           >
-            丢包率
+            {zhStatic("丢包率")}
           </button>
         </div>
         {chartMetric === "latency" && (
           <SwitchToggle
-            label="削峰平滑"
+            label={zhStatic("削峰平滑")}
             active={cutPeak}
             onToggle={() => setCutPeak((value) => !value)}
-            title="对尖峰值做轻度平滑，仅影响图线显示"
+            title={zhStatic("对尖峰值做轻度平滑，仅影响图线显示")}
           />
         )}
         <SwitchToggle
-          label="断点连线"
+          label={zhStatic("断点连线")}
           active={connectNulls}
           onToggle={() => setConnectNulls((value) => !value)}
-          title="关闭：如实显示中断/丢包断点；开启：跨过所有空缺连成完整曲线（更好看，但看不出掉线）。注：偶尔漏一两次采样的小空缺始终自动桥接，不受此开关影响。"
+          title={zhStatic("关闭：如实显示中断/丢包断点；开启：跨过所有空缺连成完整曲线（更好看，但看不出掉线）。注：偶尔漏一两次采样的小空缺始终自动桥接，不受此开关影响。")}
         />
         <button type="button" className="instance-toggle-button" onClick={toggleAll}>
           {hiddenTasks.size === 0 ? <EyeOff size={14} aria-hidden /> : <Eye size={14} aria-hidden />}
-          {hiddenTasks.size === 0 ? "隐藏全部" : "显示全部"}
+          {hiddenTasks.size === 0 ? zhStatic("隐藏全部") : zhStatic("显示全部")}
         </button>
         <button
           type="button"
@@ -584,7 +585,7 @@ export function PingChart({
           aria-busy={isFetching}
         >
           <RefreshCw size={14} aria-hidden />
-          {isFetching ? "刷新中" : isError ? "刷新失败，重试" : "刷新"}
+          {isFetching ? zhStatic("刷新中") : isError ? zhStatic("刷新失败，重试") : zhStatic("刷新")}
         </button>
       </div>
 
@@ -601,14 +602,14 @@ export function PingChart({
               onClick={() => toggleTask(task.id)}
               style={{ borderColor: visible ? task.color : "var(--border-subtle)" }}
               title={[
-                taskLabels.get(task.id) ?? `任务 #${task.id}`,
-                `当前 ${task.latest != null ? `${task.latest.toFixed(1)} ms` : "—"} | 均值 ${task.avg != null ? `${task.avg.toFixed(1)} ms` : "—"} | 丢包 ${task.loss.toFixed(1)}%`,
-                `p99 ${task.p99 != null ? `${task.p99.toFixed(0)} ms` : "—"} | 抖动 ${task.volatility != null ? task.volatility.toFixed(2) : "—"}`,
-                `min ${task.min != null ? `${task.min.toFixed(0)} ms` : "—"} | max ${task.max != null ? `${task.max.toFixed(0)} ms` : "—"} | 样本 ${task.total ?? 0} | 间隔 ${task.interval}s`,
+                taskLabels.get(task.id) ?? zhStatic(`任务 #${task.id}`),
+                zhStatic(`当前 ${task.latest != null ? `${task.latest.toFixed(1)} ms` : "—"} | 均值 ${task.avg != null ? `${task.avg.toFixed(1)} ms` : "—"} | 丢包 ${task.loss.toFixed(1)}%`),
+                zhStatic(`p99 ${task.p99 != null ? `${task.p99.toFixed(0)} ms` : "—"} | 抖动 ${task.volatility != null ? task.volatility.toFixed(2) : "—"}`),
+                zhStatic(`min ${task.min != null ? `${task.min.toFixed(0)} ms` : "—"} | max ${task.max != null ? `${task.max.toFixed(0)} ms` : "—"} | 样本 ${task.total ?? 0} | 间隔 ${task.interval}s`),
               ].join("\n")}
             >
               <span className="instance-ping-task-dot" style={{ background: task.color }} aria-hidden />
-              <span className="instance-ping-task-name">{taskLabels.get(task.id) ?? `任务 #${task.id}`}</span>
+              <span className="instance-ping-task-name">{taskLabels.get(task.id) ?? zhStatic(`任务 #${task.id}`)}</span>
               <span
                 className="instance-ping-task-primary"
                 style={{
@@ -642,7 +643,7 @@ export function PingChart({
             <ChartTooltip tooltip={tooltip} />
           </>
         ) : (
-          <div className="instance-empty">当前已隐藏全部线路，点击上方按钮可恢复显示</div>
+          <div className="instance-empty">{zhStatic("当前已隐藏全部线路，点击上方按钮可恢复显示")}</div>
         )}
       </div>
     </InstancePanel>

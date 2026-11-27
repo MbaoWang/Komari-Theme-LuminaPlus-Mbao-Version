@@ -1,4 +1,7 @@
 import { useCallback, useSyncExternalStore } from "react";
+import { toZhTW } from "./zhTw";
+
+export { toZhTW };
 
 export type LanguagePreference = "auto" | "zh-TW" | "zh-CN" | "en";
 export type ResolvedLanguage = "zh-TW" | "zh-CN" | "en";
@@ -140,6 +143,13 @@ export function txStatic(zhCN: string, zhTW: string, en: string): string {
   return zhCN;
 }
 
+export function zhStatic(zhCN: string, en?: string): string {
+  const lang = snapshot.resolvedLanguage;
+  if (lang === "zh-TW") return toZhTW(zhCN);
+  if (lang === "en" && en) return en;
+  return zhCN;
+}
+
 export function useI18n() {
   const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
@@ -156,11 +166,21 @@ export function useI18n() {
     [state.resolvedLanguage],
   );
 
+  const zh = useCallback(
+    (zhCN: string, en?: string) => {
+      if (state.resolvedLanguage === "zh-TW") return toZhTW(zhCN);
+      if (state.resolvedLanguage === "en" && en) return en;
+      return zhCN;
+    },
+    [state.resolvedLanguage],
+  );
+
   return {
     language: state.language,
     resolvedLanguage: state.resolvedLanguage,
     locale: getIntlLocale(state.resolvedLanguage),
     setLanguage,
     tx,
+    zh,
   };
 }

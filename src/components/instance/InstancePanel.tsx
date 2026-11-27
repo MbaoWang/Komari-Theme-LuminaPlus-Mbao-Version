@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { clsx } from "clsx";
 import { Spinner } from "@/components/ui/Spinner";
+import { useI18n } from "@/i18n";
 
 export function InstancePanel({
   title,
@@ -19,16 +20,25 @@ export function InstancePanel({
   children: ReactNode;
   className?: string;
 }) {
+  const { zh } = useI18n();
   return (
     <section className={clsx("instance-panel", kicker != null && "has-kicker", className)}>
       <header className="instance-panel-header">
         <div className="instance-panel-headings">
-          {kicker != null && <span className="instance-panel-kicker">{kicker}</span>}
+          {kicker != null && (
+            <span className="instance-panel-kicker">
+              {typeof kicker === "string" ? zh(kicker) : kicker}
+            </span>
+          )}
           <div className="instance-panel-title-row">
-            <h2 className="instance-panel-title">{title}</h2>
+            <h2 className="instance-panel-title">{zh(title)}</h2>
             {titleAction}
           </div>
-          {description != null && <p className="instance-panel-description">{description}</p>}
+          {description != null && (
+            <p className="instance-panel-description">
+              {typeof description === "string" ? zh(description) : description}
+            </p>
+          )}
         </div>
         {aside != null && <div className="instance-panel-aside">{aside}</div>}
       </header>
@@ -38,11 +48,12 @@ export function InstancePanel({
 }
 
 export function InstanceChartLoading({ title }: { title: string }) {
+  const { tx } = useI18n();
   return (
     <InstancePanel title={title}>
       <div className="instance-chart-loading" aria-busy>
         <Spinner size={26} label="" />
-        <span>加载中…</span>
+        <span>{tx("加载中…", "載入中…", "Loading...")}</span>
       </div>
     </InstancePanel>
   );

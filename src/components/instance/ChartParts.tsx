@@ -1,4 +1,5 @@
 import type { ChartTooltipState } from "./chartShared";
+import { zhStatic } from "@/i18n";
 
 export function ChartTooltip({ tooltip }: { tooltip: ChartTooltipState }) {
   if (!tooltip.show) return null;
@@ -48,7 +49,7 @@ export function SwitchToggle({
       <span className="instance-switch-track" aria-hidden>
         <span className="instance-switch-thumb" />
       </span>
-      <span className="instance-switch-state">{active ? "开启" : "关闭"}</span>
+      <span className="instance-switch-state">{active ? zhStatic("开启") : zhStatic("关闭")}</span>
     </button>
   );
 }

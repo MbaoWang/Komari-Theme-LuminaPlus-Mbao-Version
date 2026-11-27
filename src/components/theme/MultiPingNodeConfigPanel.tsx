@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { zhStatic } from "@/i18n";
 import { createPortal } from "react-dom";
 import {
   AlertTriangle,
@@ -44,7 +45,7 @@ interface MultiPingNodeConfigPanelProps {
 }
 
 function taskLabel(taskId: number, tasksById: Map<number, PingTask>) {
-  return tasksById.get(taskId)?.name || `任务 #${taskId}`;
+  return tasksById.get(taskId)?.name || zhStatic(`任务 #${taskId}`);
 }
 
 function taskSupportsClient(
@@ -234,20 +235,20 @@ export function MultiPingNodeConfigPanel({
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-[11px] font-semibold text-[var(--text-tertiary)]">
               <SlidersHorizontal size={14} />
-              三网延迟
+              {zhStatic("三网延迟")}
             </div>
             <h2
               id="multi-ping-config-title"
               className="mt-1 text-[19px] font-semibold text-[var(--text-primary)]"
             >
-              按服务器配置探测点
+              {zhStatic("按服务器配置探测点")}
             </h2>
             <p className="mt-1 text-[12px] text-[var(--text-secondary)]">
-              已单独配置 {customCount} / {clients.length} 台，其余继承全局默认
+              {zhStatic("已单独配置")} {customCount} / {clients.length} {zhStatic("台，其余继承全局默认")}
               {invalidClientCount > 0
                 ? fakePingForUnbound
-                  ? `，${invalidClientCount} 台含未绑定探测点并将显示模拟数据。`
-                  : `，${invalidClientCount} 台含未绑定探测点。`
+                  ? zhStatic(`，${invalidClientCount} 台含未绑定探测点并将显示模拟数据。`)
+                  : zhStatic(`，${invalidClientCount} 台含未绑定探测点。`)
                 : "。"}
             </p>
           </div>
@@ -256,8 +257,8 @@ export function MultiPingNodeConfigPanel({
             type="button"
             onClick={onClose}
             className="multi-ping-config-icon-button"
-            aria-label="关闭配置面板"
-            title="关闭"
+            aria-label={zhStatic("关闭配置面板")}
+            title={zhStatic("关闭")}
           >
             <X size={18} />
           </button>
@@ -276,18 +277,18 @@ export function MultiPingNodeConfigPanel({
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="搜索服务器 / UUID / 地区"
-                  aria-label="搜索服务器"
+                  placeholder={zhStatic("搜索服务器 / UUID / 地区")}
+                  aria-label={zhStatic("搜索服务器")}
                   className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[var(--text-tertiary)]"
                 />
               </label>
 
-              <div className="multi-ping-config-filters" aria-label="配置状态筛选">
+              <div className="multi-ping-config-filters" aria-label={zhStatic("配置状态筛选")}>
                 {(
                   [
-                    ["all", `全部 ${clients.length}`],
-                    ["custom", `已覆盖 ${customCount}`],
-                    ["default", `继承 ${clients.length - customCount}`],
+                    ["all", zhStatic(`全部 ${clients.length}`)],
+                    ["custom", zhStatic(`已覆盖 ${customCount}`)],
+                    ["default", zhStatic(`继承 ${clients.length - customCount}`)],
                   ] as const
                 ).map(([value, label]) => (
                   <button
@@ -305,10 +306,10 @@ export function MultiPingNodeConfigPanel({
               <select
                 value={group}
                 onChange={(event) => setGroup(event.target.value)}
-                aria-label="按分组筛选服务器"
+                aria-label={zhStatic("按分组筛选服务器")}
                 className="surface-inset w-full px-3 py-2 text-[12px] text-[var(--text-primary)] outline-none"
               >
-                <option value="">全部分组</option>
+                <option value="">{zhStatic("全部分组")}</option>
                 {groups.map((item) => (
                   <option key={item} value={item}>
                     {item}
@@ -361,7 +362,7 @@ export function MultiPingNodeConfigPanel({
                                 .join(" · ")
                             : [client.group, client.region]
                                 .filter(Boolean)
-                                .join(" · ") || "继承全局默认"}
+                                .join(" · ") || zhStatic("继承全局默认")}
                         </span>
                       </span>
                       {invalidIds.length > 0 ? (
@@ -369,17 +370,17 @@ export function MultiPingNodeConfigPanel({
                           className="multi-ping-config-status is-warning"
                           title={
                             fakePingForUnbound
-                              ? `${invalidIds.map((taskId) => taskLabel(taskId, tasksById)).join("、")} 未在后台绑定此服务器，将显示模拟数据`
-                              : `${invalidIds.map((taskId) => taskLabel(taskId, tasksById)).join("、")} 未在后台绑定此服务器`
+                              ? zhStatic(`${invalidIds.map((taskId) => taskLabel(taskId, tasksById)).join("、")} 未在后台绑定此服务器，将显示模拟数据`)
+                              : zhStatic(`${invalidIds.map((taskId) => taskLabel(taskId, tasksById)).join("、")} 未在后台绑定此服务器`)
                           }
                         >
                           <AlertTriangle size={12} />
-                          {fakePingForUnbound ? "将模拟" : "未绑定"}
+                          {fakePingForUnbound ? zhStatic("将模拟") : zhStatic("未绑定")}
                         </span>
                       ) : override ? (
-                        <span className="multi-ping-config-status" title="已单独配置">
+                        <span className="multi-ping-config-status" title={zhStatic("已单独配置")}>
                           <Check size={12} />
-                          已覆盖
+                          {zhStatic("已覆盖")}
                         </span>
                       ) : (
                         <ChevronRight
@@ -393,7 +394,7 @@ export function MultiPingNodeConfigPanel({
               </div>
               {filteredClients.length === 0 && (
                 <div className="px-4 py-8 text-center text-[12px] text-[var(--text-tertiary)]">
-                  没有匹配的服务器。
+                  {zhStatic("没有匹配的服务器。")}
                 </div>
               )}
             </div>
@@ -414,7 +415,7 @@ export function MultiPingNodeConfigPanel({
                     className="multi-ping-config-mobile-back"
                   >
                     <ArrowLeft size={15} />
-                    服务器列表
+                    {zhStatic("服务器列表")}
                   </button>
                   <div className="flex items-start gap-3">
                     <Flag region={selectedClient.region} size={20} />
@@ -435,20 +436,20 @@ export function MultiPingNodeConfigPanel({
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <div className="text-[13px] font-medium text-[var(--text-primary)]">
-                        探测点来源
+                        {zhStatic("探测点来源")}
                       </div>
                       <p className="mt-1 text-[11px] leading-relaxed text-[var(--text-tertiary)]">
-                        覆盖只影响当前服务器，并保留线路顺序。
+                        {zhStatic("覆盖只影响当前服务器，并保留线路顺序。")}
                       </p>
                     </div>
-                    <div className="multi-ping-config-mode" aria-label="探测点来源">
+                    <div className="multi-ping-config-mode" aria-label={zhStatic("探测点来源")}>
                       <button
                         type="button"
                         aria-pressed={!selectedTaskIds}
                         onClick={clearOverride}
                         className={clsx(!selectedTaskIds && "is-active")}
                       >
-                        继承默认
+                        {zhStatic("继承默认")}
                       </button>
                       <button
                         type="button"
@@ -458,11 +459,11 @@ export function MultiPingNodeConfigPanel({
                         className={clsx(selectedTaskIds && "is-active")}
                         title={
                           canEnableOverride
-                            ? "为当前服务器单独选择探测点"
-                            : "当前可用的 Ping 任务不足 3 个"
+                            ? zhStatic("为当前服务器单独选择探测点")
+                            : zhStatic("当前可用的 Ping 任务不足 3 个")
                         }
                       >
-                        单独配置
+                        {zhStatic("单独配置")}
                       </button>
                     </div>
                   </div>
@@ -472,15 +473,15 @@ export function MultiPingNodeConfigPanel({
                       <AlertTriangle size={16} />
                       <div>
                         <strong>
-                          后台未绑定探测点
+                          {zhStatic("后台未绑定探测点")}
                         </strong>
                         <span>
                           {selectedInvalidTaskIds
                             .map((taskId) => taskLabel(taskId, tasksById))
-                            .join("、")} 未在 Komari 后台绑定到此服务器。
+                            .join("、")} {zhStatic("未在 Komari 后台绑定到此服务器。")}
                           {fakePingForUnbound
-                            ? "模拟数据功能已开启，以上线路会显示模拟数据；模拟数据不代表真实网络质量。"
-                            : "模拟数据功能未开启，以上线路不会生成延迟；仍可改用单独配置并在下方更换探测点。"}
+                            ? zhStatic("模拟数据功能已开启，以上线路会显示模拟数据；模拟数据不代表真实网络质量。")
+                            : zhStatic("模拟数据功能未开启，以上线路不会生成延迟；仍可改用单独配置并在下方更换探测点。")}
                         </span>
                       </div>
                     </div>
@@ -509,18 +510,18 @@ export function MultiPingNodeConfigPanel({
                             <span className="multi-ping-config-line-number">{slot + 1}</span>
                             <span className="min-w-0 flex-1">
                               <span className="block text-[11px] font-medium text-[var(--text-secondary)]">
-                                线路 {slot + 1}
+                                {zhStatic("线路")} {slot + 1}
                               </span>
                               {selectedTaskIds ? (
                                 <select
                                   value={selectedTaskId ?? ""}
                                   onChange={(event) => patchTask(slot, event.target.value)}
-                                  aria-label={`${selectedClient.name} 线路 ${slot + 1}`}
+                                  aria-label={zhStatic(`${selectedClient.name} 线路 ${slot + 1}`)}
                                   className="surface-inset mt-1.5 w-full px-3 py-2 text-[13px] text-[var(--text-primary)] outline-none"
                                 >
                                   {selectedTaskId != null && !tasksById.has(selectedTaskId) && (
                                     <option value={selectedTaskId} disabled>
-                                      {taskLabel(selectedTaskId, tasksById)}（当前不可用）
+                                      {taskLabel(selectedTaskId, tasksById)}{zhStatic("（当前不可用）")}
                                     </option>
                                   )}
                                   {tasks.map((task) => (
@@ -528,12 +529,12 @@ export function MultiPingNodeConfigPanel({
                                       key={task.id}
                                       value={task.id}
                                     >
-                                      {task.name || `任务 #${task.id}`}
+                                      {task.name || zhStatic(`任务 #${task.id}`)}
                                       {!taskSupportsClient(
                                         task.id,
                                         selectedClient.uuid,
                                         taskClientsById,
-                                      ) && "（后台未绑定）"}
+                                      ) && zhStatic("（后台未绑定）")}
                                     </option>
                                   ))}
                                 </select>
@@ -542,10 +543,10 @@ export function MultiPingNodeConfigPanel({
                                   <span className="truncate">
                                     {selectedTaskId != null
                                       ? taskLabel(selectedTaskId, tasksById)
-                                      : "尚未设置全局默认"}
+                                      : zhStatic("尚未设置全局默认")}
                                   </span>
                                   {selectedTaskId != null && !selectedTaskSupported && (
-                                    <span className="multi-ping-config-inline-warning">未绑定</span>
+                                    <span className="multi-ping-config-inline-warning">{zhStatic("未绑定")}</span>
                                   )}
                                 </span>
                               )}
@@ -563,14 +564,14 @@ export function MultiPingNodeConfigPanel({
                       className="theme-manage-button is-compact"
                     >
                       <RotateCcw size={13} />
-                      恢复全局默认
+                      {zhStatic("恢复全局默认")}
                     </button>
                   )}
                 </div>
               </>
             ) : (
               <div className="flex min-h-[18rem] items-center justify-center text-[13px] text-[var(--text-tertiary)]">
-                选择一台服务器开始配置。
+                {zhStatic("选择一台服务器开始配置。")}
               </div>
             )}
           </main>

@@ -1,3 +1,5 @@
+import { zhStatic } from "@/i18n";
+
 interface HistoryRangeMeta {
   rangeStartMs?: number;
   rangeEndMs?: number;
@@ -51,13 +53,13 @@ function formatDuration(ms: number) {
   const hours = ms / (60 * 60 * 1000);
   if (hours >= 24) {
     const days = hours / 24;
-    return `${Number(days.toFixed(1))} 天`;
+    return zhStatic(`${Number(days.toFixed(1))} 天`, `${Number(days.toFixed(1))}d`);
   }
   if (hours >= 1) {
-    return `${Number(hours.toFixed(1))} 小时`;
+    return zhStatic(`${Number(hours.toFixed(1))} 小时`, `${Number(hours.toFixed(1))}h`);
   }
   const minutes = Math.max(1, Math.round(ms / 60_000));
-  return `${minutes} 分钟`;
+  return zhStatic(`${minutes} 分钟`, `${minutes}m`);
 }
 
 export function historyCoverageLabel(
@@ -79,6 +81,9 @@ export function historyCoverageLabel(
   );
   const ratio = requestedMs > 0 ? actualMs / requestedMs : 0;
   return ratio >= 0.98
-    ? `覆盖完整 ${formatDuration(requestedMs)}`
-    : `实际覆盖 ${formatDuration(actualMs)} / ${formatDuration(requestedMs)}`;
+    ? zhStatic(`覆盖完整 ${formatDuration(requestedMs)}`, `Full ${formatDuration(requestedMs)}`)
+    : zhStatic(
+        `实际覆盖 ${formatDuration(actualMs)} / ${formatDuration(requestedMs)}`,
+        `Covered ${formatDuration(actualMs)} / ${formatDuration(requestedMs)}`,
+      );
 }

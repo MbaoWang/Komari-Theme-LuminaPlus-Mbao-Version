@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { zhStatic } from "@/i18n";
 import {
   getAdminDestination,
   repairKomariServiceWorker,
@@ -48,7 +49,7 @@ export function AdminRecovery() {
     <main className="flex min-h-screen items-center justify-center px-5 text-center">
       <div className="flex max-w-md flex-col items-center gap-4">
         <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
-          正在恢复后台入口
+          {zhStatic("正在恢复后台入口")}
         </h1>
         <p className="text-[14px] text-[var(--text-secondary)]">{message}</p>
         {state !== "updating" && state !== "repairing" && (
@@ -57,7 +58,7 @@ export function AdminRecovery() {
             className="control-button px-5 py-2 text-[13px] font-medium"
             onClick={() => void repair()}
           >
-            修复并进入后台
+            {zhStatic("修复并进入后台")}
           </button>
         )}
       </div>

@@ -1,3 +1,4 @@
+import { zhStatic } from "@/i18n";
 import {
   memo,
   useEffect,
@@ -493,14 +494,14 @@ export function LoadChart({
   );
 
   if (isLoading) {
-    return <InstanceChartLoading title="负载图表" />;
+    return <InstanceChartLoading title={zhStatic("负载图表")} />;
   }
 
   if (isError && !points.length) {
     return (
-      <InstancePanel title="负载图表">
+      <InstancePanel title={zhStatic("负载图表")}>
         <div className="instance-empty">
-          <span>负载历史加载失败</span>
+          <span>{zhStatic("负载历史加载失败")}</span>
           <button
             type="button"
             className="instance-toggle-button"
@@ -508,7 +509,7 @@ export function LoadChart({
             disabled={isFetching}
             aria-busy={isFetching}
           >
-            {isFetching ? "重试中" : "重试"}
+            {isFetching ? zhStatic("重试中") : zhStatic("重试")}
           </button>
         </div>
       </InstancePanel>
@@ -517,27 +518,27 @@ export function LoadChart({
 
   if (!points.length) {
     return (
-      <InstancePanel title="负载图表">
-        <div className="instance-empty">暂无负载历史数据</div>
+      <InstancePanel title={zhStatic("负载图表")}>
+        <div className="instance-empty">{zhStatic("暂无负载历史数据")}</div>
       </InstancePanel>
     );
   }
 
   return (
     <InstancePanel
-      title="负载图表"
+      title={zhStatic("负载图表")}
       aside={
         <div className="instance-chart-headmeta">
-          <div className="instance-chart-meta" aria-label="图表数据范围">
+          <div className="instance-chart-meta" aria-label={zhStatic("图表数据范围")}>
             <span title={coverageSummary}>
               <strong>{coverageLabel ?? `覆盖 ${coverageSummary}`}</strong>
             </span>
             <span>
-              采样 <strong>{sampleSummary}</strong>
+              {zhStatic("采样")} <strong>{sampleSummary}</strong>
             </span>
           </div>
           <SwitchToggle
-            label="断点连线"
+            label={zhStatic("断点连线")}
             active={connectNulls}
             onToggle={() => setConnectNulls((value) => !value)}
           />
@@ -579,7 +580,7 @@ export function LoadChart({
         />
         <ChartCard
           icon={<MemoryStick size={13} />}
-          title="内存"
+          title={zhStatic("内存")}
           uuid={uuid}
           value={
             isRealtime && node
@@ -609,7 +610,7 @@ export function LoadChart({
         />
         <ChartCard
           icon={<HardDrive size={13} />}
-          title="磁盘"
+          title={zhStatic("磁盘")}
           uuid={uuid}
           value={
             isRealtime && node
@@ -631,7 +632,7 @@ export function LoadChart({
         />
         <ChartCard
           icon={<Network size={13} />}
-          title="网络"
+          title={zhStatic("网络")}
           uuid={uuid}
           value={
             isRealtime && node
@@ -658,7 +659,7 @@ export function LoadChart({
         />
         <ChartCard
           icon={<Workflow size={13} />}
-          title="连接数"
+          title={zhStatic("连接数")}
           uuid={uuid}
           value={
             isRealtime && node
@@ -679,7 +680,7 @@ export function LoadChart({
         />
         <ChartCard
           icon={<Gauge size={13} />}
-          title="进程"
+          title={zhStatic("进程")}
           uuid={uuid}
           value={
             isRealtime && node

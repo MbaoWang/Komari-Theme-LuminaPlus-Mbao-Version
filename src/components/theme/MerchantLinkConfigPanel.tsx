@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { zhStatic } from "@/i18n";
 import { createPortal } from "react-dom";
 import {
   ArrowLeft,
@@ -132,13 +133,13 @@ export function MerchantLinkConfigPanel({
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-[11px] font-semibold text-[var(--text-tertiary)]">
               <Store size={14} />
-              商家跳转
+              {zhStatic("商家跳转")}
             </div>
             <h2
               id="merchant-config-title"
               className="mt-1 text-[19px] font-semibold text-[var(--text-primary)]"
             >
-              按实例配置商家官网
+              {zhStatic("按实例配置商家官网")}
             </h2>
           </div>
           <button
@@ -146,8 +147,8 @@ export function MerchantLinkConfigPanel({
             type="button"
             onClick={onClose}
             className="multi-ping-config-icon-button"
-            aria-label="关闭配置面板"
-            title="关闭"
+            aria-label={zhStatic("关闭配置面板")}
+            title={zhStatic("关闭")}
           >
             <X size={18} />
           </button>
@@ -161,16 +162,16 @@ export function MerchantLinkConfigPanel({
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="搜索实例 / UUID / 地区"
-                  aria-label="搜索实例"
+                  placeholder={zhStatic("搜索实例 / UUID / 地区")}
+                  aria-label={zhStatic("搜索实例")}
                   className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[var(--text-tertiary)]"
                 />
               </label>
-              <div className="multi-ping-config-filters" aria-label="配置状态筛选">
+              <div className="multi-ping-config-filters" aria-label={zhStatic("配置状态筛选")}>
                 {([
-                  ["all", `全部 ${clients.length}`],
-                  ["configured", `已配置 ${configuredCount}`],
-                  ["unconfigured", `未配置 ${clients.length - configuredCount}`],
+                  ["all", zhStatic(`全部 ${clients.length}`)],
+                  ["configured", zhStatic(`已配置 ${configuredCount}`)],
+                  ["unconfigured", zhStatic(`未配置 ${clients.length - configuredCount}`)],
                 ] as const).map(([value, label]) => (
                   <button
                     key={value}
@@ -186,10 +187,10 @@ export function MerchantLinkConfigPanel({
               <select
                 value={group}
                 onChange={(event) => setGroup(event.target.value)}
-                aria-label="按分组筛选实例"
+                aria-label={zhStatic("按分组筛选实例")}
                 className="surface-inset w-full px-3 py-2 text-[12px] text-[var(--text-primary)] outline-none"
               >
-                <option value="">全部分组</option>
+                <option value="">{zhStatic("全部分组")}</option>
                 {groups.map((item) => <option key={item} value={item}>{item}</option>)}
               </select>
             </div>
@@ -221,11 +222,11 @@ export function MerchantLinkConfigPanel({
                         {client.name || client.uuid}
                       </span>
                       <span className="mt-1 block truncate text-[11px] text-[var(--text-tertiary)]">
-                        {configured ? link.url : "未配置 · 显示默认图标"}
+                        {configured ? link.url : zhStatic("未配置 · 显示默认图标")}
                       </span>
                     </span>
                     {configured ? (
-                      <span className="multi-ping-config-status"><Check size={12} />已配置</span>
+                      <span className="multi-ping-config-status"><Check size={12} />{zhStatic("已配置")}</span>
                     ) : (
                       <ChevronRight size={15} className="text-[var(--text-tertiary)]" />
                     )}
@@ -235,7 +236,7 @@ export function MerchantLinkConfigPanel({
               </div>
               {filteredClients.length === 0 && (
                 <div className="px-4 py-8 text-center text-[12px] text-[var(--text-tertiary)]">
-                  没有匹配的实例。
+                  {zhStatic("没有匹配的实例。")}
                 </div>
               )}
             </div>
@@ -251,7 +252,7 @@ export function MerchantLinkConfigPanel({
                     className="multi-ping-config-mobile-back"
                   >
                     <ArrowLeft size={15} />
-                    实例列表
+                    {zhStatic("实例列表")}
                   </button>
                   <div className="flex items-start gap-3">
                     <Flag region={selectedClient.region} size={20} />
@@ -270,10 +271,10 @@ export function MerchantLinkConfigPanel({
                 <div className="multi-ping-config-editor-content">
                   <div>
                     <div className="text-[13px] font-medium text-[var(--text-primary)]">
-                      商家跳转设置
+                      {zhStatic("商家跳转设置")}
                     </div>
                     <p className="mt-1 text-[11px] leading-relaxed text-[var(--text-tertiary)]">
-                      官网为空时卡片只显示不可点击的默认商家图标，不会触发跳转。
+                      {zhStatic("官网为空时卡片只显示不可点击的默认商家图标，不会触发跳转。")}
                     </p>
                   </div>
 
@@ -287,17 +288,17 @@ export function MerchantLinkConfigPanel({
                     </span>
                     <span className="min-w-0">
                       <strong className="block text-[12px] font-medium text-[var(--text-primary)]">
-                        卡片图标预览
+                        {zhStatic("卡片图标预览")}
                       </strong>
                       <span className="mt-1 block text-[11px] text-[var(--text-tertiary)]">
-                        {selectedConfigured ? "点击后将在新标签页打开商家官网" : "未配置跳转"}
+                        {selectedConfigured ? zhStatic("点击后将在新标签页打开商家官网") : zhStatic("未配置跳转")}
                       </span>
                     </span>
                   </div>
 
                   <label className="flex flex-col gap-2">
                     <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-                      商家官网地址
+                      {zhStatic("商家官网地址")}
                     </span>
                     <input
                       value={selectedLink.url}
@@ -309,7 +310,7 @@ export function MerchantLinkConfigPanel({
 
                   <label className="flex flex-col gap-2">
                     <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-                      商家图标地址（可选）
+                      {zhStatic("商家图标地址（可选）")}
                     </span>
                     <input
                       value={selectedLink.iconUrl}
@@ -318,7 +319,7 @@ export function MerchantLinkConfigPanel({
                       className="surface-inset w-full px-3 py-2.5 text-[13px] outline-none"
                     />
                     <span className="text-[11px] leading-relaxed text-[var(--text-tertiary)]">
-                      不自动读取网站图标；留空或加载失败时使用默认商家图标。
+                      {zhStatic("不自动读取网站图标；留空或加载失败时使用默认商家图标。")}
                     </span>
                   </label>
 
@@ -328,14 +329,14 @@ export function MerchantLinkConfigPanel({
                       onClick={clearSelected}
                       className="theme-manage-button is-danger self-start"
                     >
-                      清除当前实例配置
+                      {zhStatic("清除当前实例配置")}
                     </button>
                   )}
                 </div>
               </>
             ) : (
               <div className="flex min-h-[18rem] items-center justify-center text-[13px] text-[var(--text-tertiary)]">
-                选择一台实例开始配置。
+                {zhStatic("选择一台实例开始配置。")}
               </div>
             )}
           </main>

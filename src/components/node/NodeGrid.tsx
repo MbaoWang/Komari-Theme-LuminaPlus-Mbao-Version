@@ -914,40 +914,43 @@ export function NodeGrid() {
               <kbd className="home-search-kbd" aria-hidden>/</kbd>
             )}
           </label>
-          <div className="home-status-pills" role="group" aria-label={tx("状态筛选", "狀態篩選", "Status filter")}>
-            <button
-              type="button"
-              className="home-status-pill"
-              data-active={statusFilter === "all" ? "true" : "false"}
-              onClick={() => setStatusFilter("all")}
-            >
-              <span>{tx("全部", "全部", "All")}</span>
-              <span className="home-status-count">{overview.totalNodes}</span>
-            </button>
-            <button
-              type="button"
-              className="home-status-pill"
-              data-active={statusFilter === "online" ? "true" : "false"}
-              onClick={() => setStatusFilter("online")}
-            >
-              <span className="home-status-dot is-online" aria-hidden />
-              <span>{tx("在线", "在線", "Online")}</span>
-              <span className="home-status-count">{overview.onlineNodes}</span>
-            </button>
-            <button
-              type="button"
-              className="home-status-pill"
-              data-active={statusFilter === "offline" ? "true" : "false"}
-              onClick={() => setStatusFilter("offline")}
-            >
-              <span className="home-status-dot is-offline" aria-hidden />
-              <span>{tx("离线", "離線", "Offline")}</span>
-              <span className="home-status-count">{overview.offlineNodes}</span>
-            </button>
+          <div className="home-search-actions">
+            <div className="home-status-pills" role="group" aria-label={tx("状态筛选", "狀態篩選", "Status filter")}>
+              <button
+                type="button"
+                className="home-status-pill"
+                data-active={statusFilter === "all" ? "true" : "false"}
+                onClick={() => setStatusFilter("all")}
+              >
+                <span>{tx("全部", "全部", "All")}</span>
+                <span className="home-status-count">{overview.totalNodes}</span>
+              </button>
+              <button
+                type="button"
+                className="home-status-pill"
+                data-active={statusFilter === "online" ? "true" : "false"}
+                onClick={() => setStatusFilter("online")}
+              >
+                <span className="home-status-dot is-online" aria-hidden />
+                <span>{tx("在线", "在線", "Online")}</span>
+                <span className="home-status-count">{overview.onlineNodes}</span>
+              </button>
+              <button
+                type="button"
+                className="home-status-pill"
+                data-active={statusFilter === "offline" ? "true" : "false"}
+                onClick={() => setStatusFilter("offline")}
+              >
+                <span className="home-status-dot is-offline" aria-hidden />
+                <span>{tx("离线", "離線", "Offline")}</span>
+                <span className="home-status-count">{overview.offlineNodes}</span>
+              </button>
+            </div>
+            {showHomeSort && <HomeSortControl state={sort} showPrice={costsVisible} />}
           </div>
         </div>
       )}
-      {(showGroupTabs || showHomeSort) && (
+      {(showGroupTabs || (showHomeSort && !(showHomeSearchBar && visibleNodes.length > 1))) && (
         <div className={controlsWrapClassName} style={controlsStyle}>
           {showGroupTabs && (
             <GroupTabs
@@ -958,7 +961,9 @@ export function NodeGrid() {
               onReorder={reorderGroups}
             />
           )}
-          {showHomeSort && <HomeSortControl state={sort} showPrice={costsVisible} />}
+          {showHomeSort && !(showHomeSearchBar && visibleNodes.length > 1) && (
+            <HomeSortControl state={sort} showPrice={costsVisible} />
+          )}
         </div>
       )}
       {showRegionBar && (

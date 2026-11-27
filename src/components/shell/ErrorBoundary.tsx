@@ -1,4 +1,5 @@
 import { Component, useEffect, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
+import { zhStatic } from "@/i18n";
 import { isRouteErrorResponse, useRouteError } from "react-router-dom";
 import { readViewModeHint, useViewMode } from "@/hooks/useViewMode";
 
@@ -81,13 +82,13 @@ function ErrorFallback({
           <p className="theme-error-kicker">LuminaPlus</p>
           <h1 className="theme-error-title">{title}</h1>
           <p className="theme-error-message">
-            {message || "可以刷新页面，或返回首页重新进入。"}
+            {message || zhStatic("可以刷新页面，或返回首页重新进入。")}
           </p>
         </div>
         {diagnostics && (
           <details style={{ fontSize: "12px", color: "var(--text-tertiary)" }}>
             <summary style={{ cursor: "pointer", userSelect: "none" }}>
-              诊断信息（反馈时请一并截图或复制）
+              {zhStatic("诊断信息（反馈时请一并截图或复制）")}
             </summary>
             <pre style={preStyle}>{diagnostics}</pre>
             <button
@@ -95,16 +96,16 @@ function ErrorFallback({
               className="theme-error-button"
               onClick={() => void copyDiagnostics(diagnostics)}
             >
-              复制诊断信息
+              {zhStatic("复制诊断信息")}
             </button>
           </details>
         )}
         <div className="theme-error-actions">
           <button type="button" className="theme-error-button is-primary" onClick={reloadPage}>
-            刷新
+            {zhStatic("刷新")}
           </button>
           <a href="/" className="theme-error-button">
-            返回首页
+            {zhStatic("返回首页")}
           </a>
         </div>
       </section>
@@ -154,7 +155,7 @@ export function RouteErrorFallback() {
   if (isRouteErrorResponse(error)) {
     return (
       <ErrorFallback
-        title={`${error.status} ${error.statusText || "路由错误"}`}
+        title={zhStatic(`${error.status} ${error.statusText || "路由错误"}`)}
         message={typeof error.data === "string" ? error.data : "当前路由加载失败。"}
         diagnostics={diagnostics}
       />

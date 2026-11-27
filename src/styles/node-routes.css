@@ -1,7 +1,7 @@
 /* 三網回程路由膠囊列（參考高質感膠囊風格，適配深色與淺色雙模式） */
 .node-route-strip {
-  display: grid;
-  grid-template-columns: repeat(var(--route-cols, 3), minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   min-width: 0;
 }
@@ -30,10 +30,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  min-width: 0;
+  flex: 1 1 auto;
+  gap: 4.5px;
+  min-width: fit-content;
+  max-width: 100%;
   height: 27px;
-  padding: 0 7px 0 5px;
+  padding: 0 8px 0 5px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--hairline) 92%, transparent);
   background: color-mix(in srgb, var(--fill-tertiary) 78%, var(--surface-a));
@@ -52,7 +54,32 @@
 .node-route-strip.is-large .node-route-pill {
   height: 29px;
   font-size: 11.5px;
-  padding: 0 8px 0 6px;
+  padding: 0 9px 0 6px;
+}
+
+.route-preset-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-a);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.route-preset-chip:hover {
+  border-color: var(--accent-500);
+  background: color-mix(in srgb, var(--accent-500) 10%, var(--surface-a));
+  color: var(--text-primary);
 }
 
 /* 運營商識別色 */
