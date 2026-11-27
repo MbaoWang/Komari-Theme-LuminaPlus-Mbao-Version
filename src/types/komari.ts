@@ -190,22 +190,18 @@ export interface ThemeSettings {
     | "zap"
     | "sparkle"
     | "crown"
-    | "flame"
-    | "rocket"
-    | "shield"
-    | "star"
-    | "signal"
+    | "wing"
+    | "sparkles"
+    | "vip"
     | "none";
   routePremiumEffect?:
     | "beam"
     | "crystal-beam"
     | "sheen"
-    | "gold"
     | "liquid"
-    | "laser"
-    | "holo"
-    | "aurora";
-  routeBadgeStyle?: "logo" | "outline" | "text";
+    | "svip"
+    | "brushed-gold";
+  routeBadgeStyle?: "outline" | "logo" | "text";
   nodeRoutes?: Record<
     string,
     {

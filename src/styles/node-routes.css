@@ -219,91 +219,7 @@
 }
 
 /* ============================================================
- * 特效 3：香檳流金（gold）— 奢華 VIP 香檳金箔光澤 + 流動金光
- * ============================================================ */
-.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail) {
-  padding: 1.5px;
-  border: 0;
-  background: linear-gradient(120deg, #b45309, #f59e0b, #fef08a, #d97706, #b45309);
-  box-shadow:
-    0 4px 16px -4px rgba(217, 119, 6, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.65);
-}
-
-.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail) .node-route-inner {
-  border-radius: 10.5px;
-  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
-}
-
-:root[data-appearance="dark"]
-  .node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
-  .node-route-inner {
-  background: linear-gradient(180deg, #1f1a10 0%, #141008 100%);
-}
-
-.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
-  .node-route-inner::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  background: linear-gradient(
-    110deg,
-    transparent 20%,
-    rgba(254, 240, 138, 0.72) 44%,
-    rgba(255, 255, 255, 0.85) 50%,
-    rgba(245, 158, 11, 0.48) 58%,
-    transparent 80%
-  );
-  transform: translate3d(-115%, 0, 0);
-  will-change: transform;
-  animation: route-bar-sweep 2.9s cubic-bezier(0.38, 0, 0.2, 1) infinite;
-}
-
-.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"] {
-  background: linear-gradient(180deg, #fef9c3 0%, #fde68a 100%);
-  color: #78350f;
-  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.85);
-}
-
-:root[data-appearance="dark"]
-  .node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"] {
-  background: linear-gradient(180deg, rgba(217, 119, 6, 0.34) 0%, rgba(120, 53, 15, 0.22) 100%);
-  color: #fef08a;
-  text-shadow: 0 0 8px rgba(245, 158, 11, 0.55);
-  box-shadow: inset 0 1px 0 rgba(254, 240, 138, 0.35);
-}
-
-.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"]
-  .node-route-premium-icon {
-  color: #d97706;
-}
-
-:root[data-appearance="dark"]
-  .node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"]
-  .node-route-premium-icon {
-  color: #fde047;
-}
-
-.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
-  .node-route-pill[data-tier="standard"] {
-  background: var(--surface-a);
-  color: var(--text-secondary);
-}
-
-.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
-  .node-route-pill
-  + .node-route-pill {
-  border-left-color: rgba(217, 119, 6, 0.24);
-}
-
-/* ============================================================
- * 特效 4：液態玻璃（liquid）— Apple iOS 26 晶透倒角折射玻璃質感
+ * 特效 3：液態玻璃（liquid）— Apple iOS 26 晶透倒角折射玻璃質感
  * ============================================================ */
 .node-route-strip.has-premium[data-effect="liquid"]:not(.is-detail) {
   border: 1px solid rgba(255, 255, 255, 0.85);
@@ -393,133 +309,31 @@
 }
 
 /* ============================================================
- * 特效 5：光纖雷射軌（laser）— 深夜科技底 + 上下銳利光纖訊號脈衝
+ * 特效 4：QQ 超會黑曜（svip）— 曜石黑底 + 玫瑰金紫稜面折射流光
  * ============================================================ */
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail) {
-  border: 1px solid rgba(56, 189, 248, 0.55);
-  background: #070b14;
-  box-shadow:
-    0 4px 16px -4px rgba(6, 182, 212, 0.5),
-    inset 0 1px 0 rgba(56, 189, 248, 0.55),
-    inset 0 -1px 0 rgba(20, 184, 166, 0.45);
-}
-
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail) .node-route-inner {
-  background: linear-gradient(180deg, #0b1222 0%, #060a14 100%);
-}
-
-/* 上下雙軌光纖脈衝 */
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)::before,
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail) .node-route-inner::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  pointer-events: none;
-  z-index: 3;
-  will-change: transform;
-}
-
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)::before {
-  top: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    #38bdf8 35%,
-    #ffffff 50%,
-    #22d3ee 65%,
-    transparent 100%
-  );
-  animation: route-laser-top 2.2s linear infinite;
-}
-
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
-  .node-route-inner::after {
-  bottom: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    #f43f5e 32%,
-    #fde047 50%,
-    #2dd4bf 68%,
-    transparent 100%
-  );
-  animation: route-laser-bottom 2.2s linear infinite;
-}
-
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
-  .node-route-pill
-  + .node-route-pill {
-  border-left-color: rgba(56, 189, 248, 0.16);
-}
-
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"] {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--route-accent) 26%, #0b1222) 0%,
-    color-mix(in srgb, var(--route-accent) 10%, #060a14) 100%
-  );
-  color: #e0f2fe;
-  text-shadow: 0 0 8px var(--route-glow);
-  box-shadow: none;
-}
-
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"]
-  .node-route-premium-icon {
-  color: #38bdf8;
-}
-
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
-  .node-route-pill[data-tier="optimized"] {
-  background: color-mix(in srgb, var(--route-accent) 14%, #0b1222);
-  color: #cbd5e1;
-}
-
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
-  .node-route-pill[data-tier="standard"] {
-  background: rgba(255, 255, 255, 0.03);
-  color: #94a3b8;
-}
-
-/* ============================================================
- * 特效 6：SSR 全息閃卡（holo）— 高飽和液態彩虹金屬折射閃卡
- * ============================================================ */
-.node-route-strip.has-premium[data-effect="holo"]:not(.is-detail) {
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail) {
   padding: 1.5px;
   border: 0;
-  background: linear-gradient(90deg, #38bdf8, #a855f7, #ec4899, #f59e0b, #14b8a6);
+  background: linear-gradient(
+    125deg,
+    #f59e0b 0%,
+    #fda4af 30%,
+    #fbbf24 55%,
+    #a855f7 82%,
+    #f59e0b 100%
+  );
   box-shadow:
-    0 4px 16px -4px rgba(168, 85, 247, 0.45),
-    0 2px 8px -2px rgba(56, 189, 248, 0.32);
+    0 4px 16px -4px rgba(245, 158, 11, 0.4),
+    0 2px 10px -4px rgba(168, 85, 247, 0.32);
 }
 
-.node-route-strip.has-premium[data-effect="holo"]:not(.is-detail) .node-route-inner {
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail) .node-route-inner {
   border-radius: 10.5px;
-  background: linear-gradient(
-    135deg,
-    #f0f9ff 0%,
-    #f5f3ff 35%,
-    #fdf2f8 68%,
-    #ecfeff 100%
-  );
+  background: linear-gradient(180deg, #17101f 0%, #0d0a13 100%);
+  box-shadow: inset 0 1px 0 rgba(254, 240, 138, 0.28);
 }
 
-:root[data-appearance="dark"]
-  .node-route-strip.has-premium[data-effect="holo"]:not(.is-detail)
-  .node-route-inner {
-  background: linear-gradient(
-    135deg,
-    #111c33 0%,
-    #1e1636 38%,
-    #2a152c 70%,
-    #0e2429 100%
-  );
-}
-
-.node-route-strip.has-premium[data-effect="holo"]:not(.is-detail)
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail)
   .node-route-inner::after {
   content: "";
   position: absolute;
@@ -528,110 +342,140 @@
   z-index: 2;
   background: linear-gradient(
     112deg,
-    transparent 10%,
-    rgba(56, 189, 248, 0.45) 26%,
-    rgba(168, 85, 247, 0.5) 40%,
-    rgba(255, 255, 255, 0.78) 50%,
-    rgba(251, 191, 36, 0.48) 60%,
-    rgba(20, 184, 166, 0.45) 74%,
-    transparent 88%
+    transparent 18%,
+    rgba(244, 63, 94, 0.24) 36%,
+    rgba(254, 240, 138, 0.56) 49%,
+    rgba(192, 132, 252, 0.28) 60%,
+    transparent 78%
   );
   transform: translate3d(-115%, 0, 0);
   will-change: transform;
-  animation: route-bar-sweep 2.6s cubic-bezier(0.35, 0, 0.2, 1) infinite;
+  animation: route-bar-sweep 2.8s cubic-bezier(0.38, 0, 0.2, 1) infinite;
 }
 
-.node-route-strip.has-premium[data-effect="holo"]:not(.is-detail)
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail)
+  .node-route-pill
+  + .node-route-pill {
+  border-left-color: rgba(251, 191, 36, 0.16);
+}
+
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail)
   .node-route-pill[data-tier="premium"] {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--route-accent) 22%, transparent) 0%,
-    color-mix(in srgb, var(--route-accent) 10%, transparent) 100%
+    color-mix(in srgb, var(--route-accent) 18%, rgba(36, 22, 46, 0.92)) 0%,
+    color-mix(in srgb, var(--route-accent) 8%, #0e0a14) 100%
   );
-  color: color-mix(in srgb, var(--route-accent) 92%, #0f172a);
+  color: #fef3c7;
+  box-shadow: inset 0 1px 0 rgba(254, 240, 138, 0.22);
 }
 
-:root[data-appearance="dark"]
-  .node-route-strip.has-premium[data-effect="holo"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"] {
-  color: #ffffff;
-  text-shadow: 0 0 8px var(--route-glow);
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail)
+  .node-route-pill[data-tier="optimized"] {
+  background: color-mix(in srgb, var(--route-accent) 12%, #130e1c);
+  color: #e2e8f0;
+}
+
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail)
+  .node-route-pill[data-tier="standard"] {
+  background: rgba(255, 255, 255, 0.03);
+  color: #a1a1aa;
+}
+
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail)
+  .node-route-carrier.is-outline {
+  color: color-mix(in srgb, var(--route-accent) 40%, #fde68a);
+}
+
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"]
+  .node-route-premium-icon {
+  color: #fbbf24;
 }
 
 /* ============================================================
- * 特效 7：極光流彩（aurora）— 高飽和寶石色塊＋白字＋流動能量光波
+ * 特效 5：黑金拉絲（brushed-gold）— 45° 金屬拉絲暗紋 + 鉑金刀鋒細光
  * ============================================================ */
-.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail) {
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail) {
+  padding: 1.25px;
   border: 0;
-  padding: 1.5px;
-  background: linear-gradient(90deg, #2563eb, #e11d48, #0d9488);
-  box-shadow: 0 4px 16px -4px rgba(37, 99, 235, 0.42);
+  background: linear-gradient(
+    135deg,
+    #f3d58d 0%,
+    #6b5428 28%,
+    #d4af37 52%,
+    #4a3a1d 76%,
+    #f3d58d 100%
+  );
+  box-shadow: 0 4px 14px -4px rgba(15, 23, 42, 0.55);
 }
 
-.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail) .node-route-inner {
-  border-radius: 10.5px;
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
+  .node-route-inner {
+  border-radius: 10.75px;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 240, 200, 0.045) 0 1px,
+      transparent 1px 4px
+    ),
+    linear-gradient(180deg, #18171c 0%, #0e0e11 100%);
 }
 
-.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail)
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
   .node-route-inner::after {
   content: "";
   position: absolute;
-  inset: 0 -25%;
+  inset: 0;
   pointer-events: none;
   z-index: 2;
   background: linear-gradient(
-    100deg,
-    transparent 15%,
-    rgba(255, 255, 255, 0.36) 45%,
-    rgba(255, 255, 255, 0.14) 55%,
-    transparent 85%
+    118deg,
+    transparent 38%,
+    rgba(243, 213, 141, 0.22) 46%,
+    rgba(255, 251, 235, 0.65) 50%,
+    rgba(212, 175, 55, 0.22) 54%,
+    transparent 62%
   );
-  will-change: transform, opacity;
-  animation: route-aurora-breathe 3.2s ease-in-out infinite;
+  transform: translate3d(-115%, 0, 0);
+  will-change: transform;
+  animation: route-bar-sweep 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"] {
-  background: linear-gradient(
-    135deg,
-    var(--route-badge-bg) 0%,
-    var(--route-accent) 100%
-  );
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
-}
-
-.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"]
-  .node-route-carrier {
-  background: rgba(255, 255, 255, 0.24);
-  color: #ffffff;
-}
-
-.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"]
-  .node-route-carrier.is-outline {
-  background: transparent;
-  color: #ffffff;
-}
-
-.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail)
-  .node-route-pill[data-tier="premium"]
-  .node-route-premium-icon {
-  color: #fef08a;
-}
-
-.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail)
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
   .node-route-pill
   + .node-route-pill {
-  border-left-color: rgba(255, 255, 255, 0.22);
+  border-left-color: rgba(212, 175, 55, 0.18);
 }
 
-.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail)
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"] {
+  background: transparent;
+  color: #f3e3b8;
+  box-shadow: none;
+}
+
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
+  .node-route-pill[data-tier="optimized"] {
+  background: transparent;
+  color: #d6cbb0;
+}
+
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
   .node-route-pill[data-tier="standard"] {
-  background: var(--surface-a);
-  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.02);
+  color: #8e8a80;
+}
+
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
+  .node-route-carrier.is-outline {
+  color: #e5c67a;
+}
+
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"]
+  .node-route-premium-icon {
+  color: #e5c67a;
 }
 
 /* ============================================================
@@ -838,9 +682,16 @@
 }
 
 .node-route-strip.has-premium[data-effect="beam"]:not(.is-detail) .node-route-carrier.is-outline,
-.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail) .node-route-carrier.is-outline,
 :root[data-appearance="dark"] .node-route-carrier.is-outline {
   color: color-mix(in srgb, var(--route-accent) 46%, #ffffff);
+}
+
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail) .node-route-carrier.is-outline {
+  color: color-mix(in srgb, var(--route-accent) 40%, #fde68a);
+}
+
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail) .node-route-carrier.is-outline {
+  color: #e5c67a;
 }
 
 .node-route-strip.is-compact[data-count="4"] .node-route-carrier.is-logo {
@@ -927,36 +778,6 @@
   }
   100% {
     transform: translate3d(115%, 0, 0);
-  }
-}
-
-@keyframes route-aurora-breathe {
-  0%,
-  100% {
-    opacity: 0.22;
-    transform: translate3d(-14%, 0, 0);
-  }
-  50% {
-    opacity: 0.92;
-    transform: translate3d(14%, 0, 0);
-  }
-}
-
-@keyframes route-laser-top {
-  from {
-    transform: translate3d(-100%, 0, 0);
-  }
-  to {
-    transform: translate3d(100%, 0, 0);
-  }
-}
-
-@keyframes route-laser-bottom {
-  from {
-    transform: translate3d(100%, 0, 0);
-  }
-  to {
-    transform: translate3d(-100%, 0, 0);
   }
 }
 

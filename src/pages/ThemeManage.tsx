@@ -1903,9 +1903,9 @@ export function ThemeManage() {
                   </div>
                   <div className="text-[11px] text-[var(--text-tertiary)]">
                     {tx(
-                      "共 8 款风格可选，全部采用纯 GPU 合成动画，手机端同样流畅不掉帧。",
-                      "共 8 款風格可選，全部採用純 GPU 合成動畫，手機端同樣流暢不掉幀。",
-                      "8 GPU-composited effects engineered for smooth mobile 60/120fps.",
+                      "共 6 款精选风格可选，全部采用纯 GPU 合成动画，手机端同样流畅不掉帧。",
+                      "共 6 款精選風格可選，全部採用純 GPU 合成動畫，手機端同樣流暢不掉幀。",
+                      "6 curated GPU-composited effects engineered for smooth mobile 60/120fps.",
                     )}
                   </div>
                 </div>
@@ -1919,15 +1919,11 @@ export function ThemeManage() {
                           ? tx("白金跑框", "白金跑框", "Crystal Beam")
                           : effectKey === "sheen"
                             ? tx("冰晶流光", "冰晶流光", "Crystal Sheen")
-                            : effectKey === "gold"
-                              ? tx("香槟流金", "香檳流金", "Champagne Gold")
-                              : effectKey === "liquid"
-                                ? tx("液态玻璃", "液態玻璃", "Liquid Glass")
-                                : effectKey === "laser"
-                                  ? tx("光纤雷射", "光纖雷射", "Fiber Laser")
-                                  : effectKey === "holo"
-                                    ? tx("全息闪卡", "全息閃卡", "SSR Holo")
-                                    : tx("极光流彩", "極光流彩", "Vivid Aurora");
+                            : effectKey === "liquid"
+                              ? tx("液态玻璃", "液態玻璃", "Liquid Glass")
+                              : effectKey === "svip"
+                                ? tx("QQ 超会黑曜", "QQ 超會黑曜", "SVIP Obsidian")
+                                : tx("黑金拉丝", "黑金拉絲", "Brushed Gold");
                     return (
                       <button
                         key={effectKey}
@@ -1950,9 +1946,9 @@ export function ThemeManage() {
                   </div>
                   <div className="text-[11px] text-[var(--text-tertiary)]">
                     {tx(
-                      "默认使用正版造型彩底 LOGO，也可切换为纯净线框 LOGO 或文字徽章（电/联/移/互）。",
-                      "預設使用正版造型彩底 LOGO，也可切換為純淨線框 LOGO 或文字徽章（電/聯/移/互）。",
-                      "Defaults to solid carrier logos; switchable to clean outline logos or text badges.",
+                      "默认使用纯净线框 LOGO，也可切换为彩底 LOGO 或文字徽章（电/联/移/互）。",
+                      "預設使用純淨線框 LOGO，也可切換為彩底 LOGO 或文字徽章（電/聯/移/互）。",
+                      "Defaults to clean outline carrier logos; switchable to solid logos or text badges.",
                     )}
                   </div>
                 </div>
@@ -1960,10 +1956,10 @@ export function ThemeManage() {
                   {ROUTE_BADGE_STYLES.map((styleKey) => {
                     const active = draft.routeBadgeStyle === styleKey;
                     const label =
-                      styleKey === "logo"
-                        ? tx("彩底 LOGO（默认）", "彩底 LOGO（預設）", "Solid Logo")
-                        : styleKey === "outline"
-                          ? tx("纯净线框 LOGO", "純淨線框 LOGO", "Outline Logo")
+                      styleKey === "outline"
+                        ? tx("纯净线框 LOGO（默认）", "純淨線框 LOGO（預設）", "Outline Logo")
+                        : styleKey === "logo"
+                          ? tx("彩底 LOGO", "彩底 LOGO", "Solid Logo")
                           : tx("文字徽章（电/联/移）", "文字徽章（電/聯/移）", "Text Badge");
                     return (
                       <button
@@ -1999,17 +1995,13 @@ export function ThemeManage() {
                           ? tx("星芒", "星芒", "Sparkle")
                           : iconKey === "crown"
                             ? tx("皇冠", "皇冠", "Crown")
-                            : iconKey === "flame"
-                              ? tx("烈焰", "烈焰", "Flame")
-                              : iconKey === "rocket"
-                                ? tx("火箭", "火箭", "Rocket")
-                                : iconKey === "shield"
-                                  ? tx("护盾", "護盾", "Shield")
-                                  : iconKey === "star"
-                                    ? tx("星标", "星標", "Star")
-                                    : iconKey === "signal"
-                                      ? tx("光纤波", "光纖波", "Signal")
-                                      : tx("无图标", "無圖示", "None");
+                            : iconKey === "wing"
+                              ? tx("极速飞翼", "極速飛翼", "Speed Wing")
+                              : iconKey === "sparkles"
+                                ? tx("双星闪耀", "雙星閃耀", "Twin Stars")
+                                : iconKey === "vip"
+                                  ? tx("尊荣 V 徽", "尊榮 V 徽", "VIP Emblem")
+                                  : tx("无图标", "無圖示", "None");
                     return (
                       <button
                         key={iconKey}

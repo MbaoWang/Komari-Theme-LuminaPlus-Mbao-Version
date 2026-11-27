@@ -265,7 +265,7 @@ describe("normalizeThemeSettings", () => {
     expect(defaults.showNodeRoutes).toBe(true);
     expect(defaults.routePremiumIcon).toBe("zap");
     expect(defaults.routePremiumEffect).toBe("beam");
-    expect(defaults.routeBadgeStyle).toBe("logo");
+    expect(defaults.routeBadgeStyle).toBe("outline");
     expect(defaults.nodeRoutes).toEqual({});
     expect(defaults.showHomeSearchBar).toBe(true);
     expect(defaults.showCardTags).toBe(true);
@@ -276,8 +276,8 @@ describe("normalizeThemeSettings", () => {
       brandLogoUrl: "javascript:alert(1)",
       defaultCostCurrency: "twd",
       refreshIntervalMs: 5000,
-      routePremiumIcon: "sparkle",
-      routePremiumEffect: "crystal-beam",
+      routePremiumIcon: "wing",
+      routePremiumEffect: "svip",
       routeBadgeStyle: "text",
       nodeRoutes: {
         "u1": { ct: { label: "CN2 GIA" }, ix: { label: "BGP", tier: "standard" } },
@@ -290,8 +290,8 @@ describe("normalizeThemeSettings", () => {
     expect(custom.brandLogoUrl).toBe("");
     expect(custom.defaultCostCurrency).toBe("TWD");
     expect(custom.refreshIntervalMs).toBe(5000);
-    expect(custom.routePremiumIcon).toBe("sparkle");
-    expect(custom.routePremiumEffect).toBe("crystal-beam");
+    expect(custom.routePremiumIcon).toBe("wing");
+    expect(custom.routePremiumEffect).toBe("svip");
     expect(custom.routeBadgeStyle).toBe("text");
     expect(custom.nodeRoutes).toEqual({
       u1: { ct: { label: "CN2 GIA" }, ix: { label: "BGP", tier: "standard" } },

@@ -7,46 +7,38 @@ export type RoutePremiumIcon =
   | "zap"
   | "sparkle"
   | "crown"
-  | "flame"
-  | "rocket"
-  | "shield"
-  | "star"
-  | "signal"
+  | "wing"
+  | "sparkles"
+  | "vip"
   | "none";
 export type RoutePremiumEffect =
   | "beam"
   | "crystal-beam"
   | "sheen"
-  | "gold"
   | "liquid"
-  | "laser"
-  | "holo"
-  | "aurora";
-export type RouteBadgeStyle = "logo" | "outline" | "text";
+  | "svip"
+  | "brushed-gold";
+export type RouteBadgeStyle = "outline" | "logo" | "text";
 
 export const ROUTE_CARRIER_KEYS: readonly RouteCarrierKey[] = ["ct", "cu", "cm", "ix"];
 export const ROUTE_PREMIUM_ICONS: readonly RoutePremiumIcon[] = [
   "zap",
   "sparkle",
   "crown",
-  "flame",
-  "rocket",
-  "shield",
-  "star",
-  "signal",
+  "wing",
+  "sparkles",
+  "vip",
   "none",
 ];
 export const ROUTE_PREMIUM_EFFECTS: readonly RoutePremiumEffect[] = [
   "beam",
   "crystal-beam",
   "sheen",
-  "gold",
   "liquid",
-  "laser",
-  "holo",
-  "aurora",
+  "svip",
+  "brushed-gold",
 ];
-export const ROUTE_BADGE_STYLES: readonly RouteBadgeStyle[] = ["logo", "outline", "text"];
+export const ROUTE_BADGE_STYLES: readonly RouteBadgeStyle[] = ["outline", "logo", "text"];
 
 export interface NodeRouteEntry {
   label: string;
@@ -148,7 +140,7 @@ export function isRouteBadgeStyle(value: unknown): value is RouteBadgeStyle {
 
 export function normalizeRouteBadgeStyle(
   value: unknown,
-  fallback: RouteBadgeStyle = "logo",
+  fallback: RouteBadgeStyle = "outline",
 ): RouteBadgeStyle {
   return isRouteBadgeStyle(value) ? value : fallback;
 }
