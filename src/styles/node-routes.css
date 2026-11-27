@@ -1,25 +1,46 @@
-/* 三網回程路由膠囊列（參考高質感膠囊風格，適配深色與淺色雙模式） */
+/* 三網回程路由：方案 B 一體式連體分段長條（深色/淺色雙模式，4 條路線單排不擠字） */
 .node-route-strip {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0;
   min-width: 0;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--hairline) 94%, transparent);
+  background: color-mix(in srgb, var(--fill-tertiary) 68%, var(--surface-a));
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
-.node-route-strip.is-large {
-  gap: 7px;
+:root[data-appearance="dark"] .node-route-strip {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
+.node-route-strip.has-premium {
+  border-color: color-mix(in srgb, var(--accent-500) 28%, var(--hairline));
+  box-shadow:
+    0 2px 10px -4px color-mix(in srgb, var(--accent-500) 24%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+:root[data-appearance="dark"] .node-route-strip.has-premium {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 0 14px -6px rgba(59, 130, 246, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* 實例詳情頁空間寬裕，維持獨立圓角膠囊方便閱讀 */
 .node-route-strip.is-detail {
-  display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.node-route-strip.is-detail .node-route-pill {
-  flex: 0 1 auto;
-  padding: 0 10px 0 6px;
-  height: 30px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
 }
 
 .node-route-pill {
@@ -31,14 +52,12 @@
   align-items: center;
   justify-content: center;
   flex: 1 1 auto;
-  gap: 4.5px;
-  min-width: fit-content;
-  max-width: 100%;
-  height: 27px;
-  padding: 0 8px 0 5px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--hairline) 92%, transparent);
-  background: color-mix(in srgb, var(--fill-tertiary) 78%, var(--surface-a));
+  gap: 4px;
+  min-width: 0;
+  height: 29px;
+  padding: 0 7px;
+  border: 0;
+  background: transparent;
   color: var(--text-primary);
   font-size: 11px;
   font-weight: 700;
@@ -46,15 +65,51 @@
   overflow: hidden;
   isolation: isolate;
   transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms ease;
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.node-route-strip:not(.is-detail) .node-route-pill + .node-route-pill {
+  border-left: 1px solid color-mix(in srgb, var(--hairline) 82%, transparent);
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip:not(.is-detail)
+  .node-route-pill
+  + .node-route-pill {
+  border-left-color: rgba(255, 255, 255, 0.09);
+}
+
+/* 4 條路線同時顯示時微調間距與字級，確保在緊湊卡片單行完整不截字 */
+.node-route-strip.is-compact[data-count="4"] .node-route-pill {
+  padding: 0 5px;
+  gap: 3px;
+  font-size: 10.5px;
+}
+
+.node-route-strip.is-compact[data-count="4"] .node-route-carrier {
+  min-width: 15px;
+  height: 15px;
+  padding: 0 2.5px;
+  border-radius: 4px;
+  font-size: 9.5px;
 }
 
 .node-route-strip.is-large .node-route-pill {
-  height: 29px;
+  height: 31px;
   font-size: 11.5px;
-  padding: 0 9px 0 6px;
+  padding: 0 9px;
+  gap: 4.5px;
+}
+
+.node-route-strip.is-detail .node-route-pill {
+  flex: 0 1 auto;
+  height: 30px;
+  padding: 0 10px 0 6px;
+  gap: 5px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--hairline) 92%, transparent);
+  background: color-mix(in srgb, var(--fill-tertiary) 78%, var(--surface-a));
 }
 
 .route-preset-chip {
@@ -86,25 +141,25 @@
 .node-route-pill[data-carrier="ct"] {
   --route-accent: #3b82f6;
   --route-badge-bg: #2563eb;
-  --route-glow: rgba(59, 130, 246, 0.45);
+  --route-glow: rgba(59, 130, 246, 0.48);
 }
 
 .node-route-pill[data-carrier="cu"] {
   --route-accent: #f43f5e;
   --route-badge-bg: #e11d48;
-  --route-glow: rgba(244, 63, 94, 0.44);
+  --route-glow: rgba(244, 63, 94, 0.46);
 }
 
 .node-route-pill[data-carrier="cm"] {
   --route-accent: #14b8a6;
   --route-badge-bg: #0d9488;
-  --route-glow: rgba(20, 184, 166, 0.44);
+  --route-glow: rgba(20, 184, 166, 0.46);
 }
 
 .node-route-pill[data-carrier="ix"] {
   --route-accent: #8b5cf6;
   --route-badge-bg: #64748b;
-  --route-glow: rgba(139, 92, 246, 0.36);
+  --route-glow: rgba(139, 92, 246, 0.38);
 }
 
 .node-route-pill[data-carrier="ix"][data-tier="premium"] {
@@ -116,13 +171,13 @@
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  min-width: 17px;
-  height: 17px;
-  padding: 0 3.5px;
-  border-radius: 5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 4.5px;
   background: var(--route-badge-bg);
   color: #ffffff;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.02em;
@@ -134,7 +189,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 .node-route-premium-icon {
@@ -144,46 +199,52 @@
   animation: route-icon-pulse 2.8s ease-in-out infinite;
 }
 
-/* 優化直連線路：清晰專屬色，不閃爍 */
+/* 優化直連線路：柔和專屬色底，不閃爍 */
 .node-route-pill[data-tier="optimized"] {
-  border-color: color-mix(in srgb, var(--route-accent) 34%, transparent);
-  background: color-mix(in srgb, var(--route-accent) 10%, var(--surface-a));
+  background: color-mix(in srgb, var(--route-accent) 9%, var(--surface-a));
   color: color-mix(in srgb, var(--route-accent) 78%, var(--text-primary));
 }
 
 :root[data-appearance="dark"] .node-route-pill[data-tier="optimized"] {
-  border-color: color-mix(in srgb, var(--route-accent) 38%, transparent);
   background: color-mix(in srgb, var(--route-accent) 13%, var(--surface-elev-a));
   color: color-mix(in srgb, var(--route-accent) 32%, #ffffff);
 }
 
-/* 精品線路：發光外框 + 漸層光澤 + 掃光流光動畫 */
+.node-route-strip.is-detail .node-route-pill[data-tier="optimized"] {
+  border-color: color-mix(in srgb, var(--route-accent) 36%, transparent);
+}
+
+/* 精品線路：專屬發光漸層 + 頂部光帶 + 交錯流光掃光 */
 .node-route-pill[data-tier="premium"] {
-  border-color: color-mix(in srgb, var(--route-accent) 56%, transparent);
   background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--route-accent) 14%, var(--surface-a)) 0%,
+    180deg,
+    color-mix(in srgb, var(--route-accent) 16%, var(--surface-a)) 0%,
     color-mix(in srgb, var(--route-accent) 7%, var(--surface-elev-a)) 100%
   );
   color: color-mix(in srgb, var(--route-accent) 84%, var(--text-primary));
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--route-accent) 18%, transparent),
-    0 2px 10px -2px color-mix(in srgb, var(--route-accent) 34%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    inset 0 1.5px 0 color-mix(in srgb, var(--route-accent) 55%, transparent),
+    inset 0 -1px 8px -3px color-mix(in srgb, var(--route-accent) 32%, transparent);
 }
 
 :root[data-appearance="dark"] .node-route-pill[data-tier="premium"] {
-  border-color: color-mix(in srgb, var(--route-accent) 62%, rgba(255, 255, 255, 0.14));
   background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--route-accent) 22%, rgba(16, 20, 28, 0.92)) 0%,
+    180deg,
+    color-mix(in srgb, var(--route-accent) 24%, rgba(16, 20, 28, 0.92)) 0%,
     color-mix(in srgb, var(--route-accent) 11%, rgba(18, 22, 30, 0.96)) 100%
   );
   color: color-mix(in srgb, var(--route-accent) 18%, #ffffff);
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--route-accent) 22%, transparent),
-    0 0 14px -3px var(--route-glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    inset 0 1.5px 0 color-mix(in srgb, var(--route-accent) 68%, rgba(255, 255, 255, 0.16)),
+    inset 0 -2px 10px -4px var(--route-glow);
+}
+
+.node-route-strip.is-detail .node-route-pill[data-tier="premium"] {
+  border-color: color-mix(in srgb, var(--route-accent) 56%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--route-accent) 18%, transparent),
+    0 2px 10px -2px color-mix(in srgb, var(--route-accent) 34%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .node-route-pill[data-tier="premium"]::after {
@@ -194,9 +255,9 @@
   z-index: 1;
   background: linear-gradient(
     110deg,
-    transparent 20%,
-    color-mix(in srgb, var(--route-accent) 26%, rgba(255, 255, 255, 0.42)) 50%,
-    transparent 80%
+    transparent 18%,
+    color-mix(in srgb, var(--route-accent) 24%, rgba(255, 255, 255, 0.45)) 50%,
+    transparent 82%
   );
   transform: translateX(-140%);
   animation: route-premium-sheen 4.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
@@ -205,21 +266,21 @@
 :root[data-appearance="dark"] .node-route-pill[data-tier="premium"]::after {
   background: linear-gradient(
     110deg,
-    transparent 22%,
+    transparent 20%,
     rgba(255, 255, 255, 0.22) 50%,
-    transparent 78%
+    transparent 80%
   );
 }
 
-/* 交錯流光時間讓三個精品膠囊呈現波浪光澤 */
+/* 交錯流光時間讓分段長條呈現連續波浪光澤 */
 .node-route-pill[data-carrier="cu"][data-tier="premium"]::after {
-  animation-delay: 0.45s;
+  animation-delay: 0.42s;
 }
 .node-route-pill[data-carrier="cm"][data-tier="premium"]::after {
-  animation-delay: 0.9s;
+  animation-delay: 0.84s;
 }
 .node-route-pill[data-carrier="ix"][data-tier="premium"]::after {
-  animation-delay: 1.35s;
+  animation-delay: 1.26s;
 }
 
 @keyframes route-premium-sheen {
@@ -250,9 +311,26 @@
 }
 
 :root[data-appearance="dark"] .node-route-pill[data-tier="standard"] {
-  background: rgba(255, 255, 255, 0.055);
-  border-color: rgba(255, 255, 255, 0.08);
   color: var(--text-secondary);
+}
+
+/* 極窄螢幕（< 340px）若四條線路名稱特別長才允許平順換成 2x2 */
+@media (max-width: 340px) {
+  .node-route-strip:not(.is-detail)[data-count="4"] {
+    flex-wrap: wrap;
+  }
+
+  .node-route-strip:not(.is-detail)[data-count="4"] .node-route-pill {
+    flex: 1 1 50%;
+  }
+
+  .node-route-strip:not(.is-detail)[data-count="4"] .node-route-pill:nth-child(3) {
+    border-left: 0;
+  }
+
+  .node-route-strip:not(.is-detail)[data-count="4"] .node-route-pill:nth-child(n + 3) {
+    border-top: 1px solid color-mix(in srgb, var(--hairline) 82%, transparent);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

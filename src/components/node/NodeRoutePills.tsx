@@ -98,9 +98,18 @@ export const NodeRoutePills = memo(function NodeRoutePills({
     return tx("普通线路", "普通線路", "Standard");
   };
 
+  const hasPremium = routes.some((route) => route.tier === "premium");
+  const isDenseFour = density === "compact" && routes.length >= 4;
+
   return (
     <div
-      className={clsx("node-route-strip", `is-${density}`, className)}
+      className={clsx(
+        "node-route-strip",
+        `is-${density}`,
+        hasPremium && "has-premium",
+        className,
+      )}
+      data-count={routes.length}
       style={{ "--route-cols": Math.min(4, Math.max(1, routes.length)) } as CSSProperties}
       aria-label={tx("三网回程路由", "三網回程路由", "Return Routes")}
     >
@@ -122,7 +131,7 @@ export const NodeRoutePills = memo(function NodeRoutePills({
             {route.tier === "premium" && (
               <RoutePremiumBadgeIcon
                 icon={premiumIcon}
-                size={density === "compact" ? 11 : 12}
+                size={isDenseFour ? 10 : density === "compact" ? 11 : 12}
               />
             )}
           </div>

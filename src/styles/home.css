@@ -1601,3 +1601,22 @@ html.home-filter-sorting * {
   color: var(--text-tertiary);
 }
 
+@media (max-width: 720px) {
+  .home-search-toolbar {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .home-search-input-wrap {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .home-search-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: center;
+  }
+}
+
+
