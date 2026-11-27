@@ -576,7 +576,7 @@
   height: 10px;
 }
 
-.node-route-strip.is-compact[data-count="4"] .node-route-carrier {
+.node-route-strip.is-compact[data-count="4"] .node-route-carrier:not(.is-logo):not(.is-outline) {
   min-width: 14px;
   height: 14px;
   padding: 0 2px;
@@ -704,15 +704,22 @@
 }
 
 .node-route-strip.is-compact[data-count="4"] .node-route-carrier.is-logo {
+  padding: 0;
   width: 15px;
   min-width: 15px;
   height: 15px;
 }
 
 .node-route-strip.is-compact[data-count="4"] .node-route-carrier.is-outline {
-  width: 13.5px;
-  min-width: 13.5px;
-  height: 13.5px;
+  padding: 0;
+  width: 14px;
+  min-width: 14px;
+  height: 14px;
+}
+
+.node-route-carrier svg {
+  display: block;
+  flex: 0 0 auto;
 }
 
 .node-route-name {

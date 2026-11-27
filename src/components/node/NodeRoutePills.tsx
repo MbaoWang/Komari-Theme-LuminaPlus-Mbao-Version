@@ -115,9 +115,9 @@ export function CarrierLogoIcon({
   // 國際互聯 IX：地球經緯線
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="2" />
-      <ellipse cx="12" cy="12" rx="4.2" ry="8.5" stroke="currentColor" strokeWidth="1.7" />
-      <path d="M3.8 12H20.2" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="12" cy="12" r="9.6" stroke="currentColor" strokeWidth="2" />
+      <ellipse cx="12" cy="12" rx="4.6" ry="9.6" stroke="currentColor" strokeWidth="1.75" />
+      <path d="M2.6 12H21.4" stroke="currentColor" strokeWidth="1.75" />
     </svg>
   );
 }
