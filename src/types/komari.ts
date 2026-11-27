@@ -186,9 +186,26 @@ export interface ThemeSettings {
   defaultCostCurrency?: string;
   refreshIntervalMs?: number;
   showNodeRoutes?: boolean;
-  routePremiumIcon?: "zap" | "sparkle" | "crown" | "flame" | "none";
-  routePremiumEffect?: "beam" | "holo" | "aurora" | "sheen";
-  routeBadgeStyle?: "text" | "logo";
+  routePremiumIcon?:
+    | "zap"
+    | "sparkle"
+    | "crown"
+    | "flame"
+    | "rocket"
+    | "shield"
+    | "star"
+    | "signal"
+    | "none";
+  routePremiumEffect?:
+    | "beam"
+    | "crystal-beam"
+    | "sheen"
+    | "gold"
+    | "liquid"
+    | "laser"
+    | "holo"
+    | "aurora";
+  routeBadgeStyle?: "logo" | "outline" | "text";
   nodeRoutes?: Record<
     string,
     {

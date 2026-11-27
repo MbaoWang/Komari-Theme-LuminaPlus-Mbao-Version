@@ -3,9 +3,26 @@ import type { ResolvedLanguage } from "@/i18n";
 export type RouteCarrierKey = "ct" | "cu" | "cm" | "ix";
 export type RouteTier = "premium" | "optimized" | "standard";
 export type RouteTierSetting = "auto" | RouteTier;
-export type RoutePremiumIcon = "zap" | "sparkle" | "crown" | "flame" | "none";
-export type RoutePremiumEffect = "beam" | "holo" | "aurora" | "sheen";
-export type RouteBadgeStyle = "text" | "logo";
+export type RoutePremiumIcon =
+  | "zap"
+  | "sparkle"
+  | "crown"
+  | "flame"
+  | "rocket"
+  | "shield"
+  | "star"
+  | "signal"
+  | "none";
+export type RoutePremiumEffect =
+  | "beam"
+  | "crystal-beam"
+  | "sheen"
+  | "gold"
+  | "liquid"
+  | "laser"
+  | "holo"
+  | "aurora";
+export type RouteBadgeStyle = "logo" | "outline" | "text";
 
 export const ROUTE_CARRIER_KEYS: readonly RouteCarrierKey[] = ["ct", "cu", "cm", "ix"];
 export const ROUTE_PREMIUM_ICONS: readonly RoutePremiumIcon[] = [
@@ -13,15 +30,23 @@ export const ROUTE_PREMIUM_ICONS: readonly RoutePremiumIcon[] = [
   "sparkle",
   "crown",
   "flame",
+  "rocket",
+  "shield",
+  "star",
+  "signal",
   "none",
 ];
 export const ROUTE_PREMIUM_EFFECTS: readonly RoutePremiumEffect[] = [
   "beam",
+  "crystal-beam",
+  "sheen",
+  "gold",
+  "liquid",
+  "laser",
   "holo",
   "aurora",
-  "sheen",
 ];
-export const ROUTE_BADGE_STYLES: readonly RouteBadgeStyle[] = ["text", "logo"];
+export const ROUTE_BADGE_STYLES: readonly RouteBadgeStyle[] = ["logo", "outline", "text"];
 
 export interface NodeRouteEntry {
   label: string;
@@ -123,7 +148,7 @@ export function isRouteBadgeStyle(value: unknown): value is RouteBadgeStyle {
 
 export function normalizeRouteBadgeStyle(
   value: unknown,
-  fallback: RouteBadgeStyle = "text",
+  fallback: RouteBadgeStyle = "logo",
 ): RouteBadgeStyle {
   return isRouteBadgeStyle(value) ? value : fallback;
 }

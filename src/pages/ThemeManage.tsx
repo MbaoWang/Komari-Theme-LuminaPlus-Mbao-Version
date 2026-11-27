@@ -1896,16 +1896,16 @@ export function ThemeManage() {
                 onPatch={patch}
               />
 
-              <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+              <div className="flex flex-col gap-2 px-1">
                 <div>
                   <div className="text-[12px] font-medium text-[var(--text-primary)]">
                     {tx("精品线路特效", "精品線路特效", "Premium Route Effect")}
                   </div>
                   <div className="text-[11px] text-[var(--text-tertiary)]">
                     {tx(
-                      "采用单层纯 GPU 合成动画，手机端同样流畅不掉帧。",
-                      "採用單層純 GPU 合成動畫，手機端同樣流暢不掉幀。",
-                      "Single-layer GPU-composited animations for smooth mobile 60/120fps.",
+                      "共 8 款风格可选，全部采用纯 GPU 合成动画，手机端同样流畅不掉帧。",
+                      "共 8 款風格可選，全部採用純 GPU 合成動畫，手機端同樣流暢不掉幀。",
+                      "8 GPU-composited effects engineered for smooth mobile 60/120fps.",
                     )}
                   </div>
                 </div>
@@ -1914,12 +1914,20 @@ export function ThemeManage() {
                     const active = draft.routePremiumEffect === effectKey;
                     const label =
                       effectKey === "beam"
-                        ? tx("黑金跑框", "黑金跑框", "Obsidian Neon")
-                        : effectKey === "holo"
-                          ? tx("全息闪卡", "全息閃卡", "SSR Holo")
-                          : effectKey === "aurora"
-                            ? tx("极光流彩", "極光流彩", "Vivid Aurora")
-                            : tx("冰晶流光", "冰晶流光", "Crystal Sheen");
+                        ? tx("黑金跑框", "黑金跑框", "Obsidian Beam")
+                        : effectKey === "crystal-beam"
+                          ? tx("白金跑框", "白金跑框", "Crystal Beam")
+                          : effectKey === "sheen"
+                            ? tx("冰晶流光", "冰晶流光", "Crystal Sheen")
+                            : effectKey === "gold"
+                              ? tx("香槟流金", "香檳流金", "Champagne Gold")
+                              : effectKey === "liquid"
+                                ? tx("液态玻璃", "液態玻璃", "Liquid Glass")
+                                : effectKey === "laser"
+                                  ? tx("光纤雷射", "光纖雷射", "Fiber Laser")
+                                  : effectKey === "holo"
+                                    ? tx("全息闪卡", "全息閃卡", "SSR Holo")
+                                    : tx("极光流彩", "極光流彩", "Vivid Aurora");
                     return (
                       <button
                         key={effectKey}
@@ -1942,9 +1950,9 @@ export function ThemeManage() {
                   </div>
                   <div className="text-[11px] text-[var(--text-tertiary)]">
                     {tx(
-                      "在文字徽章（电/联/移/互）与精简向量 LOGO 之间切换。",
-                      "在文字徽章（電/聯/移/互）與精簡向量 LOGO 之間切換。",
-                      "Switch between text badges and crisp vector carrier logos.",
+                      "默认使用正版造型彩底 LOGO，也可切换为纯净线框 LOGO 或文字徽章（电/联/移/互）。",
+                      "預設使用正版造型彩底 LOGO，也可切換為純淨線框 LOGO 或文字徽章（電/聯/移/互）。",
+                      "Defaults to solid carrier logos; switchable to clean outline logos or text badges.",
                     )}
                   </div>
                 </div>
@@ -1953,8 +1961,10 @@ export function ThemeManage() {
                     const active = draft.routeBadgeStyle === styleKey;
                     const label =
                       styleKey === "logo"
-                        ? tx("运营商 LOGO", "運營商 LOGO", "Carrier Logos")
-                        : tx("文字徽章（电/联/移）", "文字徽章（電/聯/移）", "Text Badge");
+                        ? tx("彩底 LOGO（默认）", "彩底 LOGO（預設）", "Solid Logo")
+                        : styleKey === "outline"
+                          ? tx("纯净线框 LOGO", "純淨線框 LOGO", "Outline Logo")
+                          : tx("文字徽章（电/联/移）", "文字徽章（電/聯/移）", "Text Badge");
                     return (
                       <button
                         key={styleKey}
@@ -1970,13 +1980,13 @@ export function ThemeManage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+              <div className="flex flex-col gap-2 px-1">
                 <div>
                   <div className="text-[12px] font-medium text-[var(--text-primary)]">
                     {tx("精品线路徽标图标", "精品線路徽標圖示", "Premium Route Badge Icon")}
                   </div>
                   <div className="text-[11px] text-[var(--text-tertiary)]">
-                    {tx("自定义精品线路右侧显示的发光小图标。", "自訂精品線路右側顯示的發光小圖示。", "Choose the glowing icon shown on premium routes.")}
+                    {tx("自定义精品线路右侧显示的发光小图标。", "自訂精品線路右側顯示的發光小圖示。", "Choose the icon shown on premium routes.")}
                   </div>
                 </div>
                 <div className="instance-segmented is-scrollable">
@@ -1991,7 +2001,15 @@ export function ThemeManage() {
                             ? tx("皇冠", "皇冠", "Crown")
                             : iconKey === "flame"
                               ? tx("烈焰", "烈焰", "Flame")
-                              : tx("仅发光无图标", "僅發光無圖示", "Glow only");
+                              : iconKey === "rocket"
+                                ? tx("火箭", "火箭", "Rocket")
+                                : iconKey === "shield"
+                                  ? tx("护盾", "護盾", "Shield")
+                                  : iconKey === "star"
+                                    ? tx("星标", "星標", "Star")
+                                    : iconKey === "signal"
+                                      ? tx("光纤波", "光纖波", "Signal")
+                                      : tx("无图标", "無圖示", "None");
                     return (
                       <button
                         key={iconKey}

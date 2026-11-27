@@ -1,6 +1,5 @@
-/* 三網回程路由：方案 B 一體式連體分段長條 + 4 種高衝擊力 GPU 合成特效
- * - 專為淺色與深色雙模式大幅強化對比與光澤感（特別針對淺色白卡片做高對比炫彩設計）
- * - 每條回程欄僅 1～2 層純 transform/opacity GPU 合成動畫，禁用動畫元素 filter: drop-shadow()，手機絲滑不卡頓
+/* 三網回程路由：方案 B 一體式連體分段長條 + 8 種高衝擊力 GPU 合成特效
+ * - 專為淺色與深色雙模式優化，全部僅使用純 GPU transform/opacity 合成層，手機絲滑不卡頓
  */
 .node-route-strip {
   position: relative;
@@ -36,8 +35,7 @@
 }
 
 /* ============================================================
- * 特效 1：黑金霓虹跑框（beam）— 淺色卡片最炸裂的 VIP 電競質感！
- * 深黑曜石高光底 + 2px 雙道高飽和霓虹光束繞框 + 外暈光環 + 斜掠反光
+ * 特效 1：黑金跑框（beam）— 深黑曜石高光底 + 2px 霓虹跑框 + 金白反光
  * ============================================================ */
 .node-route-strip.has-premium[data-effect="beam"]:not(.is-detail) {
   padding: 2px;
@@ -137,7 +135,357 @@
 }
 
 /* ============================================================
- * 特效 2：SSR 全息閃卡（holo）— 高飽和液態彩虹金屬折射閃卡
+ * 特效 2：白金跑框（crystal-beam）— 冰晶亮白底 + 2px 雙道高飽和雷射繞框
+ * ============================================================ */
+.node-route-strip.has-premium[data-effect="crystal-beam"]:not(.is-detail) {
+  padding: 2px;
+  border: 0;
+  background: color-mix(in srgb, var(--hairline) 75%, #dbeafe);
+  box-shadow:
+    0 4px 16px -4px rgba(37, 99, 235, 0.36),
+    0 2px 8px -3px rgba(20, 184, 166, 0.26);
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="crystal-beam"]:not(.is-detail) {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.node-route-strip.has-premium[data-effect="crystal-beam"]:not(.is-detail)::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 460px;
+  height: 460px;
+  margin-left: -230px;
+  margin-top: -230px;
+  pointer-events: none;
+  z-index: 0;
+  background: conic-gradient(
+    from 0deg,
+    #2563eb 0deg,
+    #06b6d4 42deg,
+    transparent 88deg,
+    transparent 175deg,
+    #e11d48 212deg,
+    #14b8a6 256deg,
+    transparent 304deg,
+    #2563eb 360deg
+  );
+  will-change: transform;
+  animation: route-beam-spin 3s linear infinite;
+}
+
+.node-route-strip.has-premium[data-effect="crystal-beam"]:not(.is-detail)
+  .node-route-inner {
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="crystal-beam"]:not(.is-detail)
+  .node-route-inner {
+  background: #121826;
+}
+
+.node-route-strip.has-premium[data-effect="crystal-beam"]:not(.is-detail)
+  .node-route-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    108deg,
+    transparent 26%,
+    rgba(255, 255, 255, 0.72) 50%,
+    transparent 74%
+  );
+  transform: translate3d(-115%, 0, 0);
+  will-change: transform;
+  animation: route-bar-sweep 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="crystal-beam"]:not(.is-detail)
+  .node-route-inner::after {
+  background: linear-gradient(
+    108deg,
+    transparent 26%,
+    rgba(255, 255, 255, 0.24) 50%,
+    transparent 74%
+  );
+}
+
+/* ============================================================
+ * 特效 3：香檳流金（gold）— 奢華 VIP 香檳金箔光澤 + 流動金光
+ * ============================================================ */
+.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail) {
+  padding: 1.5px;
+  border: 0;
+  background: linear-gradient(120deg, #b45309, #f59e0b, #fef08a, #d97706, #b45309);
+  box-shadow:
+    0 4px 16px -4px rgba(217, 119, 6, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail) .node-route-inner {
+  border-radius: 10.5px;
+  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
+  .node-route-inner {
+  background: linear-gradient(180deg, #1f1a10 0%, #141008 100%);
+}
+
+.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
+  .node-route-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    rgba(254, 240, 138, 0.72) 44%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(245, 158, 11, 0.48) 58%,
+    transparent 80%
+  );
+  transform: translate3d(-115%, 0, 0);
+  will-change: transform;
+  animation: route-bar-sweep 2.9s cubic-bezier(0.38, 0, 0.2, 1) infinite;
+}
+
+.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"] {
+  background: linear-gradient(180deg, #fef9c3 0%, #fde68a 100%);
+  color: #78350f;
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.85);
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"] {
+  background: linear-gradient(180deg, rgba(217, 119, 6, 0.34) 0%, rgba(120, 53, 15, 0.22) 100%);
+  color: #fef08a;
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.55);
+  box-shadow: inset 0 1px 0 rgba(254, 240, 138, 0.35);
+}
+
+.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"]
+  .node-route-premium-icon {
+  color: #d97706;
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"]
+  .node-route-premium-icon {
+  color: #fde047;
+}
+
+.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
+  .node-route-pill[data-tier="standard"] {
+  background: var(--surface-a);
+  color: var(--text-secondary);
+}
+
+.node-route-strip.has-premium[data-effect="gold"]:not(.is-detail)
+  .node-route-pill
+  + .node-route-pill {
+  border-left-color: rgba(217, 119, 6, 0.24);
+}
+
+/* ============================================================
+ * 特效 4：液態玻璃（liquid）— Apple iOS 26 晶透倒角折射玻璃質感
+ * ============================================================ */
+.node-route-strip.has-premium[data-effect="liquid"]:not(.is-detail) {
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(241, 245, 249, 0.82) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.08),
+    0 6px 18px -6px rgba(59, 130, 246, 0.3),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -1px 2px rgba(15, 23, 42, 0.06);
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="liquid"]:not(.is-detail) {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: linear-gradient(
+    180deg,
+    rgba(30, 41, 59, 0.85) 0%,
+    rgba(15, 23, 42, 0.92) 100%
+  );
+  box-shadow:
+    0 6px 20px -6px rgba(56, 189, 248, 0.32),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.node-route-strip.has-premium[data-effect="liquid"]:not(.is-detail) .node-route-inner {
+  background: transparent;
+}
+
+.node-route-strip.has-premium[data-effect="liquid"]:not(.is-detail)
+  .node-route-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    102deg,
+    transparent 16%,
+    rgba(255, 255, 255, 0.9) 42%,
+    rgba(186, 230, 253, 0.52) 50%,
+    rgba(255, 255, 255, 0.72) 56%,
+    transparent 78%
+  );
+  transform: translate3d(-115%, 0, 0);
+  will-change: transform;
+  animation: route-bar-sweep 3.5s cubic-bezier(0.32, 0, 0.18, 1) infinite;
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="liquid"]:not(.is-detail)
+  .node-route-inner::after {
+  background: linear-gradient(
+    102deg,
+    transparent 16%,
+    rgba(255, 255, 255, 0.28) 44%,
+    rgba(56, 189, 248, 0.22) 52%,
+    transparent 78%
+  );
+}
+
+.node-route-strip.has-premium[data-effect="liquid"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"] {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    color-mix(in srgb, var(--route-accent) 12%, rgba(255, 255, 255, 0.48)) 100%
+  );
+  color: color-mix(in srgb, var(--route-accent) 88%, #0f172a);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="liquid"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"] {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    color-mix(in srgb, var(--route-accent) 18%, rgba(15, 23, 42, 0.6)) 100%
+  );
+  color: #f8fafc;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+/* ============================================================
+ * 特效 5：光纖雷射軌（laser）— 深夜科技底 + 上下銳利光纖訊號脈衝
+ * ============================================================ */
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail) {
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  background: #070b14;
+  box-shadow:
+    0 4px 16px -4px rgba(6, 182, 212, 0.5),
+    inset 0 1px 0 rgba(56, 189, 248, 0.55),
+    inset 0 -1px 0 rgba(20, 184, 166, 0.45);
+}
+
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail) .node-route-inner {
+  background: linear-gradient(180deg, #0b1222 0%, #060a14 100%);
+}
+
+/* 上下雙軌光纖脈衝 */
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)::before,
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail) .node-route-inner::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  z-index: 3;
+  will-change: transform;
+}
+
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)::before {
+  top: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #38bdf8 35%,
+    #ffffff 50%,
+    #22d3ee 65%,
+    transparent 100%
+  );
+  animation: route-laser-top 2.2s linear infinite;
+}
+
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
+  .node-route-inner::after {
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #f43f5e 32%,
+    #fde047 50%,
+    #2dd4bf 68%,
+    transparent 100%
+  );
+  animation: route-laser-bottom 2.2s linear infinite;
+}
+
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
+  .node-route-pill
+  + .node-route-pill {
+  border-left-color: rgba(56, 189, 248, 0.16);
+}
+
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--route-accent) 26%, #0b1222) 0%,
+    color-mix(in srgb, var(--route-accent) 10%, #060a14) 100%
+  );
+  color: #e0f2fe;
+  text-shadow: 0 0 8px var(--route-glow);
+  box-shadow: none;
+}
+
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"]
+  .node-route-premium-icon {
+  color: #38bdf8;
+}
+
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
+  .node-route-pill[data-tier="optimized"] {
+  background: color-mix(in srgb, var(--route-accent) 14%, #0b1222);
+  color: #cbd5e1;
+}
+
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail)
+  .node-route-pill[data-tier="standard"] {
+  background: rgba(255, 255, 255, 0.03);
+  color: #94a3b8;
+}
+
+/* ============================================================
+ * 特效 6：SSR 全息閃卡（holo）— 高飽和液態彩虹金屬折射閃卡
  * ============================================================ */
 .node-route-strip.has-premium[data-effect="holo"]:not(.is-detail) {
   padding: 1.5px;
@@ -211,7 +559,7 @@
 }
 
 /* ============================================================
- * 特效 3：極光流彩（aurora）— 高飽和寶石色塊＋白字＋流動能量光波
+ * 特效 7：極光流彩（aurora）— 高飽和寶石色塊＋白字＋流動能量光波
  * ============================================================ */
 .node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail) {
   border: 0;
@@ -263,6 +611,13 @@
 
 .node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail)
   .node-route-pill[data-tier="premium"]
+  .node-route-carrier.is-outline {
+  background: transparent;
+  color: #ffffff;
+}
+
+.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail)
+  .node-route-pill[data-tier="premium"]
   .node-route-premium-icon {
   color: #fef08a;
 }
@@ -280,7 +635,7 @@
 }
 
 /* ============================================================
- * 特效 4：冰晶流光（sheen）— 亮色通透質感 + 鮮明雙色光暈 + 銳利鏡面掃光
+ * 特效 8：冰晶流光（sheen）— 亮色通透質感 + 鮮明頂部光帶 + 鏡面掃光
  * ============================================================ */
 .node-route-strip.has-premium[data-effect="sheen"]:not(.is-detail) {
   border-color: color-mix(in srgb, var(--accent-500) 52%, var(--hairline));
@@ -472,10 +827,32 @@
   border-radius: 5px;
 }
 
+.node-route-carrier.is-outline {
+  padding: 0;
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 0;
+  background: transparent;
+  color: var(--route-accent);
+}
+
+.node-route-strip.has-premium[data-effect="beam"]:not(.is-detail) .node-route-carrier.is-outline,
+.node-route-strip.has-premium[data-effect="laser"]:not(.is-detail) .node-route-carrier.is-outline,
+:root[data-appearance="dark"] .node-route-carrier.is-outline {
+  color: color-mix(in srgb, var(--route-accent) 46%, #ffffff);
+}
+
 .node-route-strip.is-compact[data-count="4"] .node-route-carrier.is-logo {
   width: 17px;
   min-width: 17px;
   height: 17px;
+}
+
+.node-route-strip.is-compact[data-count="4"] .node-route-carrier.is-outline {
+  width: 15px;
+  min-width: 15px;
+  height: 15px;
 }
 
 .node-route-name {
@@ -506,7 +883,7 @@
   border-color: color-mix(in srgb, var(--route-accent) 36%, transparent);
 }
 
-/* 精品線路預設（冰晶流光 / 詳情頁）：鮮明專屬色光 */
+/* 精品線路預設（冰晶流光 / 白金跑框 / 詳情頁）：鮮明專屬色光 */
 .node-route-pill[data-tier="premium"] {
   background: linear-gradient(
     180deg,
@@ -562,6 +939,24 @@
   50% {
     opacity: 0.92;
     transform: translate3d(14%, 0, 0);
+  }
+}
+
+@keyframes route-laser-top {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  to {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+@keyframes route-laser-bottom {
+  from {
+    transform: translate3d(100%, 0, 0);
+  }
+  to {
+    transform: translate3d(-100%, 0, 0);
   }
 }
 

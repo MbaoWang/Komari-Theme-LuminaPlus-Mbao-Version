@@ -822,8 +822,10 @@ async function refreshLatestStatus() {
       { storeStatus: true },
     );
   } finally {
-    if (liveStatusController === controller) liveStatusController = null;
-    refreshInFlight = false;
+    if (liveStatusController === controller) {
+      liveStatusController = null;
+      refreshInFlight = false;
+    }
   }
 }
 
@@ -853,6 +855,71 @@ let stopTimer: number | null = null;
 let liveStatusTimer: number | null = null;
 let nodeInfoTimer: number | null = null;
 let liveStatusRefreshIntervalMs = LIVE_STATUS_REFRESH_INTERVAL_MS;
+let lifecycleListenersStarted = false;
+
+function isDocumentHidden(): boolean {
+  return typeof document !== "undefined" && document.visibilityState === "hidden";
+}
+
+function recoverOnResume() {
+  if (!started || isDocumentHidden()) return;
+  if (scrollIdleTimer != null) {
+    window.clearTimeout(scrollIdleTimer);
+    scrollIdleTimer = null;
+  }
+  scrollActive = false;
+  refreshDeferredWhileScrolling = false;
+  // 行動端切回前景時，若休眠前有卡死的請求，立即中止並重新拉取最新狀態。
+  if (liveStatusController) {
+    liveStatusController.abort();
+    liveStatusController = null;
+    refreshInFlight = false;
+  }
+  if (liveStatusRefreshIntervalMs <= 0) return;
+  scheduleLiveStatusTimer();
+  if (!hydrated) {
+    bootstrapSkipTicks = 0;
+    void bootstrap();
+    return;
+  }
+  void refreshLatestStatus();
+}
+
+function handleVisibilityChange() {
+  if (!isDocumentHidden()) {
+    recoverOnResume();
+  }
+}
+
+function handlePageShow(event: PageTransitionEvent) {
+  if (event.persisted) {
+    recoverOnResume();
+  }
+}
+
+function handleOnline() {
+  recoverOnResume();
+}
+
+function ensureLifecycleListenersStarted() {
+  if (lifecycleListenersStarted || typeof window === "undefined") return;
+  lifecycleListenersStarted = true;
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+  }
+  window.addEventListener("pageshow", handlePageShow);
+  window.addEventListener("online", handleOnline);
+}
+
+function stopLifecycleListeners() {
+  if (!lifecycleListenersStarted || typeof window === "undefined") return;
+  lifecycleListenersStarted = false;
+  if (typeof document !== "undefined") {
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }
+  window.removeEventListener("pageshow", handlePageShow);
+  window.removeEventListener("online", handleOnline);
+}
 
 function scheduleLiveStatusTimer() {
   if (liveStatusTimer != null) {
@@ -861,6 +928,7 @@ function scheduleLiveStatusTimer() {
   }
   if (!started || liveStatusRefreshIntervalMs <= 0) return;
   liveStatusTimer = window.setInterval(() => {
+    if (isDocumentHidden()) return;
     if (!hydrated) {
       if (bootstrapSkipTicks > 0) {
         bootstrapSkipTicks -= 1;
@@ -899,10 +967,12 @@ function ensureStarted() {
   started = true;
 
   ensureScrollTrackingStarted();
+  ensureLifecycleListenersStarted();
   void bootstrap();
   // 实时指标与节点信息使用独立轮询节奏。
   scheduleLiveStatusTimer();
   nodeInfoTimer = window.setInterval(() => {
+    if (isDocumentHidden()) return;
     void syncNodeInfo().catch(() => {});
   }, NODE_INFO_REFRESH_INTERVAL_MS);
 }
@@ -935,6 +1005,7 @@ function stopStore() {
   }
   liveStatusController?.abort();
   liveStatusController = null;
+  refreshInFlight = false;
   nodeInfoController?.abort();
   nodeInfoController = null;
   if (liveStatusTimer != null) {
@@ -953,6 +1024,7 @@ function stopStore() {
     window.removeEventListener("scroll", markScrollActivity);
     scrollTrackingStarted = false;
   }
+  stopLifecycleListeners();
   scrollActive = false;
   refreshDeferredWhileScrolling = false;
   hydrated = false;

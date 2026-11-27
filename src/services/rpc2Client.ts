@@ -41,6 +41,8 @@ type RpcCallOptions = {
 };
 
 const DEFAULT_TIMEOUT_MS = 30_000;
+const WS_FALLBACK_TIMEOUT_MS = 4_000;
+const STALE_HIDDEN_DURATION_MS = 5_000;
 const HEARTBEAT_INTERVAL_MS = 15_000;
 const RECONNECT_INTERVAL_MS = 3_000;
 const MAX_RECONNECT_INTERVAL_MS = 30_000;
@@ -65,11 +67,14 @@ class RPC2Client {
   private connectPromise: Promise<void> | null = null;
   private reconnectTimer: number | null = null;
   private heartbeatTimer: number | null = null;
+  private hiddenAt: number | null = null;
+  private lifecycleAttached = false;
   private closed = false;
   private state: "disconnected" | "connecting" | "connected" | "reconnecting" | "error" =
     "disconnected";
 
   constructor(private readonly baseUrl = "/api/rpc2") {
+    this.attachLifecycleListeners();
     this.autoConnect();
   }
 
@@ -83,13 +88,27 @@ class RPC2Client {
     }
 
     if (this.state === "connected") {
-      try {
-        return await this.callViaWebSocket<TParams, TResult>(method, params, options);
-      } catch (error) {
-        // 服务端已拒绝的 RPC 不能再用 HTTP 重试。
-        if (error instanceof RpcResponseError) throw error;
-        if (options.signal?.aborted) throw error;
-        return await this.callViaHttp<TParams, TResult>(method, params, options);
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        this.invalidateSocket("RPC2 WebSocket is no longer open");
+      } else {
+        try {
+          const wsTimeout = Math.min(
+            options.timeout ?? DEFAULT_TIMEOUT_MS,
+            WS_FALLBACK_TIMEOUT_MS,
+          );
+          return await this.callViaWebSocket<TParams, TResult>(method, params, {
+            ...options,
+            timeout: wsTimeout,
+          });
+        } catch (error) {
+          // 服务端已拒绝的 RPC 不能再用 HTTP 重试。
+          if (error instanceof RpcResponseError) throw error;
+          if (options.signal?.aborted) throw error;
+          // 行動端網路切換或背景休眠常造成半開(half-open)連線：一旦 WS 逾時或傳輸失敗，
+          // 立刻關閉殭屍連線並排程重連，避免每次輪詢都重覆卡住等待 WS 超時。
+          this.invalidateSocket("RPC2 WebSocket transport failed");
+          return await this.callViaHttp<TParams, TResult>(method, params, options);
+        }
       }
     }
 
@@ -103,8 +122,88 @@ class RPC2Client {
     });
   }
 
+  private invalidateSocket(reason: string) {
+    this.stopHeartbeat();
+    if (this.ws) {
+      this.ws.onclose = null;
+      this.ws.onmessage = null;
+      try {
+        this.ws.close();
+      } catch {}
+      this.ws = null;
+    }
+    this.state = "disconnected";
+    this.rejectPendingRequests(new Error(reason));
+    if (!this.closed) {
+      this.scheduleReconnect();
+    }
+  }
+
+  private reconnectNow() {
+    if (this.closed) return;
+    if (this.reconnectTimer != null) {
+      window.clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.reconnectAttempts = 0;
+    this.autoConnect();
+  }
+
+  private handleVisibilityChange = () => {
+    if (typeof document === "undefined") return;
+    if (document.visibilityState === "hidden") {
+      this.hiddenAt = Date.now();
+      return;
+    }
+    const hiddenDuration = this.hiddenAt != null ? Date.now() - this.hiddenAt : 0;
+    this.hiddenAt = null;
+    if (hiddenDuration >= STALE_HIDDEN_DURATION_MS && this.ws) {
+      // iOS Safari / 行動瀏覽器切背景後 TCP 連線常被系統靜默中止但 readyState 仍為 OPEN；
+      // 主動重建 socket，讓回前景的第一次輪詢直接走快速 HTTP，同時背景恢復 WS。
+      this.invalidateSocket("RPC2 WebSocket reset after background resume");
+      this.reconnectNow();
+    } else if (this.state !== "connected") {
+      this.reconnectNow();
+    }
+  };
+
+  private handlePageShow = (event: PageTransitionEvent) => {
+    if (event.persisted) {
+      this.invalidateSocket("RPC2 WebSocket reset after bfcache restore");
+      this.reconnectNow();
+    }
+  };
+
+  private handleOnline = () => {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      this.invalidateSocket("RPC2 WebSocket reset on network online");
+      this.reconnectNow();
+    }
+  };
+
+  private attachLifecycleListeners() {
+    if (this.lifecycleAttached || typeof window === "undefined") return;
+    this.lifecycleAttached = true;
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", this.handleVisibilityChange);
+    }
+    window.addEventListener("pageshow", this.handlePageShow);
+    window.addEventListener("online", this.handleOnline);
+  }
+
+  private detachLifecycleListeners() {
+    if (!this.lifecycleAttached || typeof window === "undefined") return;
+    this.lifecycleAttached = false;
+    if (typeof document !== "undefined") {
+      document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+    }
+    window.removeEventListener("pageshow", this.handlePageShow);
+    window.removeEventListener("online", this.handleOnline);
+  }
+
   close() {
     this.closed = true;
+    this.detachLifecycleListeners();
     this.stopHeartbeat();
     if (this.reconnectTimer != null) {
       window.clearTimeout(this.reconnectTimer);

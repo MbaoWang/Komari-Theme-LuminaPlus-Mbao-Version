@@ -657,6 +657,12 @@
 }
 
 @media (max-width: 720px) {
+  .server-card,
+  .compact-node-card,
+  .mini-node-card {
+    content-visibility: visible;
+  }
+
   .server-card-content {
     padding: 16px;
   }

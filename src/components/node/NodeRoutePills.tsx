@@ -176,6 +176,69 @@ export function RoutePremiumBadgeIcon({
     );
   }
 
+  if (icon === "rocket") {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 16 16"
+        fill="currentColor"
+        className="node-route-premium-icon"
+        aria-hidden
+      >
+        <path d="M13.8 2.2C11.2 2.1 8.7 3.1 6.9 4.9L5.5 6.3L3.2 6.6L1.7 8.1L4.5 9.1L6.9 11.5L7.9 14.3L9.4 12.8L9.7 10.5L11.1 9.1C12.9 7.3 13.9 4.8 13.8 2.2ZM10.4 6.8C9.8 6.8 9.2 6.2 9.2 5.6C9.2 5 9.8 4.4 10.4 4.4C11 4.4 11.6 5 11.6 5.6C11.6 6.2 11 6.8 10.4 6.8ZM2.4 13.6C3.4 13.5 4.4 13.1 5 12.4L3.6 11C2.9 11.6 2.5 12.6 2.4 13.6Z" />
+      </svg>
+    );
+  }
+
+  if (icon === "shield") {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 16 16"
+        fill="currentColor"
+        className="node-route-premium-icon"
+        aria-hidden
+      >
+        <path d="M8 1.4L2.6 3.6V7.6C2.6 11.1 4.9 13.8 8 14.8C11.1 13.8 13.4 11.1 13.4 7.6V3.6L8 1.4ZM7.2 10.7L4.8 8.3L5.8 7.3L7.2 8.7L10.3 5.5L11.3 6.5L7.2 10.7Z" />
+      </svg>
+    );
+  }
+
+  if (icon === "star") {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 16 16"
+        fill="currentColor"
+        className="node-route-premium-icon"
+        aria-hidden
+      >
+        <path d="M8 1.3L10.1 5.6L14.8 6.3L11.4 9.6L12.2 14.3L8 12.1L3.8 14.3L4.6 9.6L1.2 6.3L5.9 5.6L8 1.3Z" />
+      </svg>
+    );
+  }
+
+  if (icon === "signal") {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 16 16"
+        fill="currentColor"
+        className="node-route-premium-icon"
+        aria-hidden
+      >
+        <rect x="1.8" y="10.2" width="2.4" height="4" rx="0.8" />
+        <rect x="5.4" y="7.4" width="2.4" height="6.8" rx="0.8" />
+        <rect x="9" y="4.6" width="2.4" height="9.6" rx="0.8" />
+        <rect x="12.6" y="1.8" width="2.4" height="12.4" rx="0.8" />
+      </svg>
+    );
+  }
+
   // Default: sleek lightning bolt ("zap")
   return (
     <svg
@@ -195,7 +258,7 @@ export const NodeRoutePills = memo(function NodeRoutePills({
   routes,
   premiumIcon = "zap",
   premiumEffect = "beam",
-  badgeStyle = "text",
+  badgeStyle = "logo",
   density = "compact",
   className,
 }: {
@@ -218,6 +281,7 @@ export const NodeRoutePills = memo(function NodeRoutePills({
 
   const hasPremium = routes.some((route) => route.tier === "premium");
   const isDenseFour = density === "compact" && routes.length >= 4;
+  const usesLogo = badgeStyle === "logo" || badgeStyle === "outline";
 
   const pills = routes.map((route) => {
     const shortLabel = getCarrierShortLabel(route.carrier, resolvedLanguage);
@@ -231,13 +295,17 @@ export const NodeRoutePills = memo(function NodeRoutePills({
         title={`${fullLabel} · ${route.label} (${tierText(route.tier)})`}
       >
         <span
-          className={clsx("node-route-carrier", badgeStyle === "logo" && "is-logo")}
+          className={clsx(
+            "node-route-carrier",
+            badgeStyle === "logo" && "is-logo",
+            badgeStyle === "outline" && "is-outline",
+          )}
           aria-hidden
         >
-          {badgeStyle === "logo" ? (
+          {usesLogo ? (
             <CarrierLogoIcon
               carrier={route.carrier}
-              size={isDenseFour ? 12.5 : 13.5}
+              size={badgeStyle === "outline" ? (isDenseFour ? 14 : 15) : isDenseFour ? 12.5 : 13.5}
             />
           ) : (
             shortLabel
