@@ -560,23 +560,11 @@
   pointer-events: none;
 }
 
-/* 無右側圖示（普通/優化線路或無圖示模式）時，因左側為鏤空線框 LOGO、右側為實心粗體字，
-   視覺重心偏右約 2px；給予右側 5px 光學補償讓文字與 LOGO 整體看起來完全正中。 */
-.node-route-strip:not(.is-detail) .node-route-pill[data-has-icon="false"] {
-  padding-left: 3px;
-  padding-right: 7px;
-}
-
 /* 4 條路線等寬均分時微調內距與字距，讓中線正中對齊且長名稱（如 CN2 GIA）仍完整顯示 */
 .node-route-strip.is-compact[data-count="4"] .node-route-pill {
   padding: 0 2px;
   gap: 2px;
   font-size: 10px;
-}
-
-.node-route-strip.is-compact[data-count="4"] .node-route-pill[data-has-icon="false"] {
-  padding-left: 1px;
-  padding-right: 5px;
 }
 
 .node-route-strip.is-compact[data-count="4"] .node-route-name {
