@@ -87,6 +87,8 @@ export function InstanceDetails({
           <NodeRoutePills
             routes={routes}
             premiumIcon={themeSettings.routePremiumIcon}
+            premiumEffect={themeSettings.routePremiumEffect}
+            badgeStyle={themeSettings.routeBadgeStyle}
             density="detail"
           />
         </div>

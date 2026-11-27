@@ -42,8 +42,12 @@ import {
 } from "@/utils/currency";
 import {
   normalizeNodeRoutes,
+  normalizeRouteBadgeStyle,
+  normalizeRoutePremiumEffect,
   normalizeRoutePremiumIcon,
   type NodeRoutesMap,
+  type RouteBadgeStyle,
+  type RoutePremiumEffect,
   type RoutePremiumIcon,
 } from "@/utils/nodeRoutes";
 
@@ -162,6 +166,8 @@ export interface ResolvedThemeSettings {
   refreshIntervalMs: RefreshIntervalOption;
   showNodeRoutes: boolean;
   routePremiumIcon: RoutePremiumIcon;
+  routePremiumEffect: RoutePremiumEffect;
+  routeBadgeStyle: RouteBadgeStyle;
   nodeRoutes: NodeRoutesMap;
   showHomeSearchBar: boolean;
   showCardTags: boolean;
@@ -230,6 +236,8 @@ export const DEFAULT_THEME_SETTINGS: ResolvedThemeSettings = {
   refreshIntervalMs: 2000,
   showNodeRoutes: true,
   routePremiumIcon: "zap",
+  routePremiumEffect: "beam",
+  routeBadgeStyle: "text",
   nodeRoutes: {},
   showHomeSearchBar: true,
   showCardTags: true,
@@ -422,6 +430,8 @@ export function normalizeThemeSettings(
     refreshIntervalMs: normalizeRefreshIntervalMs(settings?.refreshIntervalMs, 2000),
     showNodeRoutes: enabledUnlessFalse(settings?.showNodeRoutes),
     routePremiumIcon: normalizeRoutePremiumIcon(settings?.routePremiumIcon, "zap"),
+    routePremiumEffect: normalizeRoutePremiumEffect(settings?.routePremiumEffect, "beam"),
+    routeBadgeStyle: normalizeRouteBadgeStyle(settings?.routeBadgeStyle, "text"),
     nodeRoutes: normalizeNodeRoutes(settings?.nodeRoutes),
     showHomeSearchBar: enabledUnlessFalse(settings?.showHomeSearchBar),
     showCardTags: enabledUnlessFalse(settings?.showCardTags),

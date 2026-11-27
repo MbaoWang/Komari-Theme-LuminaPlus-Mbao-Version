@@ -4,6 +4,8 @@ export type RouteCarrierKey = "ct" | "cu" | "cm" | "ix";
 export type RouteTier = "premium" | "optimized" | "standard";
 export type RouteTierSetting = "auto" | RouteTier;
 export type RoutePremiumIcon = "zap" | "sparkle" | "crown" | "flame" | "none";
+export type RoutePremiumEffect = "beam" | "holo" | "aurora" | "sheen";
+export type RouteBadgeStyle = "text" | "logo";
 
 export const ROUTE_CARRIER_KEYS: readonly RouteCarrierKey[] = ["ct", "cu", "cm", "ix"];
 export const ROUTE_PREMIUM_ICONS: readonly RoutePremiumIcon[] = [
@@ -13,6 +15,13 @@ export const ROUTE_PREMIUM_ICONS: readonly RoutePremiumIcon[] = [
   "flame",
   "none",
 ];
+export const ROUTE_PREMIUM_EFFECTS: readonly RoutePremiumEffect[] = [
+  "beam",
+  "holo",
+  "aurora",
+  "sheen",
+];
+export const ROUTE_BADGE_STYLES: readonly RouteBadgeStyle[] = ["text", "logo"];
 
 export interface NodeRouteEntry {
   label: string;
@@ -89,6 +98,34 @@ export function normalizeRoutePremiumIcon(
   fallback: RoutePremiumIcon = "zap",
 ): RoutePremiumIcon {
   return isRoutePremiumIcon(value) ? value : fallback;
+}
+
+export function isRoutePremiumEffect(value: unknown): value is RoutePremiumEffect {
+  return (
+    typeof value === "string" &&
+    ROUTE_PREMIUM_EFFECTS.includes(value as RoutePremiumEffect)
+  );
+}
+
+export function normalizeRoutePremiumEffect(
+  value: unknown,
+  fallback: RoutePremiumEffect = "beam",
+): RoutePremiumEffect {
+  return isRoutePremiumEffect(value) ? value : fallback;
+}
+
+export function isRouteBadgeStyle(value: unknown): value is RouteBadgeStyle {
+  return (
+    typeof value === "string" &&
+    ROUTE_BADGE_STYLES.includes(value as RouteBadgeStyle)
+  );
+}
+
+export function normalizeRouteBadgeStyle(
+  value: unknown,
+  fallback: RouteBadgeStyle = "text",
+): RouteBadgeStyle {
+  return isRouteBadgeStyle(value) ? value : fallback;
 }
 
 function normalizeRouteTierSetting(value: unknown): RouteTierSetting | undefined {

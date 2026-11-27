@@ -40,7 +40,10 @@ import { MultiPingNodeConfigPanel } from "@/components/theme/MultiPingNodeConfig
 import { MerchantLinkConfigPanel } from "@/components/theme/MerchantLinkConfigPanel";
 import { NodeRouteConfigPanel } from "@/components/theme/NodeRouteConfigPanel";
 import { TrafficResetConfigPanel } from "@/components/theme/TrafficResetConfigPanel";
-import { RoutePremiumBadgeIcon } from "@/components/node/NodeRoutePills";
+import {
+  NodeRoutePills,
+  RoutePremiumBadgeIcon,
+} from "@/components/node/NodeRoutePills";
 import { Spinner } from "@/components/ui/Spinner";
 import { Flag } from "@/components/ui/Flag";
 import { usePublicConfig } from "@/hooks/usePublicConfig";
@@ -91,9 +94,14 @@ import {
 } from "@/utils/merchantLinks";
 import {
   normalizeNodeRoutes,
+  ROUTE_BADGE_STYLES,
   ROUTE_CARRIER_KEYS,
+  ROUTE_PREMIUM_EFFECTS,
   ROUTE_PREMIUM_ICONS,
   type NodeRoutesMap,
+  type ResolvedRoutePill,
+  type RouteBadgeStyle,
+  type RoutePremiumEffect,
   type RoutePremiumIcon,
 } from "@/utils/nodeRoutes";
 import { normalizeTrafficResetDays } from "@/utils/trafficReset";
@@ -386,6 +394,8 @@ function pickManagedThemeSettings(settings: ResolvedThemeSettings) {
     refreshIntervalMs: settings.refreshIntervalMs,
     showNodeRoutes: settings.showNodeRoutes,
     routePremiumIcon: settings.routePremiumIcon,
+    routePremiumEffect: settings.routePremiumEffect,
+    routeBadgeStyle: settings.routeBadgeStyle,
     nodeRoutes: Object.fromEntries(
       Object.keys(settings.nodeRoutes)
         .sort()
@@ -911,10 +921,19 @@ const MerchantLinkConfigControl = memo(function MerchantLinkConfigControl({
   );
 });
 
+const ROUTE_PREVIEW_SAMPLE: ResolvedRoutePill[] = [
+  { carrier: "ct", label: "CN2 GIA", tier: "premium" },
+  { carrier: "cu", label: "9929", tier: "premium" },
+  { carrier: "cm", label: "CMIN2", tier: "premium" },
+  { carrier: "ix", label: "Tier1", tier: "standard" },
+];
+
 const NodeRouteConfigControl = memo(function NodeRouteConfigControl({
   clients,
   routesMap,
   premiumIcon,
+  premiumEffect,
+  badgeStyle,
   configuredNodeCount,
   enabled,
   disabled,
@@ -927,6 +946,8 @@ const NodeRouteConfigControl = memo(function NodeRouteConfigControl({
   clients: AdminClient[];
   routesMap: NodeRoutesMap;
   premiumIcon: RoutePremiumIcon;
+  premiumEffect: RoutePremiumEffect;
+  badgeStyle: RouteBadgeStyle;
   configuredNodeCount: number;
   enabled: boolean;
   disabled: boolean;
@@ -973,6 +994,8 @@ const NodeRouteConfigControl = memo(function NodeRouteConfigControl({
           clients={clients}
           routesMap={routesMap}
           premiumIcon={premiumIcon}
+          premiumEffect={premiumEffect}
+          badgeStyle={badgeStyle}
           saving={saving}
           saveDisabled={saveDisabled}
           saveError={saveError}
@@ -1876,6 +1899,80 @@ export function ThemeManage() {
               <div className="flex flex-wrap items-center justify-between gap-2 px-1">
                 <div>
                   <div className="text-[12px] font-medium text-[var(--text-primary)]">
+                    {tx("精品线路特效", "精品線路特效", "Premium Route Effect")}
+                  </div>
+                  <div className="text-[11px] text-[var(--text-tertiary)]">
+                    {tx(
+                      "采用单层纯 GPU 合成动画，手机端同样流畅不掉帧。",
+                      "採用單層純 GPU 合成動畫，手機端同樣流暢不掉幀。",
+                      "Single-layer GPU-composited animations for smooth mobile 60/120fps.",
+                    )}
+                  </div>
+                </div>
+                <div className="instance-segmented is-scrollable">
+                  {ROUTE_PREMIUM_EFFECTS.map((effectKey) => {
+                    const active = draft.routePremiumEffect === effectKey;
+                    const label =
+                      effectKey === "beam"
+                        ? tx("霓虹跑框", "霓虹跑框", "Neon Beam")
+                        : effectKey === "holo"
+                          ? tx("全息闪卡", "全息閃卡", "Holo Prism")
+                          : effectKey === "aurora"
+                            ? tx("极光脉冲", "極光脈衝", "Aurora")
+                            : tx("柔和流光", "柔和流光", "Soft Sheen");
+                    return (
+                      <button
+                        key={effectKey}
+                        type="button"
+                        data-active={active ? "true" : "false"}
+                        aria-pressed={active}
+                        onClick={() => patch("routePremiumEffect", effectKey)}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                <div>
+                  <div className="text-[12px] font-medium text-[var(--text-primary)]">
+                    {tx("运营商标记样式", "電信商標記樣式", "Carrier Badge Style")}
+                  </div>
+                  <div className="text-[11px] text-[var(--text-tertiary)]">
+                    {tx(
+                      "在文字徽章（电/联/移/互）与精简向量 LOGO 之间切换。",
+                      "在文字徽章（電/聯/移/互）與精簡向量 LOGO 之間切換。",
+                      "Switch between text badges and crisp vector carrier logos.",
+                    )}
+                  </div>
+                </div>
+                <div className="instance-segmented is-scrollable">
+                  {ROUTE_BADGE_STYLES.map((styleKey) => {
+                    const active = draft.routeBadgeStyle === styleKey;
+                    const label =
+                      styleKey === "logo"
+                        ? tx("运营商 LOGO", "運營商 LOGO", "Carrier Logos")
+                        : tx("文字徽章（电/联/移）", "文字徽章（電/聯/移）", "Text Badge");
+                    return (
+                      <button
+                        key={styleKey}
+                        type="button"
+                        data-active={active ? "true" : "false"}
+                        aria-pressed={active}
+                        onClick={() => patch("routeBadgeStyle", styleKey)}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                <div>
+                  <div className="text-[12px] font-medium text-[var(--text-primary)]">
                     {tx("精品线路徽标图标", "精品線路徽標圖示", "Premium Route Badge Icon")}
                   </div>
                   <div className="text-[11px] text-[var(--text-tertiary)]">
@@ -1911,12 +2008,29 @@ export function ThemeManage() {
                   })}
                 </div>
               </div>
+
+              <div className="flex flex-col gap-1.5 rounded-xl border border-[var(--hairline)] bg-[var(--surface-a)] p-3">
+                <span className="text-[11px] font-medium text-[var(--text-tertiary)]">
+                  {tx("实时样式预览", "即時樣式預覽", "Live Style Preview")}
+                </span>
+                <div className="max-w-[360px]">
+                  <NodeRoutePills
+                    routes={ROUTE_PREVIEW_SAMPLE}
+                    premiumIcon={draft.routePremiumIcon}
+                    premiumEffect={draft.routePremiumEffect}
+                    badgeStyle={draft.routeBadgeStyle}
+                    density="compact"
+                  />
+                </div>
+              </div>
             </div>
 
             <NodeRouteConfigControl
               clients={sortedClients}
               routesMap={draft.nodeRoutes}
               premiumIcon={draft.routePremiumIcon}
+              premiumEffect={draft.routePremiumEffect}
+              badgeStyle={draft.routeBadgeStyle}
               configuredNodeCount={routeConfiguredNodeCount}
               enabled={draft.showNodeRoutes}
               disabled={clientsLoading || sortedClients.length === 0}

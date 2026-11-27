@@ -144,6 +144,8 @@ export const NodeCard = memo(function NodeCard({
             <NodeRoutePills
               routes={routes}
               premiumIcon={themeSettings.routePremiumIcon}
+              premiumEffect={themeSettings.routePremiumEffect}
+              badgeStyle={themeSettings.routeBadgeStyle}
               density="large"
               className="card-metric-section"
             />

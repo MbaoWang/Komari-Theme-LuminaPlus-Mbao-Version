@@ -752,6 +752,8 @@ export const CompactNodeCard = memo(function CompactNodeCard({
         <NodeRoutePills
           routes={routes}
           premiumIcon={themeSettings.routePremiumIcon}
+          premiumEffect={themeSettings.routePremiumEffect}
+          badgeStyle={themeSettings.routeBadgeStyle}
           density="compact"
         />
       )}

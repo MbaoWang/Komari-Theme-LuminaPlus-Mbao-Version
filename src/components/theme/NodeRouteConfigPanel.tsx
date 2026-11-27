@@ -22,7 +22,9 @@ import {
   ROUTE_CARRIER_KEYS,
   type NodeRouteConfig,
   type NodeRoutesMap,
+  type RouteBadgeStyle,
   type RouteCarrierKey,
+  type RoutePremiumEffect,
   type RoutePremiumIcon,
   type RouteTierSetting,
 } from "@/utils/nodeRoutes";
@@ -34,6 +36,8 @@ interface NodeRouteConfigPanelProps {
   clients: AdminClient[];
   routesMap: NodeRoutesMap;
   premiumIcon: RoutePremiumIcon;
+  premiumEffect: RoutePremiumEffect;
+  badgeStyle: RouteBadgeStyle;
   saving: boolean;
   saveDisabled: boolean;
   saveError: string | null;
@@ -53,6 +57,8 @@ export function NodeRouteConfigPanel({
   clients,
   routesMap,
   premiumIcon,
+  premiumEffect,
+  badgeStyle,
   saving,
   saveDisabled,
   saveError,
@@ -339,6 +345,8 @@ export function NodeRouteConfigPanel({
                       <NodeRoutePills
                         routes={previewPills}
                         premiumIcon={premiumIcon}
+                        premiumEffect={premiumEffect}
+                        badgeStyle={badgeStyle}
                         density="compact"
                       />
                     ) : (

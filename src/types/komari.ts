@@ -187,6 +187,8 @@ export interface ThemeSettings {
   refreshIntervalMs?: number;
   showNodeRoutes?: boolean;
   routePremiumIcon?: "zap" | "sparkle" | "crown" | "flame" | "none";
+  routePremiumEffect?: "beam" | "holo" | "aurora" | "sheen";
+  routeBadgeStyle?: "text" | "logo";
   nodeRoutes?: Record<
     string,
     {

@@ -264,6 +264,8 @@ describe("normalizeThemeSettings", () => {
     expect(defaults.refreshIntervalMs).toBe(2000);
     expect(defaults.showNodeRoutes).toBe(true);
     expect(defaults.routePremiumIcon).toBe("zap");
+    expect(defaults.routePremiumEffect).toBe("beam");
+    expect(defaults.routeBadgeStyle).toBe("text");
     expect(defaults.nodeRoutes).toEqual({});
     expect(defaults.showHomeSearchBar).toBe(true);
     expect(defaults.showCardTags).toBe(true);
@@ -275,6 +277,8 @@ describe("normalizeThemeSettings", () => {
       defaultCostCurrency: "twd",
       refreshIntervalMs: 5000,
       routePremiumIcon: "sparkle",
+      routePremiumEffect: "holo",
+      routeBadgeStyle: "logo",
       nodeRoutes: {
         "u1": { ct: { label: "CN2 GIA" }, ix: { label: "BGP", tier: "standard" } },
       },
@@ -287,6 +291,8 @@ describe("normalizeThemeSettings", () => {
     expect(custom.defaultCostCurrency).toBe("TWD");
     expect(custom.refreshIntervalMs).toBe(5000);
     expect(custom.routePremiumIcon).toBe("sparkle");
+    expect(custom.routePremiumEffect).toBe("holo");
+    expect(custom.routeBadgeStyle).toBe("logo");
     expect(custom.nodeRoutes).toEqual({
       u1: { ct: { label: "CN2 GIA" }, ix: { label: "BGP", tier: "standard" } },
     });

@@ -1,35 +1,195 @@
-/* 三網回程路由：方案 B 一體式連體分段長條（深色/淺色雙模式，4 條路線單排不擠字） */
+/* 三網回程路由：方案 B 一體式連體分段長條 + 4 種 GPU 合成級高幀率特效
+ * 效能設計：
+ * - 整條回程列僅使用 1 層純 transform/opacity GPU 合成動畫，避免每張卡 6~8 層重繪。
+ * - 禁用動畫元素上的 filter: drop-shadow()，解決 iOS Safari 逐幀重新光柵化造成的卡頓。
+ * - 使用 contain: layout paint style 隔離重繪範圍。
+ */
 .node-route-strip {
+  position: relative;
   display: flex;
-  flex-wrap: nowrap;
-  align-items: stretch;
-  gap: 0;
   min-width: 0;
   border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--hairline) 94%, transparent);
   background: color-mix(in srgb, var(--fill-tertiary) 68%, var(--surface-a));
   overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  contain: layout paint style;
 }
 
 :root[data-appearance="dark"] .node-route-strip {
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.045);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.node-route-strip.has-premium {
-  border-color: color-mix(in srgb, var(--accent-500) 28%, var(--hairline));
-  box-shadow:
-    0 2px 10px -4px color-mix(in srgb, var(--accent-500) 24%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+.node-route-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--fill-tertiary) 55%, var(--surface-a));
+  overflow: hidden;
 }
 
-:root[data-appearance="dark"] .node-route-strip.has-premium {
-  border-color: rgba(255, 255, 255, 0.15);
+:root[data-appearance="dark"] .node-route-inner {
+  background: color-mix(in srgb, var(--surface-elev-a) 88%, #0d1117);
+}
+
+/* ============================================================
+ * 特效 1：霓虹流光跑框（Conic Border Beam）
+ * 單層超大 conic-gradient 以純 GPU rotate() 繞框，全瀏覽器 60/120fps 絲滑
+ * ============================================================ */
+.node-route-strip.has-premium[data-effect="beam"]:not(.is-detail) {
+  padding: 1.5px;
+  border: 0;
+  background: color-mix(in srgb, var(--hairline) 65%, transparent);
+  box-shadow: 0 2px 12px -4px rgba(59, 130, 246, 0.32);
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="beam"]:not(.is-detail) {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 16px -6px rgba(56, 189, 248, 0.45);
+}
+
+.node-route-strip.has-premium[data-effect="beam"]:not(.is-detail)::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 440px;
+  height: 440px;
+  margin-left: -220px;
+  margin-top: -220px;
+  pointer-events: none;
+  z-index: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 24deg,
+    #3b82f6 52deg,
+    #06b6d4 76deg,
+    transparent 108deg,
+    transparent 204deg,
+    #f43f5e 232deg,
+    #14b8a6 258deg,
+    transparent 292deg,
+    transparent 360deg
+  );
+  will-change: transform;
+  animation: route-beam-spin 3.8s linear infinite;
+}
+
+.node-route-strip.has-premium[data-effect="beam"]:not(.is-detail) .node-route-inner {
+  border-radius: 10.5px;
+}
+
+/* ============================================================
+ * 特效 2：全息閃卡折射（Holo Prism）
+ * 單層彩虹金屬高光掃掠，純 GPU translate3d()
+ * ============================================================ */
+.node-route-strip.has-premium[data-effect="holo"]:not(.is-detail) {
+  border-color: color-mix(in srgb, #8b5cf6 46%, var(--hairline));
   box-shadow:
-    0 0 14px -6px rgba(59, 130, 246, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 2px 12px -4px rgba(139, 92, 246, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="holo"]:not(.is-detail) {
+  border-color: rgba(167, 139, 250, 0.48);
+  box-shadow: 0 0 16px -5px rgba(139, 92, 246, 0.45);
+}
+
+.node-route-strip.has-premium[data-effect="holo"]:not(.is-detail) .node-route-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    112deg,
+    transparent 15%,
+    rgba(56, 189, 248, 0.28) 32%,
+    rgba(168, 85, 247, 0.34) 46%,
+    rgba(251, 191, 36, 0.3) 58%,
+    rgba(20, 184, 166, 0.28) 72%,
+    transparent 86%
+  );
+  transform: translate3d(-115%, 0, 0);
+  will-change: transform;
+  animation: route-bar-sweep 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* ============================================================
+ * 特效 3：極光呼吸脈衝（Aurora Pulse）
+ * 單層柔光極光呼吸，僅動畫化 opacity + translate3d()
+ * ============================================================ */
+.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail) {
+  border-color: color-mix(in srgb, #14b8a6 48%, var(--hairline));
+  box-shadow: 0 2px 14px -4px rgba(20, 184, 166, 0.36);
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail) {
+  border-color: rgba(45, 212, 191, 0.45);
+  box-shadow: 0 0 18px -5px rgba(20, 184, 166, 0.48);
+}
+
+.node-route-strip.has-premium[data-effect="aurora"]:not(.is-detail) .node-route-inner::after {
+  content: "";
+  position: absolute;
+  inset: -4px -20%;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    rgba(59, 130, 246, 0.22) 0%,
+    rgba(244, 63, 94, 0.2) 35%,
+    rgba(20, 184, 166, 0.24) 70%,
+    rgba(59, 130, 246, 0.22) 100%
+  );
+  will-change: transform, opacity;
+  animation: route-aurora-breathe 4.4s ease-in-out infinite;
+}
+
+/* ============================================================
+ * 特效 4：柔和流光（Sheen）
+ * 單層連續白光輕掠整條膠囊，比舊版 4 層同時重繪省 75% GPU
+ * ============================================================ */
+.node-route-strip.has-premium[data-effect="sheen"]:not(.is-detail) {
+  border-color: color-mix(in srgb, var(--accent-500) 34%, var(--hairline));
+  box-shadow: 0 2px 10px -4px color-mix(in srgb, var(--accent-500) 26%, transparent);
+}
+
+.node-route-strip.has-premium[data-effect="sheen"]:not(.is-detail) .node-route-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    110deg,
+    transparent 24%,
+    rgba(255, 255, 255, 0.42) 50%,
+    transparent 76%
+  );
+  transform: translate3d(-115%, 0, 0);
+  will-change: transform;
+  animation: route-bar-sweep 4.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+:root[data-appearance="dark"]
+  .node-route-strip.has-premium[data-effect="sheen"]:not(.is-detail)
+  .node-route-inner::after {
+  background: linear-gradient(
+    110deg,
+    transparent 24%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 76%
+  );
 }
 
 /* 實例詳情頁空間寬裕，維持獨立圓角膠囊方便閱讀 */
@@ -41,6 +201,7 @@
   background: transparent;
   box-shadow: none;
   overflow: visible;
+  contain: none;
 }
 
 .node-route-pill {
@@ -63,20 +224,13 @@
   font-weight: 700;
   line-height: 1;
   overflow: hidden;
-  isolation: isolate;
-  transition:
-    background-color 180ms ease,
-    box-shadow 180ms ease;
 }
 
-.node-route-strip:not(.is-detail) .node-route-pill + .node-route-pill {
+.node-route-inner .node-route-pill + .node-route-pill {
   border-left: 1px solid color-mix(in srgb, var(--hairline) 82%, transparent);
 }
 
-:root[data-appearance="dark"]
-  .node-route-strip:not(.is-detail)
-  .node-route-pill
-  + .node-route-pill {
+:root[data-appearance="dark"] .node-route-inner .node-route-pill + .node-route-pill {
   border-left-color: rgba(255, 255, 255, 0.09);
 }
 
@@ -181,7 +335,20 @@
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.02em;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+}
+
+.node-route-carrier.is-logo {
+  padding: 0;
+  width: 17px;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 5px;
+}
+
+.node-route-strip.is-compact[data-count="4"] .node-route-carrier.is-logo {
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
 }
 
 .node-route-name {
@@ -192,14 +359,13 @@
   letter-spacing: -0.015em;
 }
 
+/* 不對動畫元素使用 filter: drop-shadow()，保持 iOS/行動裝置滿幀不掉幀 */
 .node-route-premium-icon {
   flex: 0 0 auto;
   color: var(--route-accent);
-  filter: drop-shadow(0 0 4px var(--route-glow));
-  animation: route-icon-pulse 2.8s ease-in-out infinite;
 }
 
-/* 優化直連線路：柔和專屬色底，不閃爍 */
+/* 優化直連線路：柔和專屬色底 */
 .node-route-pill[data-tier="optimized"] {
   background: color-mix(in srgb, var(--route-accent) 9%, var(--surface-a));
   color: color-mix(in srgb, var(--route-accent) 78%, var(--text-primary));
@@ -214,17 +380,15 @@
   border-color: color-mix(in srgb, var(--route-accent) 36%, transparent);
 }
 
-/* 精品線路：專屬發光漸層 + 頂部光帶 + 交錯流光掃光 */
+/* 精品線路：專屬發光漸層底色 + 頂部光帶（靜態高質感，零重繪開銷） */
 .node-route-pill[data-tier="premium"] {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--route-accent) 16%, var(--surface-a)) 0%,
+    color-mix(in srgb, var(--route-accent) 17%, var(--surface-a)) 0%,
     color-mix(in srgb, var(--route-accent) 7%, var(--surface-elev-a)) 100%
   );
-  color: color-mix(in srgb, var(--route-accent) 84%, var(--text-primary));
-  box-shadow:
-    inset 0 1.5px 0 color-mix(in srgb, var(--route-accent) 55%, transparent),
-    inset 0 -1px 8px -3px color-mix(in srgb, var(--route-accent) 32%, transparent);
+  color: color-mix(in srgb, var(--route-accent) 85%, var(--text-primary));
+  box-shadow: inset 0 1.5px 0 color-mix(in srgb, var(--route-accent) 56%, transparent);
 }
 
 :root[data-appearance="dark"] .node-route-pill[data-tier="premium"] {
@@ -234,74 +398,44 @@
     color-mix(in srgb, var(--route-accent) 11%, rgba(18, 22, 30, 0.96)) 100%
   );
   color: color-mix(in srgb, var(--route-accent) 18%, #ffffff);
-  box-shadow:
-    inset 0 1.5px 0 color-mix(in srgb, var(--route-accent) 68%, rgba(255, 255, 255, 0.16)),
-    inset 0 -2px 10px -4px var(--route-glow);
+  box-shadow: inset 0 1.5px 0 color-mix(in srgb, var(--route-accent) 72%, rgba(255, 255, 255, 0.16));
 }
 
 .node-route-strip.is-detail .node-route-pill[data-tier="premium"] {
   border-color: color-mix(in srgb, var(--route-accent) 56%, transparent);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--route-accent) 18%, transparent),
-    0 2px 10px -2px color-mix(in srgb, var(--route-accent) 34%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    0 2px 10px -2px color-mix(in srgb, var(--route-accent) 34%, transparent);
 }
 
-.node-route-pill[data-tier="premium"]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background: linear-gradient(
-    110deg,
-    transparent 18%,
-    color-mix(in srgb, var(--route-accent) 24%, rgba(255, 255, 255, 0.45)) 50%,
-    transparent 82%
-  );
-  transform: translateX(-140%);
-  animation: route-premium-sheen 4.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-:root[data-appearance="dark"] .node-route-pill[data-tier="premium"]::after {
-  background: linear-gradient(
-    110deg,
-    transparent 20%,
-    rgba(255, 255, 255, 0.22) 50%,
-    transparent 80%
-  );
-}
-
-/* 交錯流光時間讓分段長條呈現連續波浪光澤 */
-.node-route-pill[data-carrier="cu"][data-tier="premium"]::after {
-  animation-delay: 0.42s;
-}
-.node-route-pill[data-carrier="cm"][data-tier="premium"]::after {
-  animation-delay: 0.84s;
-}
-.node-route-pill[data-carrier="ix"][data-tier="premium"]::after {
-  animation-delay: 1.26s;
-}
-
-@keyframes route-premium-sheen {
-  0%,
-  55% {
-    transform: translateX(-140%);
+@keyframes route-beam-spin {
+  from {
+    transform: rotate(0deg);
   }
-  100% {
-    transform: translateX(140%);
+  to {
+    transform: rotate(360deg);
   }
 }
 
-@keyframes route-icon-pulse {
+@keyframes route-bar-sweep {
+  0%,
+  42% {
+    transform: translate3d(-115%, 0, 0);
+  }
+  100% {
+    transform: translate3d(115%, 0, 0);
+  }
+}
+
+@keyframes route-aurora-breathe {
   0%,
   100% {
-    opacity: 0.92;
-    transform: scale(1);
+    opacity: 0.25;
+    transform: translate3d(-6%, 0, 0);
   }
   50% {
-    opacity: 1;
-    transform: scale(1.12);
+    opacity: 0.78;
+    transform: translate3d(6%, 0, 0);
   }
 }
 
@@ -310,13 +444,9 @@
   color: var(--text-secondary);
 }
 
-:root[data-appearance="dark"] .node-route-pill[data-tier="standard"] {
-  color: var(--text-secondary);
-}
-
 /* 極窄螢幕（< 340px）若四條線路名稱特別長才允許平順換成 2x2 */
 @media (max-width: 340px) {
-  .node-route-strip:not(.is-detail)[data-count="4"] {
+  .node-route-strip:not(.is-detail)[data-count="4"] .node-route-inner {
     flex-wrap: wrap;
   }
 
@@ -334,8 +464,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .node-route-pill[data-tier="premium"]::after,
-  .node-route-premium-icon {
+  .node-route-strip::before,
+  .node-route-inner::after {
     animation: none;
   }
 }
