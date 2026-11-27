@@ -2,6 +2,7 @@
  * - 專為淺色與深色雙模式優化，全部僅使用純 GPU transform/opacity 合成層，手機絲滑不卡頓
  */
 .node-route-strip {
+  --route-divider: color-mix(in srgb, var(--hairline) 82%, transparent);
   position: relative;
   display: flex;
   min-width: 0;
@@ -13,6 +14,7 @@
 }
 
 :root[data-appearance="dark"] .node-route-strip {
+  --route-divider: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.045);
 }
@@ -98,10 +100,8 @@
   animation: route-bar-sweep 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-.node-route-strip.has-premium[data-effect="beam"]:not(.is-detail)
-  .node-route-pill
-  + .node-route-pill {
-  border-left-color: rgba(255, 255, 255, 0.12);
+.node-route-strip.has-premium[data-effect="beam"]:not(.is-detail) {
+  --route-divider: rgba(255, 255, 255, 0.12);
 }
 
 .node-route-strip.has-premium[data-effect="beam"]:not(.is-detail)
@@ -353,10 +353,8 @@
   animation: route-bar-sweep 2.8s cubic-bezier(0.38, 0, 0.2, 1) infinite;
 }
 
-.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail)
-  .node-route-pill
-  + .node-route-pill {
-  border-left-color: rgba(251, 191, 36, 0.16);
+.node-route-strip.has-premium[data-effect="svip"]:not(.is-detail) {
+  --route-divider: rgba(251, 191, 36, 0.16);
 }
 
 .node-route-strip.has-premium[data-effect="svip"]:not(.is-detail)
@@ -442,10 +440,8 @@
   animation: route-bar-sweep 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
-  .node-route-pill
-  + .node-route-pill {
-  border-left-color: rgba(212, 175, 55, 0.18);
+.node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail) {
+  --route-divider: rgba(212, 175, 55, 0.18);
 }
 
 .node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
@@ -552,12 +548,23 @@
   overflow: hidden;
 }
 
-.node-route-inner .node-route-pill + .node-route-pill {
-  border-left: 1px solid color-mix(in srgb, var(--hairline) 82%, transparent);
+/* 用零寬度絕對定位 ::before 繪製分隔線，避免 border-left 吃掉第 2~4 格 1px 寬度造成內容偏右 */
+.node-route-inner .node-route-pill + .node-route-pill::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--route-divider);
+  pointer-events: none;
 }
 
-:root[data-appearance="dark"] .node-route-inner .node-route-pill + .node-route-pill {
-  border-left-color: rgba(255, 255, 255, 0.1);
+/* 無右側圖示（普通/優化線路或無圖示模式）時，因左側為鏤空線框 LOGO、右側為實心粗體字，
+   視覺重心偏右約 2px；給予右側 5px 光學補償讓文字與 LOGO 整體看起來完全正中。 */
+.node-route-strip:not(.is-detail) .node-route-pill[data-has-icon="false"] {
+  padding-left: 3px;
+  padding-right: 7px;
 }
 
 /* 4 條路線等寬均分時微調內距與字距，讓中線正中對齊且長名稱（如 CN2 GIA）仍完整顯示 */
@@ -565,6 +572,11 @@
   padding: 0 2px;
   gap: 2px;
   font-size: 10px;
+}
+
+.node-route-strip.is-compact[data-count="4"] .node-route-pill[data-has-icon="false"] {
+  padding-left: 1px;
+  padding-right: 5px;
 }
 
 .node-route-strip.is-compact[data-count="4"] .node-route-name {
@@ -812,8 +824,8 @@
     flex: 1 1 50%;
   }
 
-  .node-route-strip:not(.is-detail)[data-count="4"] .node-route-pill:nth-child(3) {
-    border-left: 0;
+  .node-route-strip:not(.is-detail)[data-count="4"] .node-route-pill:nth-child(3)::before {
+    display: none;
   }
 
   .node-route-strip:not(.is-detail)[data-count="4"] .node-route-pill:nth-child(n + 3) {

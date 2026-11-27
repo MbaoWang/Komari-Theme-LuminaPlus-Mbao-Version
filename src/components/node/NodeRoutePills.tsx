@@ -254,12 +254,14 @@ export const NodeRoutePills = memo(function NodeRoutePills({
   const pills = routes.map((route) => {
     const shortLabel = getCarrierShortLabel(route.carrier, resolvedLanguage);
     const fullLabel = getCarrierFullLabel(route.carrier, resolvedLanguage);
+    const hasRightIcon = route.tier === "premium" && premiumIcon !== "none";
     return (
       <div
         key={route.carrier}
         className="node-route-pill"
         data-carrier={route.carrier}
         data-tier={route.tier}
+        data-has-icon={hasRightIcon ? "true" : "false"}
         title={`${fullLabel} · ${route.label} (${tierText(route.tier)})`}
       >
         <span
@@ -280,7 +282,7 @@ export const NodeRoutePills = memo(function NodeRoutePills({
           )}
         </span>
         <span className="node-route-name">{route.label}</span>
-        {route.tier === "premium" && (
+        {hasRightIcon && (
           <RoutePremiumBadgeIcon
             icon={premiumIcon}
             size={isDenseFour ? 10 : density === "compact" ? 11 : 12}

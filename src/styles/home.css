@@ -834,6 +834,8 @@
   display: flex;
   overflow-x: auto;
   align-items: center;
+  justify-content: center;
+  justify-content: safe center;
   gap: 8px;
 }
 
@@ -951,6 +953,7 @@ html.home-filter-sorting * {
   .home-region-chips {
     flex-wrap: wrap;
     overflow-x: visible;
+    justify-content: center;
   }
 
   .home-region-chip {
