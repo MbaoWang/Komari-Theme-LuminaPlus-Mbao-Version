@@ -7,6 +7,8 @@ import { OsLogo } from "@/components/ui/OsLogo";
 import { useNodeCardModel } from "@/hooks/useNodeCardModel";
 import { usePreferences } from "@/hooks/usePreferences";
 import { useMetricColorsVersion } from "@/hooks/useMetricColors";
+import { useThemeSettings } from "@/hooks/useThemeSettings";
+import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { formatBytes } from "@/utils/format";
 import { speedRateColor } from "@/utils/metricTone";
 import { CanvasStrip, fillRoundedRect, safeCanvasColor } from "./CanvasStrip";
@@ -228,6 +230,8 @@ const NodeRow = memo(function NodeRow({ uuid, showCosts }: { uuid: string; showC
   const { resolvedAppearance } = usePreferences();
   const colorsVersion = useMetricColorsVersion();
   const redrawKey = `${resolvedAppearance}:${colorsVersion}`;
+  const themeSettings = useThemeSettings();
+  const { privacyMode } = usePrivacyMode();
   const model = useNodeCardModel(uuid, {
     pingBucketCount: LIST_PING_BUCKETS,
   });
@@ -254,6 +258,8 @@ const NodeRow = memo(function NodeRow({ uuid, showCosts }: { uuid: string; showC
     isOffline,
     osName,
   } = model;
+  const visibleTags = !themeSettings.isReady || themeSettings.showCardTags ? footerTags : [];
+  const effectiveRenewalPrice = privacyMode && renewalPrice ? "•••" : renewalPrice;
   const listPingState = resolveListPingState(
     ping.loadState,
     hasRealHomepagePingBinding,
@@ -294,15 +300,15 @@ const NodeRow = memo(function NodeRow({ uuid, showCosts }: { uuid: string; showC
               {node.name}
             </span>
           </div>
-          {((showCosts && renewalPrice) || footerTags.length > 0) && (
-            <div className="node-list-chips" title={footerTags.length > 0 ? joinTagTitle(footerTags) : undefined}>
-              {showCosts && renewalPrice && (
+          {((showCosts && effectiveRenewalPrice) || visibleTags.length > 0) && (
+            <div className="node-list-chips" title={visibleTags.length > 0 ? joinTagTitle(visibleTags) : undefined}>
+              {showCosts && effectiveRenewalPrice && (
                 <span className="dstatus-price-chip">
                   <CircleDollarSign size={12} strokeWidth={2.2} />
-                  {renewalPrice}
+                  {effectiveRenewalPrice}
                 </span>
               )}
-              {footerTags.map((tag, index) => (
+              {visibleTags.map((tag, index) => (
                 <span
                   key={`${tag.label}-${index}`}
                   className="dstatus-tag-chip"

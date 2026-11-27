@@ -3,18 +3,21 @@ import { Lock } from "lucide-react";
 import { BackgroundLayer } from "./BackgroundLayer";
 import { AmbientEffectLayer } from "./AmbientEffectLayer";
 import { Spinner } from "@/components/ui/Spinner";
+import { useI18n } from "@/i18n";
 import { useAppearance } from "@/hooks/useAppearance";
 import { useAuth } from "@/hooks/useAuth";
 import { usePublicConfig } from "@/hooks/usePublicConfig";
 import { useSiteMetadata } from "@/hooks/useSiteMetadata";
 import { useMetricColorsSync } from "@/hooks/useMetricColors";
 import { useNodeStoreStatus } from "@/hooks/useNode";
+import { useRefreshInterval } from "@/hooks/useRefreshInterval";
 import { PwaPullToRefresh } from "./PwaPullToRefresh";
 
 export function AppShell() {
   useAppearance();
   useSiteMetadata();
   useMetricColorsSync();
+  useRefreshInterval();
   const { pathname, search } = useLocation();
   const publicConfig = usePublicConfig();
   const auth = useAuth();
@@ -68,31 +71,37 @@ export function AppShell() {
 }
 
 function AccessError({ onRetry }: { onRetry: () => void }) {
+  const { tx } = useI18n();
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
       <div className="space-y-2">
         <div className="text-[15px] font-semibold text-[var(--text-primary)]">
-          无法读取站点配置
+          {tx("无法读取站点配置", "無法讀取站點設定", "Unable to load site configuration")}
         </div>
-        <p className="text-[13px] text-[var(--text-secondary)]">请检查网络后重试。</p>
+        <p className="text-[13px] text-[var(--text-secondary)]">
+          {tx("请检查网络后重试。", "請檢查網路後重試。", "Please check your connection and retry.")}
+        </p>
       </div>
       <button type="button" onClick={onRetry} className="control-button px-4 py-2 text-[13px] font-medium">
-        重试
+        {tx("重试", "重試", "Retry")}
       </button>
     </div>
   );
 }
 
 function PrivateSiteGate() {
+  const { tx } = useI18n();
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
       <div className="grid h-12 w-12 place-items-center rounded-full bg-[var(--surface-elev)] text-[var(--text-tertiary)]">
         <Lock size={22} strokeWidth={2} />
       </div>
       <div className="space-y-2">
-        <div className="text-[15px] font-semibold text-[var(--text-primary)]">站点已设为私有</div>
+        <div className="text-[15px] font-semibold text-[var(--text-primary)]">
+          {tx("站点已设为私有", "站點已設為私有", "Private Site")}
+        </div>
         <p className="max-w-[32rem] text-[13px] text-[var(--text-secondary)]">
-          登录后即可查看节点数据。
+          {tx("登录后即可查看节点数据。", "登入後即可查看節點資料。", "Sign in to view server telemetry.")}
         </p>
       </div>
       <a
@@ -101,7 +110,7 @@ function PrivateSiteGate() {
         rel="noopener noreferrer"
         className="control-button px-4 py-2 text-[13px] font-medium"
       >
-        前往登录
+        {tx("前往登录", "前往登入", "Sign in")}
       </a>
     </div>
   );

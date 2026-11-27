@@ -1,6 +1,7 @@
 import { Fragment, Suspense, lazy, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronLeft, RefreshCw } from "lucide-react";
+import { useI18n } from "@/i18n";
 import { Flag } from "@/components/ui/Flag";
 import { Spinner } from "@/components/ui/Spinner";
 import { useMinuteClock } from "@/hooks/useClock";
@@ -11,11 +12,6 @@ import { formatByteRateLabel, formatBytes } from "@/utils/format";
 import type { NodeInfo } from "@/types/komari";
 import type { TodayTrafficSample, TodayTrafficStat } from "@/utils/trafficStats";
 
-const DAY_FORMATTER = new Intl.DateTimeFormat("zh-CN", {
-  month: "long",
-  day: "numeric",
-  weekday: "short",
-});
 const TIME_FORMATTER = new Intl.DateTimeFormat("zh-CN", {
   hour: "2-digit",
   minute: "2-digit",
@@ -56,6 +52,7 @@ function PeakSummaryRow({
   direction: "up" | "down";
   detail: TrafficDetail | null;
 }) {
+  const { tx } = useI18n();
   const value = direction === "up" ? detail?.stat.peakUp ?? 0 : detail?.stat.peakDown ?? 0;
   const timeMs = direction === "up" ? detail?.stat.peakUpAt ?? null : detail?.stat.peakDownAt ?? null;
   const Icon = direction === "up" ? ArrowUp : ArrowDown;
@@ -64,12 +61,14 @@ function PeakSummaryRow({
     <div className="traffic-summary-peak-row">
       <span className="traffic-summary-peak-label">
         <Icon size={13} strokeWidth={2.4} aria-hidden />
-        {direction === "up" ? "上行" : "下行"}
+        {direction === "up" ? tx("上行", "上行", "Up") : tx("下行", "下行", "Down")}
       </span>
       <span className="traffic-summary-peak-main">
         <strong>{detail ? formatByteRateLabel(value) : "—"}</strong>
         <small>
-          {detail && value > 0 ? `${detail.node.name} · ${formatPeakTime(timeMs, value)}` : "暂无峰值"}
+          {detail && value > 0
+            ? `${detail.node.name} · ${formatPeakTime(timeMs, value)}`
+            : tx("暂无峰值", "暫無峰值", "No peak")}
         </small>
       </span>
     </div>
@@ -85,6 +84,7 @@ function TrafficDetailToggle({
   controlsId: string;
   onClick: () => void;
 }) {
+  const { tx } = useI18n();
   return (
     <button
       type="button"
@@ -93,7 +93,7 @@ function TrafficDetailToggle({
       aria-controls={controlsId}
       onClick={onClick}
     >
-      详情
+      {tx("详情", "詳情", "Details")}
       <ChevronDown size={13} strokeWidth={2.2} aria-hidden />
     </button>
   );
@@ -106,14 +106,17 @@ function TrafficSampleChart({
   id: string;
   samples: TodayTrafficSample[];
 }) {
+  const { tx } = useI18n();
   return (
-    <section id={id} className="traffic-detail-panel" aria-label="本日网络上下行明细">
+    <section id={id} className="traffic-detail-panel" aria-label={tx("本日网络上下行明细", "本日網路上下行明細", "Today's bandwidth samples")}>
       <header className="traffic-detail-head">
-        <strong>本日网络上下行</strong>
-        <span>{samples.length} 个采样</span>
+        <strong>{tx("本日网络上下行", "本日網路上下行", "Today's Bandwidth")}</strong>
+        <span>{tx(`${samples.length} 个采样`, `${samples.length} 個採樣`, `${samples.length} samples`)}</span>
       </header>
       {samples.length === 0 ? (
-        <div className="traffic-detail-empty">本日暂无速率采样</div>
+        <div className="traffic-detail-empty">
+          {tx("本日暂无速率采样", "本日暫無速率採樣", "No rate samples today")}
+        </div>
       ) : (
         <Suspense
           fallback={
@@ -130,12 +133,22 @@ function TrafficSampleChart({
 }
 
 export function Traffic() {
+  const { locale, tx } = useI18n();
   const [expandedUuid, setExpandedUuid] = useState<string | null>(null);
   const now = useMinuteClock();
   const isMobileLayout = useMediaQuery(TRAFFIC_MOBILE_QUERY);
   const nodes = useVisibleNodes();
   const uuids = useMemo(() => nodes.map((node) => node.uuid), [nodes]);
   const trafficQuery = useTodayTrafficStats(uuids, now);
+  const dayLabel = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        month: "long",
+        day: "numeric",
+        weekday: "short",
+      }).format(now),
+    [locale, now],
+  );
   const details = useMemo<TrafficDetail[]>(() => {
     const stats = new Map(trafficQuery.data?.rows.map((row) => [row.uuid, row] as const));
     return nodes
@@ -183,7 +196,7 @@ export function Traffic() {
       <div className="flex items-center justify-between gap-3">
         <Link to="/" className="instance-page-back">
           <ChevronLeft size={14} />
-          返回
+          {tx("返回", "返回", "Back")}
         </Link>
         <button
           type="button"
@@ -191,8 +204,8 @@ export function Traffic() {
           onClick={() => void trafficQuery.refetch()}
           disabled={trafficQuery.isFetching || nodes.length === 0}
           aria-busy={trafficQuery.isFetching}
-          aria-label="刷新今日流量统计"
-          title="刷新"
+          aria-label={tx("刷新今日流量统计", "刷新今日流量統計", "Refresh today's traffic")}
+          title={tx("刷新", "刷新", "Refresh")}
         >
           <RefreshCw size={16} />
         </button>
@@ -200,8 +213,10 @@ export function Traffic() {
 
       {nodes.length === 0 ? (
         <div className="flex h-[40vh] flex-col items-center justify-center gap-2 text-[var(--text-tertiary)]">
-          <span className="text-[15px]">暂无节点数据</span>
-          <span className="text-[12px]">等待后端推送或前往管理后台添加</span>
+          <span className="text-[15px]">{tx("暂无节点数据", "暫無節點資料", "No node data")}</span>
+          <span className="text-[12px]">
+            {tx("等待后端推送或前往管理后台添加", "等待後端推送或前往管理後台新增", "Waiting for agents or add one in admin")}
+          </span>
         </div>
       ) : trafficQuery.isPending ? (
         <div className="flex h-[40vh] items-center justify-center">
@@ -209,19 +224,19 @@ export function Traffic() {
         </div>
       ) : trafficQuery.isError ? (
         <section className="traffic-error" role="alert">
-          <strong>无法读取今日流量统计</strong>
-          <span>请检查网络或历史记录配置后重试。</span>
+          <strong>{tx("无法读取今日流量统计", "無法讀取今日流量統計", "Unable to load daily traffic")}</strong>
+          <span>{tx("请检查网络或历史记录配置后重试。", "請檢查網路或歷史記錄設定後重試。", "Check network or history settings and retry.")}</span>
           <button type="button" onClick={() => void trafficQuery.refetch()}>
-            重新加载
+            {tx("重新加载", "重新載入", "Reload")}
           </button>
         </section>
       ) : (
         <>
-          <section className="traffic-summary-grid" aria-label="今日流量汇总">
+          <section className="traffic-summary-grid" aria-label={tx("今日流量汇总", "今日流量彙總", "Daily traffic summary")}>
             <article className="traffic-summary-card">
               <div className="traffic-summary-head">
-                <span className="assets-eyebrow">今日流量</span>
-                <span>{DAY_FORMATTER.format(now)}</span>
+                <span className="assets-eyebrow">{tx("今日流量", "今日流量", "Today's Traffic")}</span>
+                <span>{dayLabel}</span>
               </div>
               <strong className="traffic-summary-total">
                 {sampledDetails.length > 0 ? formatBytes(totalUp + totalDown) : "—"}
@@ -234,8 +249,8 @@ export function Traffic() {
 
             <article className="traffic-summary-card">
               <div className="traffic-summary-head">
-                <span className="assets-eyebrow">今日采样峰值</span>
-                <span>统计至 {TIME_FORMATTER.format(updatedAt)}</span>
+                <span className="assets-eyebrow">{tx("今日采样峰值", "今日採樣峰值", "Today's Peak")}</span>
+                <span>{tx(`统计至 ${TIME_FORMATTER.format(updatedAt)}`, `統計至 ${TIME_FORMATTER.format(updatedAt)}`, `As of ${TIME_FORMATTER.format(updatedAt)}`)}</span>
               </div>
               <div className="traffic-summary-peak-list">
                 <PeakSummaryRow direction="up" detail={peakUp} />
@@ -245,23 +260,25 @@ export function Traffic() {
           </section>
 
           <div className="assets-section-head">
-            <span className="assets-eyebrow">节点明细</span>
-            <span className="assets-count">{details.length} 台</span>
-            <span className="traffic-sample-note">峰值按历史采样计算</span>
+            <span className="assets-eyebrow">{tx("节点明细", "節點明細", "Node Breakdown")}</span>
+            <span className="assets-count">
+              {tx(`${details.length} 台`, `${details.length} 台`, `${details.length} nodes`)}
+            </span>
+            <span className="traffic-sample-note">
+              {tx("峰值按历史采样计算", "峰值按歷史採樣計算", "Peaks computed from history samples")}
+            </span>
           </div>
 
-          {/* 桌面表格与移动卡片按 JS 媒体查询二选一渲染(与 Assets 同方案),
-              避免双树同时挂载、展开时 uPlot 图表建两份。 */}
           {!isMobileLayout && (
           <div className="assets-table-wrap traffic-table-wrap">
             <table className="assets-table traffic-table">
               <thead>
                 <tr>
-                  <th><span>节点</span></th>
-                  <th data-numeric><span>今日流量</span></th>
-                  <th data-numeric><span>上行峰值</span></th>
-                  <th data-numeric><span>下行峰值</span></th>
-                  <th data-action><span>操作</span></th>
+                  <th><span>{tx("节点", "節點", "Node")}</span></th>
+                  <th data-numeric><span>{tx("今日流量", "今日流量", "Today")}</span></th>
+                  <th data-numeric><span>{tx("上行峰值", "上行峰值", "Peak Up")}</span></th>
+                  <th data-numeric><span>{tx("下行峰值", "下行峰值", "Peak Down")}</span></th>
+                  <th data-action><span>{tx("操作", "操作", "Action")}</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -289,7 +306,7 @@ export function Traffic() {
                               <small>↑ {formatBytes(stat.trafficUp)} · ↓ {formatBytes(stat.trafficDown)}</small>
                             </span>
                           ) : (
-                            <span className="traffic-no-data">无数据</span>
+                            <span className="traffic-no-data">{tx("无数据", "無資料", "No data")}</span>
                           )}
                         </td>
                         <td data-numeric>
@@ -335,7 +352,7 @@ export function Traffic() {
                       <span>{node.name}</span>
                     </Link>
                     <div className="traffic-node-card-actions">
-                      <strong>{stat.hasSamples ? formatBytes(total) : "无数据"}</strong>
+                      <strong>{stat.hasSamples ? formatBytes(total) : tx("无数据", "無資料", "No data")}</strong>
                       <TrafficDetailToggle
                         expanded={expanded}
                         controlsId={detailId}
@@ -351,11 +368,11 @@ export function Traffic() {
                       </div>
                       <dl className="traffic-node-card-peaks">
                         <div>
-                          <dt>上行峰值</dt>
+                          <dt>{tx("上行峰值", "上行峰值", "Peak Up")}</dt>
                           <dd><PeakValue value={stat.peakUp} timeMs={stat.peakUpAt} /></dd>
                         </div>
                         <div>
-                          <dt>下行峰值</dt>
+                          <dt>{tx("下行峰值", "下行峰值", "Peak Down")}</dt>
                           <dd><PeakValue value={stat.peakDown} timeMs={stat.peakDownAt} /></dd>
                         </div>
                       </dl>

@@ -20,6 +20,7 @@ import { MerchantLinkAction } from "./MerchantLinkAction";
 import { HealthBucketTooltip } from "./HealthBucketTooltip";
 import { useNodeCardModel } from "@/hooks/useNodeCardModel";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
+import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { speedRateColor } from "@/utils/metricTone";
 import { supportsFineHover } from "@/utils/mediaQuery";
 import {
@@ -420,6 +421,7 @@ export const MiniNodeCard = memo(function MiniNodeCard({
     pingBucketCount: HEALTH_BAR_COUNT,
   });
   const themeSettings = useThemeSettings();
+  const { privacyMode } = usePrivacyMode();
 
   if (!model.node) {
     return <article className="mini-node-card animate-pulse" aria-busy />;
@@ -443,6 +445,8 @@ export const MiniNodeCard = memo(function MiniNodeCard({
     osName,
   } = model;
   const showMerchantLink = themeSettings.isReady && themeSettings.showMerchantLinks;
+  const showCardTags = !themeSettings.isReady || themeSettings.showCardTags;
+  const effectiveRenewalPrice = privacyMode && renewalPrice ? "•••" : renewalPrice;
 
   return (
     <article className={clsx("mini-node-card", isOffline && "is-offline")}>
@@ -454,8 +458,8 @@ export const MiniNodeCard = memo(function MiniNodeCard({
         showTodayTraffic={showTodayTraffic}
       />
       <MiniChips
-        tags={footerTags}
-        renewalPrice={showCosts ? renewalPrice : null}
+        tags={showCardTags ? footerTags : []}
+        renewalPrice={showCosts ? effectiveRenewalPrice : null}
         ipv4={node.ipv4}
         ipv6={node.ipv6}
       />

@@ -51,7 +51,7 @@ describe("home responsive layout contracts", () => {
   });
 
   it("resets child panels on collapse and keeps home-only routing out of controls", () => {
-    expect(controlsSource).toContain("if (nextCollapsed) setColorsOpen(false)");
+    expect(controlsSource).toContain('if (nextCollapsed) setActivePopover("none")');
     expect(controlsSource).not.toContain("useLocation");
     expect(controlsSource).not.toContain("useSearchParams");
     expect(controlsSource).not.toContain("usePublicConfig");

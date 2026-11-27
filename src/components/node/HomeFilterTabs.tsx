@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { Flag } from "@/components/ui/Flag";
 import { SortableFilterRow } from "@/components/ui/SortableFilterRow";
 import { HOME_ALL_GROUP, HOME_ALL_REGION, type HomeRegionOption } from "@/utils/homeNodes";
@@ -11,10 +12,11 @@ export function GroupTabs({
   canReorder: boolean;
   onReorder: (order: string[]) => void;
 }) {
+  const { tx } = useI18n();
   return (
     <SortableFilterRow
       items={groups} selected={selectedGroup} onSelect={onSelectGroup}
-      className="home-group-tabs" label="节点分组"
+      className="home-group-tabs" label={tx("节点分组", "節點分組", "Node groups")}
       canReorder={canReorder} onReorder={onReorder} renderItem={(group) => group}
       leadingContent={
         <button
@@ -22,7 +24,7 @@ export function GroupTabs({
           data-active={selectedGroup === HOME_ALL_GROUP ? "true" : "false"}
           onClick={() => onSelectGroup(HOME_ALL_GROUP)}
         >
-          全部
+          {tx("全部", "全部", "All")}
         </button>
       }
     />
@@ -39,13 +41,14 @@ export function RegionTabs({
   canReorder: boolean;
   onReorder: (order: string[]) => void;
 }) {
+  const { tx } = useI18n();
   const counts = new Map(regions.map(({ code, count }) => [code, count]));
   return (
-    <section className="home-region-bar" aria-label="地区筛选">
+    <section className="home-region-bar" aria-label={tx("地区筛选", "地區篩選", "Region filter")}>
       <SortableFilterRow
         items={regions.map(({ code }) => code)} selected={selectedRegion}
         onSelect={(code) => onSelectRegion(selectedRegion === code ? HOME_ALL_REGION : code)}
-        className="home-region-chips" itemClassName="home-region-chip" label="节点地区"
+        className="home-region-chips" itemClassName="home-region-chip" label={tx("节点地区", "節點地區", "Regions")}
         canReorder={canReorder} onReorder={onReorder}
         renderItem={(code) => (
           <>

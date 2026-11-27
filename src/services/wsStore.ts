@@ -852,14 +852,14 @@ let retainCount = 0;
 let stopTimer: number | null = null;
 let liveStatusTimer: number | null = null;
 let nodeInfoTimer: number | null = null;
+let liveStatusRefreshIntervalMs = LIVE_STATUS_REFRESH_INTERVAL_MS;
 
-function ensureStarted() {
-  if (started) return;
-  started = true;
-
-  ensureScrollTrackingStarted();
-  void bootstrap();
-  // 实时指标与节点信息使用独立轮询节奏。
+function scheduleLiveStatusTimer() {
+  if (liveStatusTimer != null) {
+    window.clearInterval(liveStatusTimer);
+    liveStatusTimer = null;
+  }
+  if (!started || liveStatusRefreshIntervalMs <= 0) return;
   liveStatusTimer = window.setInterval(() => {
     if (!hydrated) {
       if (bootstrapSkipTicks > 0) {
@@ -870,7 +870,38 @@ function ensureStarted() {
       return;
     }
     void refreshLatestStatus();
-  }, LIVE_STATUS_REFRESH_INTERVAL_MS);
+  }, liveStatusRefreshIntervalMs);
+}
+
+export function getLiveStatusRefreshIntervalMs(): number {
+  return liveStatusRefreshIntervalMs;
+}
+
+export function setLiveStatusRefreshIntervalMs(ms: number) {
+  const normalized = Number.isFinite(ms) && ms > 0 ? Math.max(1000, Math.round(ms)) : 0;
+  if (liveStatusRefreshIntervalMs === normalized) return;
+  liveStatusRefreshIntervalMs = normalized;
+  if (typeof window !== "undefined" && started) {
+    scheduleLiveStatusTimer();
+  }
+}
+
+export function triggerManualRefresh() {
+  if (!hydrated) {
+    void bootstrap();
+    return;
+  }
+  void refreshLatestStatus();
+}
+
+function ensureStarted() {
+  if (started) return;
+  started = true;
+
+  ensureScrollTrackingStarted();
+  void bootstrap();
+  // 实时指标与节点信息使用独立轮询节奏。
+  scheduleLiveStatusTimer();
   nodeInfoTimer = window.setInterval(() => {
     void syncNodeInfo().catch(() => {});
   }, NODE_INFO_REFRESH_INTERVAL_MS);

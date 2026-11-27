@@ -1,3 +1,4 @@
+import { txStatic } from "@/i18n";
 import { LONG_TERM_EXPIRE_DAYS, resolveExpireTimestamp } from "@/utils/format";
 
 export interface TrafficResetDisplay {
@@ -53,7 +54,14 @@ export function getTrafficResetDisplay(
   return {
     day,
     date: dateLabel,
-    label: days === 0 ? "今日重置" : `${days}天后重置`,
-    title: `流量重置日：${dateLabel} · ${custom ? "自定义" : "默认按到期日"}，每月${day}日重置（不足该日取月末）`,
+    label:
+      days === 0
+        ? txStatic("今日重置", "今日重置", "Resets today")
+        : txStatic(`${days}天后重置`, `${days}天後重置`, `Resets in ${days}d`),
+    title: txStatic(
+      `流量重置日：${dateLabel} · ${custom ? "自定义" : "默认按到期日"}，每月${day}日重置（不足该日取月末）`,
+      `流量重置日：${dateLabel} · ${custom ? "自訂" : "預設按到期日"}，每月${day}日重置（不足該日取月末）`,
+      `Traffic reset: ${dateLabel} · ${custom ? "Custom" : "Default by expiry"}, resets on day ${day} monthly`,
+    ),
   };
 }

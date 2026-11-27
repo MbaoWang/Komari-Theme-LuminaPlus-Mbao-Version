@@ -31,7 +31,7 @@ const nodes: NodeInfo[] = [
     auto_renewal: true,
     currency: "CNY",
     expired_at: dateAfter(24),
-    tags: "边缘, 高带宽",
+    tags: "三网 CMIN2<purple>;500M<indigo>;原生IP<green>",
     public_remark: "东京入口与静态资源",
     traffic_limit: 4 * TIB,
     traffic_limit_type: "sum",
@@ -480,9 +480,15 @@ export function installDevMockApi() {
 
     if (url.hostname === "api.frankfurter.dev") {
       return json([
-        { base: "USD", quote: "CNY", rate: 7.18 },
-        { base: "USD", quote: "EUR", rate: 0.86 },
-        { base: "USD", quote: "JPY", rate: 146.4 },
+        { base: "USD", quote: "CNY", rate: 7.24 },
+        { base: "USD", quote: "TWD", rate: 32.65 },
+        { base: "USD", quote: "HKD", rate: 7.78 },
+        { base: "USD", quote: "EUR", rate: 0.92 },
+        { base: "USD", quote: "JPY", rate: 151.4 },
+        { base: "USD", quote: "GBP", rate: 0.78 },
+        { base: "USD", quote: "SGD", rate: 1.34 },
+        { base: "USD", quote: "AUD", rate: 1.53 },
+        { base: "USD", quote: "CAD", rate: 1.39 },
       ]);
     }
 
@@ -564,6 +570,39 @@ export function installDevMockApi() {
           homepageMultiPingNodeTaskIds: {
             ...(nodes[0] ? { [nodes[0].uuid]: [3, 2, 1] } : {}),
             ...(nodes[1] ? { [nodes[1].uuid]: [1, 4, 3] } : {}),
+          },
+          showBrandLogo: true,
+          showNodeRoutes: true,
+          routePremiumIcon: "zap",
+          nodeRoutes: {
+            ...(nodes[0]
+              ? {
+                  [nodes[0].uuid]: {
+                    ct: { label: "CMIN2" },
+                    cu: { label: "CMIN2" },
+                    cm: { label: "CMIN2" },
+                    ix: { label: "BGP" },
+                  },
+                }
+              : {}),
+            ...(nodes[1]
+              ? {
+                  [nodes[1].uuid]: {
+                    ct: { label: "CN2 GIA" },
+                    cu: { label: "AS9929" },
+                    cm: { label: "CMIN2" },
+                  },
+                }
+              : {}),
+            ...(nodes[2]
+              ? {
+                  [nodes[2].uuid]: {
+                    ct: { label: "163" },
+                    cu: { label: "AS4837" },
+                    cm: { label: "CMI" },
+                  },
+                }
+              : {}),
           },
         },
       });

@@ -3,6 +3,7 @@ import { normalizeBillingCycle } from "@/utils/billing";
 import { fetchWithTimeout } from "@/utils/abort";
 import { resolveExpireTimestamp } from "@/utils/format";
 import { buildNodeIdentitySet, nodeMatchesIdentitySet, normalizeNodeIdentityList } from "@/utils/nodeIdentity";
+import { CURRENCY_META, type DisplayCurrency } from "@/utils/currency";
 
 const COST_TARGET_CURRENCY = "CNY";
 export const DEFAULT_COST_RATE_API_URL = "https://api.frankfurter.dev/v2/rates?base=USD";
@@ -588,6 +589,59 @@ const CNY_MONEY_FORMATTER = new Intl.NumberFormat("zh-CN", {
   maximumFractionDigits: 2,
 });
 
+const MONEY_FORMATTERS = new Map<number, Intl.NumberFormat>();
+function getMoneyFormatter(decimals: number) {
+  let formatter = MONEY_FORMATTERS.get(decimals);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    MONEY_FORMATTERS.set(decimals, formatter);
+  }
+  return formatter;
+}
+
 export function formatCnyMoney(value: number) {
   return `¥ ${CNY_MONEY_FORMATTER.format(value || 0)}`;
+}
+
+/** 將以 CNY 為基準計算的金額換算成指定目標幣別；缺匯率時返回 null。 */
+export function convertCnyToCurrency(
+  amountCny: number,
+  targetCurrency: DisplayCurrency,
+  rates?: Record<string, number> | null,
+): number | null {
+  if (!Number.isFinite(amountCny)) return 0;
+  if (targetCurrency === "CNY") return amountCny;
+  const cnyRate = rates?.CNY;
+  const targetRate = rates?.[targetCurrency];
+  if (!cnyRate || !targetRate || !Number.isFinite(cnyRate) || !Number.isFinite(targetRate)) {
+    return null;
+  }
+  return (amountCny / cnyRate) * targetRate;
+}
+
+export function formatMoney(value: number, currency: DisplayCurrency): string {
+  const meta = CURRENCY_META[currency];
+  const formatter = getMoneyFormatter(meta.decimals);
+  return `${meta.symbol} ${formatter.format(value || 0)}`;
+}
+
+export function formatSignedMoney(value: number, currency: DisplayCurrency): string {
+  const sign = value < 0 ? "-" : "+";
+  return `${sign}${formatMoney(Math.abs(value), currency)}`;
+}
+
+export function formatMoneyParts(
+  value: number,
+  currency: DisplayCurrency,
+): { symbol: string; int: string; frac: string | null } {
+  const meta = CURRENCY_META[currency];
+  const formatted = getMoneyFormatter(meta.decimals).format(value || 0);
+  if (meta.decimals === 0) {
+    return { symbol: meta.symbol, int: formatted, frac: null };
+  }
+  const [int = "0", frac = "00"] = formatted.split(".");
+  return { symbol: meta.symbol, int, frac };
 }

@@ -1,4 +1,4 @@
-/* 首页品牌铭牌：只保留站点名，绝对定位到 AppShell 已经存在的顶部留白里。 */
+/* 首页品牌铭牌：LOGO + 站点名，绝对定位到 AppShell 已经存在的顶部留白里。 */
 .home-brand {
   position: absolute;
   top: -14px;
@@ -8,11 +8,21 @@
   height: 36px;
   max-width: min(38rem, calc(100vw - 10rem));
   align-items: center;
+  gap: 9px;
   pointer-events: none;
   transition:
     opacity 160ms ease,
     transform 180ms ease,
     visibility 160ms ease;
+}
+
+.home-brand-logo {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  object-fit: contain;
+  user-select: none;
 }
 
 .home-brand-title {
@@ -1330,3 +1340,255 @@ html.home-filter-sorting * {
     width: 100%;
   }
 }
+
+/* 快捷彈窗（語言 / 刷新頻率） */
+.floating-quick-popover {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 210px;
+  max-width: min(290px, calc(100vw - 2rem));
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--surface-elev-a) 95%, transparent);
+  box-shadow: 0 14px 32px -16px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.floating-quick-popover-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.floating-quick-popover-title {
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--text-tertiary);
+}
+
+.floating-quick-popover-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-a);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.floating-quick-popover-action:hover {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--accent-500) 45%, transparent);
+}
+
+.floating-quick-popover-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.floating-quick-popover-grid.is-compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.floating-quick-popover-item {
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 9px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-a);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+.floating-quick-popover-item:hover {
+  color: var(--text-primary);
+  background: var(--fill-tertiary);
+}
+
+.floating-quick-popover-item[data-active="true"] {
+  border-color: color-mix(in srgb, var(--accent-500) 50%, transparent);
+  background: color-mix(in srgb, var(--accent-500) 14%, var(--surface-a));
+  color: var(--accent-500);
+}
+
+/* 資產概覽幣別切換下拉 */
+.overview-currency-select {
+  appearance: none;
+  height: 22px;
+  padding: 0 18px 0 7px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background-color: color-mix(in srgb, var(--fill-tertiary) 72%, var(--surface-a));
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-tertiary) 50%),
+    linear-gradient(135deg, var(--text-tertiary) 50%, transparent 50%);
+  background-position:
+    calc(100% - 9px) 50%,
+    calc(100% - 5.5px) 50%;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+  color: var(--text-secondary);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.overview-currency-select:hover,
+.overview-currency-select:focus-visible {
+  border-color: color-mix(in srgb, var(--accent-500) 45%, transparent);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.overview-card-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 首頁快速搜尋與狀態篩選列 */
+.home-search-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.home-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 240px;
+  max-width: 380px;
+  height: 36px;
+  padding: 0 10px 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-a);
+  color: var(--text-tertiary);
+  gap: 8px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.home-search-input-wrap:focus-within {
+  border-color: color-mix(in srgb, var(--accent-500) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-500) 12%, transparent);
+}
+
+.home-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+
+.home-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.home-search-clear {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--fill-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.home-search-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  min-width: 20px;
+  padding: 0 5px;
+  border-radius: 6px;
+  border: 1px solid var(--hairline);
+  background: var(--fill-tertiary);
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.home-status-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 12px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-a);
+}
+
+.home-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.home-status-pill:hover {
+  color: var(--text-primary);
+}
+
+.home-status-pill[data-active="true"] {
+  background: var(--fill-tertiary);
+  color: var(--text-primary);
+}
+
+.home-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+}
+
+.home-status-dot.is-online {
+  background: var(--status-success);
+}
+
+.home-status-dot.is-offline {
+  background: var(--status-offline);
+}
+
+.home-status-count {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+

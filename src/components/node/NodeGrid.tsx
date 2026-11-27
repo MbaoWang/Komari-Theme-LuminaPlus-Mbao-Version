@@ -1,8 +1,11 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CircleDollarSign } from "lucide-react";
+import { CircleDollarSign, Search, X } from "lucide-react";
+import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrency } from "@/hooks/useCurrency";
+import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import {
   useAllNodeMeta,
   useHomeNodeSummaries,
@@ -18,7 +21,17 @@ import {
   formatByteRate,
   formatByteRateLabel,
 } from "@/utils/format";
-import { calculateCostSummary, formatCnyMoney, getExchangeRates } from "@/utils/cost";
+import {
+  calculateCostSummary,
+  convertCnyToCurrency,
+  formatMoney,
+  getExchangeRates,
+} from "@/utils/cost";
+import {
+  DISPLAY_CURRENCIES,
+  type CurrencyPreference,
+  type DisplayCurrency,
+} from "@/utils/currency";
 import { useHiddenNodeUuids } from "@/hooks/useVisibleNodes";
 import { speedRateColor } from "@/utils/metricTone";
 import {
@@ -70,6 +83,7 @@ const GRID_LAYOUT: Record<NodeViewMode, { className: string; minColumnWidth: num
 };
 
 type MiniGridStyle = CSSProperties & { "--mini-card-min-width": string };
+type HomeStatusFilter = "all" | "online" | "offline";
 
 // 标准 UUID 不含逗号，可安全拼成稳定签名。
 const UUID_KEY_SEPARATOR = ",";
@@ -111,9 +125,60 @@ function TrafficBarsIcon({ size = 19 }: { size?: number }) {
 }
 
 // 站点铭牌由 CSS 放进 AppShell 顶部留白，不占概览卡内容流。
-function HomeBrand({ siteName }: { siteName: string }) {
+function FallbackBrandLogo() {
   return (
-    <header className="home-brand" aria-label="站点名称">
+    <svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      className="home-brand-logo"
+      aria-hidden
+    >
+      <rect width="24" height="24" rx="6" fill="var(--accent-500)" />
+      <path
+        d="M7 6.5V17.5M7 12L13.5 6.5M10 9.5L16.5 17.5"
+        stroke="#FFFFFF"
+        strokeWidth="2.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="17.2" cy="7.2" r="2" fill="#FFFFFF" opacity="0.92" />
+    </svg>
+  );
+}
+
+function HomeBrand({
+  siteName,
+  showLogo,
+  logoUrl,
+}: {
+  siteName: string;
+  showLogo: boolean;
+  logoUrl: string;
+}) {
+  const { tx } = useI18n();
+  const [logoFailed, setLogoFailed] = useState(false);
+  const resolvedLogoSrc = logoUrl || "/favicon.ico";
+
+  useEffect(() => {
+    setLogoFailed(false);
+  }, [resolvedLogoSrc]);
+
+  return (
+    <header className="home-brand" aria-label={tx("站点名称", "站點名稱", "Site title")}>
+      {showLogo &&
+        (!logoFailed ? (
+          <img
+            src={resolvedLogoSrc}
+            alt=""
+            className="home-brand-logo"
+            decoding="async"
+            onError={() => setLogoFailed(true)}
+          />
+        ) : (
+          <FallbackBrandLogo />
+        ))}
       <h1 className="home-brand-title" title={siteName}>
         {siteName}
       </h1>
@@ -125,6 +190,11 @@ function HomeOverviewCards({
   overview,
   costSummary,
   costLoading,
+  rates,
+  displayCurrency,
+  currencyPreference,
+  onSelectCurrency,
+  privacyMode,
   showOverviewRatings,
   showTrafficRating,
   showBandwidthRating,
@@ -142,6 +212,11 @@ function HomeOverviewCards({
   overview: HomeOverview;
   costSummary: { remainingCny: number } | null;
   costLoading: boolean;
+  rates: Record<string, number> | null | undefined;
+  displayCurrency: DisplayCurrency;
+  currencyPreference: CurrencyPreference;
+  onSelectCurrency: (next: CurrencyPreference) => void;
+  privacyMode: boolean;
   dense: boolean;
   mapBackground: boolean;
   showOverviewRatings: boolean;
@@ -156,6 +231,7 @@ function HomeOverviewCards({
   renewalNodes: RenewalReminderSource[];
   onWarmTraffic: () => void;
 }) {
+  const { tx } = useI18n();
   const [trafficValue, trafficUnit] = formatBytes(
     overview.trafficUp + overview.trafficDown,
   ).split(" ");
@@ -164,13 +240,20 @@ function HomeOverviewCards({
     overview.totalNodes > 0 ? (overview.onlineNodes / overview.totalNodes) * 100 : 0;
   const offlinePct =
     overview.totalNodes > 0 ? (overview.offlineNodes / overview.totalNodes) * 100 : 0;
+  const convertedRemaining = costSummary
+    ? convertCnyToCurrency(costSummary.remainingCny, displayCurrency, rates)
+    : null;
   const remainingValue = !showCosts
     ? "-"
-    : costSummary
-      ? formatCnyMoney(costSummary.remainingCny)
-      : costLoading
-        ? "计算中"
-        : "—";
+    : privacyMode
+      ? "••••••"
+      : convertedRemaining != null
+        ? formatMoney(convertedRemaining, displayCurrency)
+        : costSummary
+          ? formatMoney(costSummary.remainingCny, "CNY")
+          : costLoading
+            ? tx("计算中", "計算中", "Calculating")
+            : "—";
   const trafficDetailLabel = `↑ ${formatBytes(overview.trafficUp)} · ↓ ${formatBytes(overview.trafficDown)}`;
   const trafficCompactLabel = `↑${formatCompactBytes(overview.trafficUp)} ↓${formatCompactBytes(overview.trafficDown)}`;
   const bandwidthDetailLabel = `↑ ${formatByteRateLabel(overview.netUp)} · ↓ ${formatByteRateLabel(overview.netDown)}`;
@@ -192,7 +275,7 @@ function HomeOverviewCards({
         })
       : null;
   const assetRating =
-    !mapBackground && showOverviewRatings && showAssetRating && costSummary
+    !mapBackground && showOverviewRatings && showAssetRating && costSummary && !privacyMode
       ? getOverviewRating({
           kind: "asset",
           value: costSummary.remainingCny,
@@ -208,9 +291,12 @@ function HomeOverviewCards({
     ) : null;
 
   return (
-    <section className={`home-overview${dense ? " is-dense" : ""}${mapBackground ? " is-map" : ""}`} aria-label="首页总览">
+    <section
+      className={`home-overview${dense ? " is-dense" : ""}${mapBackground ? " is-map" : ""}`}
+      aria-label={tx("首页总览", "首頁總覽", "Overview")}
+    >
       <article className="overview-card" data-metric="online">
-        <span className="overview-card-label">在线节点</span>
+        <span className="overview-card-label">{tx("在线节点", "在線節點", "Online Nodes")}</span>
         <div className="overview-card-main">
           <p className="overview-card-value">
             {overview.onlineNodes}
@@ -218,8 +304,6 @@ function HomeOverviewCards({
           </p>
         </div>
         {overview.totalNodes >= 5 && overview.totalNodes <= 10 ? (
-          // 节点数 5–10 时改用块状:每台一格,在线格在左、离线格在右、未知格居中,
-          // 与条状的「左绿右红」完全同步。颜色复用同一组 token,避免该红却绿。
           <div className="overview-blocks" role="presentation">
             {Array.from({ length: overview.totalNodes }, (_, i) => {
               const cls =
@@ -240,7 +324,7 @@ function HomeOverviewCards({
       </article>
 
       <article className="overview-card" data-metric="bandwidth">
-        <span className="overview-card-label">实时带宽</span>
+        <span className="overview-card-label">{tx("实时带宽", "即時頻寬", "Live Bandwidth")}</span>
         <div className="overview-card-main">
           <p
             className="overview-card-value"
@@ -263,12 +347,12 @@ function HomeOverviewCards({
 
       <article className="overview-card" data-metric="traffic">
         <div className="overview-card-head">
-          <span className="overview-card-label">累计流量</span>
+          <span className="overview-card-label">{tx("累计流量", "累計流量", "Total Traffic")}</span>
           <Link
             to="/traffic"
             className="overview-card-action"
-            aria-label="打开今日流量统计页"
-            title="今日流量统计"
+            aria-label={tx("打开今日流量统计页", "開啟今日流量統計頁", "Open daily traffic stats")}
+            title={tx("今日流量统计", "今日流量統計", "Today's Traffic")}
             onPointerEnter={onWarmTraffic}
             onFocus={onWarmTraffic}
             onClick={onWarmTraffic}
@@ -295,15 +379,37 @@ function HomeOverviewCards({
 
       <article className="overview-card" data-metric="asset">
         <div className="overview-card-head">
-          <span className="overview-card-label">资产概览</span>
-          {showDetailButton && <RenewalReminder nodes={renewalNodes} />}
+          <span className="overview-card-label">{tx("资产概览", "資產概覽", "Asset Value")}</span>
+          <div className="overview-card-head-actions">
+            {showCosts && !privacyMode && (
+              <select
+                className="overview-currency-select"
+                value={currencyPreference}
+                onChange={(e) => onSelectCurrency(e.target.value as CurrencyPreference)}
+                aria-label={tx("切换显示币别", "切換顯示幣別", "Display currency")}
+                title={tx("切换资产显示币别", "切換資產顯示幣別", "Switch display currency")}
+              >
+                <option value="auto">
+                  {tx(`自动(${displayCurrency})`, `自動(${displayCurrency})`, `Auto(${displayCurrency})`)}
+                </option>
+                {DISPLAY_CURRENCIES.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
+            )}
+            {showDetailButton && <RenewalReminder nodes={renewalNodes} />}
+          </div>
         </div>
         <div className="overview-card-main">
           <p className="overview-card-value">{remainingValue}</p>
         </div>
         {!mapBackground && (
           <div className="overview-card-footer">
-            <p className="overview-card-caption">实时汇率计算</p>
+            <p className="overview-card-caption">
+              {tx("实时汇率计算", "即時匯率換算", "Live FX rate")}
+            </p>
             {renderRating(assetRating)}
           </div>
         )}
@@ -313,6 +419,9 @@ function HomeOverviewCards({
 }
 
 export function NodeGrid() {
+  const { tx } = useI18n();
+  const { currencyPreference, resolvedCurrency, setCurrencyPreference } = useCurrency();
+  const { privacyMode } = usePrivacyMode();
   const now = useHourlyClock();
   const queryClient = useQueryClient();
   const nodes = useHomeNodeSummaries();
@@ -321,7 +430,7 @@ export function NodeGrid() {
   const { hydrated: storeHydrated, nodeInfoError } = useNodeStoreStatus();
   const { data: me } = useAuth();
   const { data: publicConfig } = usePublicConfig();
-  const siteName = publicConfig?.sitename?.trim() || "节点概览";
+  const siteName = publicConfig?.sitename?.trim() || tx("节点概览", "節點概覽", "Nodes");
   const themeSettings = useThemeSettings();
   const { mode } = useViewMode();
   const sort = useHomeSort();
@@ -336,11 +445,9 @@ export function NodeGrid() {
   const filterReorderingEnabled = canReorderFilters && !isMobileViewport;
   const costsVisible =
     themeSettings.isReady && canViewCosts(themeSettings, me?.logged_in === true);
-  // enableHomeSort 控制访客能否改排序;关闭时无视 session 覆盖、直接用管理员默认序(默认仍是 weight)。
   const sortEnabled = themeSettings.isReady && themeSettings.enableHomeSort;
   const configuredSortField = sortEnabled ? sort.field : themeSettings.homeSortField;
   const configuredSortDirection = sortEnabled ? sort.direction : themeSettings.homeSortDirection;
-  // 费用不公开时不能通过相对顺序推断价格；存量的价格排序偏好回退到默认权重顺序。
   const sortField = !costsVisible && configuredSortField === "price"
     ? "default"
     : configuredSortField;
@@ -349,7 +456,37 @@ export function NodeGrid() {
     : configuredSortDirection;
   const [selectedGroup, setSelectedGroup] = useState(HOME_ALL_GROUP);
   const [selectedRegion, setSelectedRegion] = useState(HOME_ALL_REGION);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<HomeStatusFilter>("all");
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   useHomepagePingOverview(mode);
+
+  const showHomeSearchBar = themeSettings.isReady && themeSettings.showHomeSearchBar;
+
+  useEffect(() => {
+    if (!showHomeSearchBar) {
+      setSearchQuery("");
+      setStatusFilter("all");
+      return;
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      event.preventDefault();
+      searchInputRef.current?.focus();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showHomeSearchBar]);
 
   // 摘要不含名称，先从完整 meta 解析主题隐藏列表，再统一过滤各类数据。
   const hiddenUuids = useHiddenNodeUuids();
@@ -368,6 +505,11 @@ export function NodeGrid() {
       ),
     [allMeta, me?.logged_in, hiddenUuids],
   );
+  const metaByUuid = useMemo(() => {
+    const map = new Map<string, (typeof visibleMeta)[number]>();
+    for (const item of visibleMeta) map.set(item.uuid, item);
+    return map;
+  }, [visibleMeta]);
   const renewalNodes = useMemo<RenewalReminderSource[]>(() => {
     const onlineByUuid = new Map(
       nodeOnlineSummaries.map((node) => [node.uuid, node.online]),
@@ -439,18 +581,15 @@ export function NodeGrid() {
       return () => idleWindow.cancelIdleCallback?.(handle);
     }
 
-    // Safari 等无 requestIdleCallback 的浏览器，在首页稳定后再低优先级预取。
     const handle = window.setTimeout(preloadAssetsPage, 1_000);
     return () => window.clearTimeout(handle);
   }, [showCostDetailButton, showCostFloatingButton]);
 
-  // 资产入口存在时预热汇率，供概览、价格排序和资产页复用。
   const costNeeded = costOverviewNeeded || showCostFloatingButton;
   const rateQuery = useQuery({
     queryKey: ["cost-rates", themeSettings.costRateApiUrl],
     queryFn: ({ signal }) => getExchangeRates(themeSettings.costRateApiUrl, { signal }),
     staleTime: 60 * 60 * 1000,
-    // 「价格」排序也要汇率换算月化价,即便没显示资产卡也得拉一次;但空列表无需拉。
     enabled: costsVisible && (costNeeded || sortField === "price") && hasNodes,
     retry: 1,
   });
@@ -467,7 +606,6 @@ export function NodeGrid() {
         : null,
     [costsVisible, now, visibleMeta, themeSettings.costIgnoredNodes, themeSettings.costPremiums, rateQuery.data],
   );
-  // 「价格」排序键:月化价格(CNY);免费/忽略/汇率缺失的节点 null,排到默认序之后。
   const priceByUuid = useMemo(() => {
     const map = new Map<string, number | null>();
     if (costSummary) {
@@ -493,7 +631,6 @@ export function NodeGrid() {
         : visibleNodes.filter((node) => getHomeGroupLabel(node.group) === selectedGroup),
     [visibleNodes, selectedGroup],
   );
-  // 地区选项在分组筛选之后统计,让国旗计数反映当前分组内的分布。
   const regionOptions = useMemo(
     () => getHomeRegionOptions(
       groupFilteredNodes,
@@ -511,14 +648,36 @@ export function NodeGrid() {
   const reorderRegions = useCallback((visibleOrder: string[]) => {
     reorderFilters({ field: "homeRegionOrder", visibleOrder, availableOrder: availableRegions });
   }, [reorderFilters, availableRegions]);
-  const filteredNodes = useMemo(
+  const regionFilteredNodes = useMemo(
     () =>
       selectedRegion === HOME_ALL_REGION
         ? groupFilteredNodes
         : groupFilteredNodes.filter((node) => getDisplayRegionCode(node.region) === selectedRegion),
     [groupFilteredNodes, selectedRegion],
   );
-  // 排序在分组筛选之后。离线永远沉底(写死,见 homeSort);实时网速走防抖(键平滑+滞回+5s 重排)。
+  const filteredNodes = useMemo(() => {
+    const keyword = searchQuery.trim().toLowerCase();
+    return regionFilteredNodes.filter((node) => {
+      if (statusFilter === "online" && node.online !== true) return false;
+      if (statusFilter === "offline" && node.online !== false) return false;
+      if (!keyword) return true;
+      const meta = metaByUuid.get(node.uuid);
+      const routeConfig = themeSettings.nodeRoutes[node.uuid];
+      const routeText = routeConfig
+        ? Object.values(routeConfig)
+            .map((entry) => entry?.label ?? "")
+            .join(" ")
+        : "";
+      return [
+        meta?.name,
+        meta?.group,
+        meta?.region,
+        meta?.tags,
+        meta?.public_remark,
+        routeText,
+      ].some((field) => String(field || "").toLowerCase().includes(keyword));
+    });
+  }, [metaByUuid, regionFilteredNodes, searchQuery, statusFilter, themeSettings.nodeRoutes]);
   const orderedNodes = useHomeNodeOrder({
     nodes: filteredNodes,
     field: sortField,
@@ -533,7 +692,6 @@ export function NodeGrid() {
     }
   }, [groupOptions, selectedGroup]);
 
-  // 选中的地区在当前分组里不存在了(切换分组/节点变化)就回到全部。
   useEffect(() => {
     if (
       selectedRegion !== HOME_ALL_REGION &&
@@ -543,7 +701,6 @@ export function NodeGrid() {
     }
   }, [regionOptions, selectedRegion]);
 
-  // 地区栏被配置关闭(热更新)时,清掉可能残留的地区筛选,否则会留下一个不可见的过滤条件。
   useEffect(() => {
     if (!themeSettings.showRegionBar && selectedRegion !== HOME_ALL_REGION) {
       setSelectedRegion(HOME_ALL_REGION);
@@ -556,7 +713,6 @@ export function NodeGrid() {
     }
   }, [themeSettings.showGroupTabs, selectedGroup]);
 
-  // 卡片列表只随 UUID 集合/顺序变化；卡片内部各自订阅实时数据。
   const uuidsKey = useMemo(
     () => orderedNodes.map((node) => node.uuid).join(UUID_KEY_SEPARATOR),
     [orderedNodes],
@@ -565,7 +721,6 @@ export function NodeGrid() {
     () => (uuidsKey ? uuidsKey.split(UUID_KEY_SEPARATOR) : []),
     [uuidsKey],
   );
-  // 列表档由下方 NodeListView 渲染,这里不必构造卡片元素。
   const cards = useMemo(
     () =>
       mode === "list"
@@ -598,10 +753,8 @@ export function NodeGrid() {
   const showGroupTabs =
     themeSettings.isReady && themeSettings.showGroupTabs && groupOptions.length > 0;
   const showHomeSort = sortEnabled && visibleNodes.length > 1;
-  // 地区栏:只有一个地区时筛选无意义,>1 才显示。
   const showRegionBar =
     themeSettings.isReady && themeSettings.showRegionBar && regionOptions.length > 1;
-  // 分组标签栏与卡片网格共用列定义，让标签栏左缘对齐首卡。
   const isMini = mode === "mini";
   const isList = mode === "list";
   const { className: gridClassName, minColumnWidth } = GRID_LAYOUT[mode];
@@ -616,7 +769,6 @@ export function NodeGrid() {
       {cards}
     </div>
   );
-  // 迷你与列表档的控件栏借用小卡列宽，避免跟随密集内容列而被压窄。
   const borrowControlsGrid = isMini || isList;
   const controlsWrapClassName = borrowControlsGrid
     ? "grid gap-3 home-controls-bar mb-4"
@@ -634,28 +786,35 @@ export function NodeGrid() {
         className="flex h-[40vh] flex-col items-center justify-center gap-2 text-[var(--text-tertiary)]"
         aria-live="polite"
       >
-        <span className="text-[14px]">节点数据暂时无法加载</span>
-        <span className="text-[12px]">正在等待后端自动重试</span>
+        <span className="text-[14px]">
+          {tx("节点数据暂时无法加载", "節點資料暫時無法載入", "Unable to load node data")}
+        </span>
+        <span className="text-[12px]">
+          {tx("正在等待后端自动重试", "正在等待後端自動重試", "Retrying automatically...")}
+        </span>
       </div>
     );
   }
 
-  // 资产页悬浮入口 + 首页概览卡在「空节点」与正常两个分支里完全一致，提取一次复用。
   const homeHeader = (
     <>
       {showCostFloatingButton && (
         <Link
           to="/assets"
           className="cost-summary-ball show"
-          aria-label="打开资产统计页"
-          title="资产统计"
+          aria-label={tx("打开资产统计页", "開啟資產統計頁", "Open assets page")}
+          title={tx("资产统计", "資產統計", "Assets")}
         >
           <span className="cost-summary-ball-icon" aria-hidden>
             <CircleDollarSign size={16} />
           </span>
         </Link>
       )}
-      <HomeBrand siteName={siteName} />
+      <HomeBrand
+        siteName={siteName}
+        showLogo={themeSettings.showBrandLogo}
+        logoUrl={themeSettings.brandLogoUrl}
+      />
       {mapBackgroundEnabled && (
         <Suspense fallback={null}>
           <NodeMapBackground nodes={visibleNodes} />
@@ -675,6 +834,11 @@ export function NodeGrid() {
             renewalNodes={renewalNodes}
             costSummary={costSummary}
             costLoading={costLoading}
+            rates={rateQuery.data?.rates}
+            displayCurrency={resolvedCurrency}
+            currencyPreference={currencyPreference}
+            onSelectCurrency={setCurrencyPreference}
+            privacyMode={privacyMode}
             showOverviewRatings={themeSettings.showOverviewRatings}
             showTrafficRating={themeSettings.showTrafficRating}
             showBandwidthRating={themeSettings.showBandwidthRating}
@@ -694,12 +858,18 @@ export function NodeGrid() {
       <>
         {homeHeader}
         <div className="flex h-[40vh] flex-col items-center justify-center gap-2 text-[var(--text-tertiary)]">
-          <span className="text-[15px]">尚未连接到任何节点</span>
-          <span className="text-[12px]">等待后端推送或前往管理后台添加</span>
+          <span className="text-[15px]">
+            {tx("尚未连接到任何节点", "尚未連線至任何節點", "No nodes connected yet")}
+          </span>
+          <span className="text-[12px]">
+            {tx("等待后端推送或前往管理后台添加", "等待後端推送或前往管理後台新增", "Waiting for agents or add one in admin")}
+          </span>
         </div>
       </>
     );
   }
+
+  const isFilteredEmpty = orderedUuids.length === 0;
 
   return (
     <>
@@ -708,8 +878,76 @@ export function NodeGrid() {
       {orderError && (
         <div className="home-filter-order-error" role="alert">{orderError}</div>
       )}
+      {showHomeSearchBar && visibleNodes.length > 1 && (
+        <div className="home-search-toolbar">
+          <label className="home-search-input-wrap">
+            <Search size={14} aria-hidden />
+            <input
+              ref={searchInputRef}
+              type="search"
+              className="home-search-input"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  setSearchQuery("");
+                  searchInputRef.current?.blur();
+                }
+              }}
+              placeholder={tx(
+                "搜索节点名称、标签、地区或回程线路…",
+                "搜尋節點名稱、標籤、地區或回程線路…",
+                "Search nodes, tags, regions, routes...",
+              )}
+              aria-label={tx("搜索节点", "搜尋節點", "Search nodes")}
+            />
+            {searchQuery ? (
+              <button
+                type="button"
+                className="home-search-clear"
+                onClick={() => setSearchQuery("")}
+                aria-label={tx("清空搜索", "清空搜尋", "Clear search")}
+              >
+                <X size={12} />
+              </button>
+            ) : (
+              <kbd className="home-search-kbd" aria-hidden>/</kbd>
+            )}
+          </label>
+          <div className="home-status-pills" role="group" aria-label={tx("状态筛选", "狀態篩選", "Status filter")}>
+            <button
+              type="button"
+              className="home-status-pill"
+              data-active={statusFilter === "all" ? "true" : "false"}
+              onClick={() => setStatusFilter("all")}
+            >
+              <span>{tx("全部", "全部", "All")}</span>
+              <span className="home-status-count">{overview.totalNodes}</span>
+            </button>
+            <button
+              type="button"
+              className="home-status-pill"
+              data-active={statusFilter === "online" ? "true" : "false"}
+              onClick={() => setStatusFilter("online")}
+            >
+              <span className="home-status-dot is-online" aria-hidden />
+              <span>{tx("在线", "在線", "Online")}</span>
+              <span className="home-status-count">{overview.onlineNodes}</span>
+            </button>
+            <button
+              type="button"
+              className="home-status-pill"
+              data-active={statusFilter === "offline" ? "true" : "false"}
+              onClick={() => setStatusFilter("offline")}
+            >
+              <span className="home-status-dot is-offline" aria-hidden />
+              <span>{tx("离线", "離線", "Offline")}</span>
+              <span className="home-status-count">{overview.offlineNodes}</span>
+            </button>
+          </div>
+        </div>
+      )}
       {(showGroupTabs || showHomeSort) && (
-        // 分组标签落首列、排序钉在末列右侧；窄屏时两者保持在同一控件栏内。
         <div className={controlsWrapClassName} style={controlsStyle}>
           {showGroupTabs && (
             <GroupTabs
@@ -732,7 +970,25 @@ export function NodeGrid() {
           onReorder={reorderRegions}
         />
       )}
-      {isList ? (
+      {isFilteredEmpty ? (
+        <div className="flex h-[28vh] flex-col items-center justify-center gap-3 text-[var(--text-tertiary)]">
+          <span className="text-[14px]">
+            {tx("没有符合筛选条件的节点", "沒有符合篩選條件的節點", "No matching nodes")}
+          </span>
+          <button
+            type="button"
+            className="control-button px-3 py-1.5 text-[12px]"
+            onClick={() => {
+              setSearchQuery("");
+              setStatusFilter("all");
+              setSelectedGroup(HOME_ALL_GROUP);
+              setSelectedRegion(HOME_ALL_REGION);
+            }}
+          >
+            {tx("重置筛选", "重設篩選", "Reset filters")}
+          </button>
+        </div>
+      ) : isList ? (
         <NodeListView uuids={orderedUuids} showCosts={costsVisible} />
       ) : showTrafficPopover ? (
         <TodayTrafficStatsProvider uuids={trafficUuids}>

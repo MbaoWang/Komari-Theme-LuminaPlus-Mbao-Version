@@ -1,4 +1,5 @@
 import { Database } from "lucide-react";
+import { useI18n } from "@/i18n";
 import type { TrafficResetDisplay } from "@/utils/trafficReset";
 
 export function TrafficQuotaLabel({
@@ -8,6 +9,7 @@ export function TrafficQuotaLabel({
   remainingLabel: string;
   reset: TrafficResetDisplay | null;
 }) {
+  const { tx } = useI18n();
   // 仅压缩卡片提示，保留原始精度；其他流量展示继续使用完整单位。
   const compactRemaining = remainingLabel.replace(
     /^(\d+(?:\.\d+)?)\s+([KMGTPE]?)B$/,
@@ -18,7 +20,7 @@ export function TrafficQuotaLabel({
     <span className="traffic-quota-label">
       <span className="traffic-quota-summary">
         <Database size={13} strokeWidth={2} />
-        <span>剩余</span>
+        <span>{tx("剩余", "剩餘", "Left")}</span>
         <span>
           <strong className="traffic-quota-remain" title={remainingLabel}>{compactRemaining}</strong>
           {reset && (

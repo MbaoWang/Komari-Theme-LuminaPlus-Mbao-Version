@@ -5,6 +5,7 @@
 @import "./cost-summary.css";
 @import "./traffic-stats.css";
 @import "./node-card.css";
+@import "./node-routes.css";
 @import "./compact-node-card.css";
 @import "./mini-node-card.css";
 @import "./node-list.css";

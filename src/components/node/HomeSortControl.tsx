@@ -1,8 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react";
+import { useI18n } from "@/i18n";
 import {
   HOME_SORT_FIELDS,
-  HOME_SORT_FIELD_LABELS,
   HOME_SORT_NATURAL_DIRECTION,
   type HomeSortDirection,
   type HomeSortField,
@@ -26,6 +26,7 @@ export function HomeSortControl({
   state: HomeSortControlState;
   showPrice?: boolean;
 }) {
+  const { tx } = useI18n();
   const { field, direction, setField, toggleDirection } = state;
   const visibleField = !showPrice && field === "price" ? "default" : field;
   const visibleDirection = !showPrice && field === "price"
@@ -35,6 +36,24 @@ export function HomeSortControl({
   const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const panelId = useId();
+
+  const fieldLabel = (f: HomeSortField) => {
+    switch (f) {
+      case "default":
+        return tx("默认排序", "預設排序", "Default");
+      case "name":
+        return tx("名称", "名稱", "Name");
+      case "speed":
+        return tx("实时网速", "即時網速", "Speed");
+      case "traffic":
+        return tx("累计流量", "累計流量", "Traffic");
+      case "price":
+        return tx("价格", "價格", "Price");
+    }
+  };
+  const dirLabel = visibleDirection === "asc"
+    ? tx("升序", "升序", "Asc")
+    : tx("降序", "降序", "Desc");
 
   useEffect(() => {
     if (!open) return;
@@ -68,15 +87,23 @@ export function HomeSortControl({
         aria-haspopup="true"
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
-        aria-label={`排序方式，当前${HOME_SORT_FIELD_LABELS[visibleField]}${visibleDirection === "asc" ? "升序" : "降序"}`}
-        title={`排序：${HOME_SORT_FIELD_LABELS[visibleField]}（${visibleDirection === "asc" ? "升序" : "降序"}）`}
+        aria-label={tx(
+          `排序方式，当前${fieldLabel(visibleField)}${dirLabel}`,
+          `排序方式，目前${fieldLabel(visibleField)}${dirLabel}`,
+          `Sort by ${fieldLabel(visibleField)} (${dirLabel})`,
+        )}
+        title={tx(
+          `排序：${fieldLabel(visibleField)}（${dirLabel}）`,
+          `排序：${fieldLabel(visibleField)}（${dirLabel}）`,
+          `Sort: ${fieldLabel(visibleField)} (${dirLabel})`,
+        )}
         onClick={() => setOpen((value) => !value)}
       >
         <SortIcon direction={visibleDirection} />
-        <span>{HOME_SORT_FIELD_LABELS[visibleField]}</span>
+        <span>{fieldLabel(visibleField)}</span>
       </button>
       {open && (
-        <div id={panelId} className="home-sort-panel" role="group" aria-label="排序方式">
+        <div id={panelId} className="home-sort-panel" role="group" aria-label={tx("排序方式", "排序方式", "Sort")}>
           {HOME_SORT_FIELDS.map((option) => {
             if (!showPrice && option === "price") return null;
             const active = option === visibleField;
@@ -89,7 +116,7 @@ export function HomeSortControl({
                 className="home-sort-item"
                 onClick={() => select(option)}
               >
-                <span className="home-sort-item-label">{HOME_SORT_FIELD_LABELS[option]}</span>
+                <span className="home-sort-item-label">{fieldLabel(option)}</span>
                 {active && <SortIcon direction={direction} size={15} />}
               </button>
             );

@@ -15,10 +15,12 @@ import {
   CircleDollarSign,
   Network,
 } from "lucide-react";
+import { useI18n } from "@/i18n";
 import { useNodeCardModel } from "@/hooks/useNodeCardModel";
 import { usePreferences } from "@/hooks/usePreferences";
 import { useMetricColorsVersion } from "@/hooks/useMetricColors";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
+import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { formatBytes } from "@/utils/format";
 import { HOMEPAGE_MULTI_PING_TASK_COUNT } from "@/utils/pingTasks";
 import {
@@ -34,6 +36,7 @@ import { CanvasStrip, mixSrgbTowardWhite, safeCanvasColor } from "./CanvasStrip"
 import { NodeTodayTrafficPopover } from "./NodeTodayTrafficPopover";
 import { MerchantLinkAction } from "./MerchantLinkAction";
 import { TrafficQuotaLabel } from "./TrafficQuotaLabel";
+import { NodeRoutePills } from "./NodeRoutePills";
 import type { TrafficResetDisplay } from "@/utils/trafficReset";
 import type { NodeMerchantLink } from "@/utils/merchantLinks";
 import {
@@ -63,6 +66,8 @@ export const NodeCard = memo(function NodeCard({
   showTodayTraffic?: boolean;
   showCosts?: boolean;
 }) {
+  const { tx } = useI18n();
+  const { privacyMode } = usePrivacyMode();
   const { resolvedAppearance } = usePreferences();
   // 自定义配色改动时 version 自增，拼进 redrawKey 让 canvas 进度条即时重画（含离线静态卡）。
   const colorsVersion = useMetricColorsVersion();
@@ -89,6 +94,7 @@ export const NodeCard = memo(function NodeCard({
     pingBuckets,
     homepagePingLines,
     footerTags,
+    routes,
     subtitle,
     expire,
     expireColor,
@@ -109,6 +115,9 @@ export const NodeCard = memo(function NodeCard({
   } = model;
   const showConnections = themeSettings.isReady && themeSettings.showConnections;
   const showMerchantLink = themeSettings.isReady && themeSettings.showMerchantLinks;
+  const showNodeRoutes = !themeSettings.isReady || themeSettings.showNodeRoutes;
+  const showCardTags = !themeSettings.isReady || themeSettings.showCardTags;
+  const effectiveRenewalPrice = privacyMode && renewalPrice ? "•••" : renewalPrice;
 
   return (
     <article
@@ -131,6 +140,15 @@ export const NodeCard = memo(function NodeCard({
             redrawKey={redrawKey}
           />
 
+          {showNodeRoutes && routes.length > 0 && (
+            <NodeRoutePills
+              routes={routes}
+              premiumIcon={themeSettings.routePremiumIcon}
+              density="large"
+              className="card-metric-section"
+            />
+          )}
+
           <NodeTrafficSection
             node={node}
             upRate={upRate}
@@ -152,13 +170,13 @@ export const NodeCard = memo(function NodeCard({
             <div className="card-metric-section server-card-meta-grid">
               <FooterStat
                 icon={<Network size={13} strokeWidth={2} />}
-                label="TCP 连接"
+                label={tx("TCP 连接", "TCP 連線", "TCP")}
                 value={node.connectionsTcp.toLocaleString()}
                 color="var(--progress-network)"
               />
               <FooterStat
                 icon={<Network size={13} strokeWidth={2} />}
-                label="UDP 连接"
+                label={tx("UDP 连接", "UDP 連線", "UDP")}
                 value={node.connectionsUdp.toLocaleString()}
                 color="var(--progress-network)"
               />
@@ -190,8 +208,8 @@ export const NodeCard = memo(function NodeCard({
           expire={expire}
           expireColor={expireColor}
           uptime={uptime}
-          footerTags={footerTags}
-          renewalPrice={showCosts ? renewalPrice : null}
+          footerTags={showCardTags ? footerTags : []}
+          renewalPrice={showCosts ? effectiveRenewalPrice : null}
         />
       </div>
     </article>
@@ -268,6 +286,7 @@ function NodeMetricSection({
   loadFraction: number;
   redrawKey: string;
 }) {
+  const { tx } = useI18n();
   return (
     <div className="card-metric-section server-metric-grid">
       <MetricBar
@@ -275,14 +294,14 @@ function NodeMetricSection({
         label="CPU"
         valueText={node.cpuPct.toFixed(2)}
         unit="%"
-        detailText={`${node.cpu_cores || 0} 核`}
+        detailText={tx(`${node.cpu_cores || 0} 核`, `${node.cpu_cores || 0} 核`, `${node.cpu_cores || 0} vCPU`)}
         fraction={node.cpuPct / 100}
         redrawKey={redrawKey}
         paint="var(--progress-cpu)"
       />
       <MetricBar
         icon={<MemoryStick size={13} strokeWidth={2} />}
-        label="内存"
+        label={tx("内存", "記憶體", "RAM")}
         valueText={node.ramPct.toFixed(2)}
         unit="%"
         detailText={`${formatBytes(node.ramUsed)} / ${formatBytes(node.ramTotal)}`}
@@ -292,7 +311,7 @@ function NodeMetricSection({
       />
       <MetricBar
         icon={<HardDrive size={13} strokeWidth={2} />}
-        label="磁盘"
+        label={tx("磁盘", "磁碟", "Disk")}
         valueText={node.diskPct.toFixed(1)}
         unit="%"
         detailText={`${formatBytes(node.diskUsed)} / ${formatBytes(node.diskTotal)}`}
@@ -302,7 +321,7 @@ function NodeMetricSection({
       />
       <MetricBar
         icon={<Gauge size={13} strokeWidth={2} />}
-        label="负载"
+        label={tx("负载", "負載", "Load")}
         valueText={node.load1.toFixed(2)}
         fraction={loadFraction}
         redrawKey={redrawKey}
@@ -736,6 +755,16 @@ function TrafficStat({
   color: string;
   icon: ReactNode;
 }) {
+  const { tx } = useI18n();
+  const dirText =
+    direction === "上行" ? tx("上行", "上行", "Up") : tx("下行", "下行", "Down");
+  const totalText =
+    totalLabel === "出站" ? tx("出站", "出站", "Out") : tx("入站", "入站", "In");
+  const statusText = live
+    ? active
+      ? tx("实时", "即時", "Live")
+      : tx("空闲", "閒置", "Idle")
+    : tx("离线", "離線", "Offline");
   // 按当前速率单位档取热力色:文字/圆点/实时点都随速度量级变色,图标仍用方向色(color)区分上下行。
   const speedColor = speedRateColor(rate.unit);
   return (
@@ -743,7 +772,7 @@ function TrafficStat({
       <div className="traffic-stat-head">
         <div className="traffic-stat-label">
           <span style={{ color }}>{icon}</span>
-          <span style={{ color: speedColor }}>{direction}</span>
+          <span style={{ color: speedColor }}>{dirText}</span>
         </div>
         <span className="traffic-stat-value tabular" style={{ color: speedColor }}>
           {rate.value}
@@ -755,8 +784,8 @@ function TrafficStat({
         <span
           className="traffic-stat-live"
           data-live={live ? "true" : "false"}
-          title={live ? (active ? "实时" : "空闲") : "离线"}
-          aria-label={live ? (active ? "实时" : "空闲") : "离线"}
+          title={statusText}
+          aria-label={statusText}
         >
           <span
             className="traffic-stat-live-dot"
@@ -764,13 +793,13 @@ function TrafficStat({
               background: speedColor,
             }}
           />
-          {live && <span>{active ? "实时" : "空闲"}</span>}
+          {live && <span>{statusText}</span>}
         </span>
       </div>
       <div className="traffic-stat-foot">
         <div className="traffic-stat-total-label">
           <GlobeArrow direction={totalLabel} color={color} />
-          <span>{totalLabel}</span>
+          <span>{totalText}</span>
         </div>
         <span className="tabular">{total}</span>
       </div>

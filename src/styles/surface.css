@@ -321,7 +321,7 @@ body::after {
   right: calc(100% + 8px);
   display: inline-flex;
   width: max-content;
-  max-width: min(340px, calc(100vw - 5rem));
+  max-width: min(520px, calc(100vw - 5rem));
   align-items: center;
   gap: 8px;
   overflow: hidden;
@@ -362,6 +362,7 @@ body::after {
 }
 
 .floating-controls-inner > .metric-color-picker,
+.floating-controls-inner > .floating-quick-popover,
 .floating-controls-sync-warning {
   position: absolute;
   top: calc(100% + 8px);

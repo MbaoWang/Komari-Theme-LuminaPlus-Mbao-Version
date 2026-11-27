@@ -1,3 +1,4 @@
+import { txStatic } from "@/i18n";
 import { getExpireDaysRemaining, LONG_TERM_EXPIRE_DAYS } from "@/utils/format";
 
 const INT_PRICE_FORMATTER = new Intl.NumberFormat("zh-CN", {
@@ -86,17 +87,19 @@ export function formatBillingCycle(value: string | number | null | undefined) {
   const cycle = normalizeBillingCycle(value);
   switch (cycle.kind) {
     case "lifetime":
-      return "永久";
+      return txStatic("永久", "永久", "Lifetime");
     case "month":
-      return "月";
+      return txStatic("月", "月", "mo");
     case "quarter":
-      return "季";
+      return txStatic("季", "季", "qtr");
     case "halfYear":
-      return "半年";
+      return txStatic("半年", "半年", "6mo");
     case "year":
-      return (cycle.years ?? 1) === 1 ? "年" : `${cycle.years}年`;
+      return (cycle.years ?? 1) === 1
+        ? txStatic("年", "年", "yr")
+        : txStatic(`${cycle.years}年`, `${cycle.years}年`, `${cycle.years}yr`);
     case "days":
-      return `${cycle.days}天`;
+      return txStatic(`${cycle.days}天`, `${cycle.days}天`, `${cycle.days}d`);
   }
 }
 
@@ -112,8 +115,8 @@ export function formatRenewalPrice({
   expired_at?: string | number | null;
 }) {
   if (!Number.isFinite(price)) return null;
-  if (price === -1) return "免费";
-  if (price === 0) return isLongTermExpire(expired_at) ? "免费" : null;
+  if (price === -1) return txStatic("免费", "免費", "Free");
+  if (price === 0) return isLongTermExpire(expired_at) ? txStatic("免费", "免費", "Free") : null;
   if (price < 0) return null;
 
   const symbol = currency?.trim() || "¥";

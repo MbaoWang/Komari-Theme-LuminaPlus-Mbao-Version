@@ -255,4 +255,43 @@ describe("normalizeThemeSettings", () => {
       normalizeThemeSettings({ hiddenNodes: "节点A, 节点A\nuuid-1；节点B" } as never).hiddenNodes,
     ).toEqual(["节点A", "uuid-1", "节点B"]);
   });
+
+  it("normalizes brand logo, currency, refresh interval, routes, and utility toggles", () => {
+    const defaults = normalizeThemeSettings({});
+    expect(defaults.showBrandLogo).toBe(true);
+    expect(defaults.brandLogoUrl).toBe("");
+    expect(defaults.defaultCostCurrency).toBe("auto");
+    expect(defaults.refreshIntervalMs).toBe(2000);
+    expect(defaults.showNodeRoutes).toBe(true);
+    expect(defaults.routePremiumIcon).toBe("zap");
+    expect(defaults.nodeRoutes).toEqual({});
+    expect(defaults.showHomeSearchBar).toBe(true);
+    expect(defaults.showCardTags).toBe(true);
+    expect(defaults.enablePrivacyModeToggle).toBe(true);
+
+    const custom = normalizeThemeSettings({
+      showBrandLogo: false,
+      brandLogoUrl: "javascript:alert(1)",
+      defaultCostCurrency: "twd",
+      refreshIntervalMs: 5000,
+      routePremiumIcon: "sparkle",
+      nodeRoutes: {
+        "u1": { ct: { label: "CN2 GIA" }, ix: { label: "BGP", tier: "standard" } },
+      },
+      showHomeSearchBar: false,
+      showCardTags: false,
+      enablePrivacyModeToggle: false,
+    });
+    expect(custom.showBrandLogo).toBe(false);
+    expect(custom.brandLogoUrl).toBe("");
+    expect(custom.defaultCostCurrency).toBe("TWD");
+    expect(custom.refreshIntervalMs).toBe(5000);
+    expect(custom.routePremiumIcon).toBe("sparkle");
+    expect(custom.nodeRoutes).toEqual({
+      u1: { ct: { label: "CN2 GIA" }, ix: { label: "BGP", tier: "standard" } },
+    });
+    expect(custom.showHomeSearchBar).toBe(false);
+    expect(custom.showCardTags).toBe(false);
+    expect(custom.enablePrivacyModeToggle).toBe(false);
+  });
 });

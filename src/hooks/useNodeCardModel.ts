@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useI18n } from "@/i18n";
 import { useFakePingFallback } from "@/hooks/useFakePing";
 import { useHourlyClock, useMinuteClock } from "@/hooks/useClock";
 import { useNodeCardSnapshots } from "@/hooks/useNode";
@@ -34,6 +35,7 @@ import {
   HOMEPAGE_MULTI_PING_TASK_COUNT,
   resolveHomepageMultiPingTaskIds,
 } from "@/utils/pingTasks";
+import { isRouteTag, resolveNodeRoutes } from "@/utils/nodeRoutes";
 
 interface NodeCardModelOptions {
   pingBucketCount?: number;
@@ -54,6 +56,7 @@ export function useNodeCardModel(
     includeMultiPing = false,
   }: NodeCardModelOptions = {},
 ) {
+  const { resolvedLanguage, tx } = useI18n();
   const { meta, metrics, trafficTrend } = useNodeCardSnapshots(uuid);
   const {
     showCardGroup,
@@ -63,6 +66,7 @@ export function useNodeCardModel(
     enableHomepageMultiPing,
     homepageMultiPingTaskIds,
     homepageMultiPingNodeTaskIds,
+    nodeRoutes,
   } = useThemeSettings();
   const effectiveMultiPingTaskIds = useMemo(
     () =>
@@ -120,7 +124,7 @@ export function useNodeCardModel(
       const sourceLine: HomepagePingLine =
         loaded ?? {
           taskId,
-          taskName: `任务 #${taskId}`,
+          taskName: tx(`任务 #${taskId}`, `任務 #${taskId}`, `Task #${taskId}`),
           client: uuid,
           isAssigned: true,
           loadState: "pending",
@@ -151,12 +155,21 @@ export function useNodeCardModel(
     multiPingActive,
     pingBucketCount,
     realPingLines,
+    tx,
     uuid,
   ]);
 
   const metaModel = useMemo(() => {
+    void resolvedLanguage;
     if (!meta) return null;
-    const tags = parseTags(meta.tags);
+    // 保留非路由語法的標籤，避免 ct:CMIN2 等設定同時出現在一般標籤列。
+    const rawNonRouteTags = (meta.tags ?? "")
+      .split(";")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0 && !isRouteTag(item))
+      .join(";");
+    const tags = parseTags(rawNonRouteTags);
+    const routes = resolveNodeRoutes(nodeRoutes[uuid], meta.tags);
     const group = showCardGroup ? meta.group : undefined;
     const subtitleParts = [group, meta.public_remark]
       .map((part) => part?.trim())
@@ -173,6 +186,7 @@ export function useNodeCardModel(
           : [];
     return {
       tags,
+      routes,
       footerTags: fallbackFooterTags,
       compactFooterTags,
       subtitle: joinDisplayParts(subtitleParts),
@@ -183,7 +197,7 @@ export function useNodeCardModel(
       osName: resolveOsInfo(meta.os).name,
       loadBaseline: meta.cpu_cores > 0 ? meta.cpu_cores : 4,
     };
-  }, [meta, now, showCardGroup, trafficResetDays, uuid]);
+  }, [meta, nodeRoutes, now, resolvedLanguage, showCardGroup, trafficResetDays, uuid]);
 
   // ping 派生的颜色只在 ping item 变化时才变。
   const pingModel = useMemo(
@@ -207,6 +221,7 @@ export function useNodeCardModel(
   );
 
   return useMemo(() => {
+    void resolvedLanguage;
     if (!meta || !metrics || !metaModel) {
       return {
         node: undefined,
@@ -266,6 +281,7 @@ export function useNodeCardModel(
     pingModel,
     ping,
     pingBuckets,
+    resolvedLanguage,
     trafficTrend,
   ]);
 }

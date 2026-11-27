@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   CircleDollarSign,
+  Download,
   EyeOff,
   Grid3x3,
   ImageIcon,
@@ -13,6 +14,7 @@ import {
   ListFilter,
   Moon,
   RefreshCw,
+  Route,
   Rows3,
   Save,
   Search,
@@ -21,14 +23,18 @@ import {
   Store,
   Sun,
   SunMoon,
+  Upload,
   Video,
   Wallpaper,
 } from "lucide-react";
 import { clsx } from "clsx";
+import { useI18n } from "@/i18n";
 import { InstancePanel } from "@/components/instance/InstancePanel";
 import { MultiPingNodeConfigPanel } from "@/components/theme/MultiPingNodeConfigPanel";
 import { MerchantLinkConfigPanel } from "@/components/theme/MerchantLinkConfigPanel";
+import { NodeRouteConfigPanel } from "@/components/theme/NodeRouteConfigPanel";
 import { TrafficResetConfigPanel } from "@/components/theme/TrafficResetConfigPanel";
+import { RoutePremiumBadgeIcon } from "@/components/node/NodeRoutePills";
 import { Spinner } from "@/components/ui/Spinner";
 import { Flag } from "@/components/ui/Flag";
 import { usePublicConfig } from "@/hooks/usePublicConfig";
@@ -67,11 +73,23 @@ import {
   normalizeCostRateApiUrl,
   type CostPremiumEntry,
 } from "@/utils/cost";
+import {
+  DISPLAY_CURRENCIES,
+  getCurrencyLabel,
+  type CurrencyPreference,
+} from "@/utils/currency";
 import { normalizeNodeIdentityList } from "@/utils/nodeIdentity";
 import {
   normalizeNodeMerchantLinks,
   type NodeMerchantLinks,
 } from "@/utils/merchantLinks";
+import {
+  normalizeNodeRoutes,
+  ROUTE_CARRIER_KEYS,
+  ROUTE_PREMIUM_ICONS,
+  type NodeRoutesMap,
+  type RoutePremiumIcon,
+} from "@/utils/nodeRoutes";
 import { normalizeTrafficResetDays } from "@/utils/trafficReset";
 import {
   HOMEPAGE_MULTI_PING_TASK_COUNT,
@@ -83,10 +101,13 @@ import {
 } from "@/utils/pingTasks";
 import {
   DEFAULT_THEME_SETTINGS,
+  normalizeBrandLogoUrl,
   normalizeHomeHeaderVisibleSeconds,
   normalizeThemeSettings,
+  REFRESH_INTERVAL_OPTIONS,
   type AmbientEffect,
   type BackgroundMediaType,
+  type RefreshIntervalOption,
   type ResolvedThemeSettings,
 } from "@/utils/themeSettings";
 import {
@@ -353,6 +374,20 @@ function pickManagedThemeSettings(settings: ResolvedThemeSettings) {
     surfaceOpacity: settings.surfaceOpacity,
     enableAmbientEffect: settings.enableAmbientEffect,
     ambientEffect: settings.ambientEffect,
+    showBrandLogo: settings.showBrandLogo,
+    brandLogoUrl: settings.brandLogoUrl,
+    defaultCostCurrency: settings.defaultCostCurrency,
+    refreshIntervalMs: settings.refreshIntervalMs,
+    showNodeRoutes: settings.showNodeRoutes,
+    routePremiumIcon: settings.routePremiumIcon,
+    nodeRoutes: Object.fromEntries(
+      Object.keys(settings.nodeRoutes)
+        .sort()
+        .map((uuid) => [uuid, settings.nodeRoutes[uuid]]),
+    ),
+    showHomeSearchBar: settings.showHomeSearchBar,
+    showCardTags: settings.showCardTags,
+    enablePrivacyModeToggle: settings.enablePrivacyModeToggle,
   };
 }
 
@@ -869,7 +904,82 @@ const MerchantLinkConfigControl = memo(function MerchantLinkConfigControl({
   );
 });
 
+const NodeRouteConfigControl = memo(function NodeRouteConfigControl({
+  clients,
+  routesMap,
+  premiumIcon,
+  configuredNodeCount,
+  enabled,
+  disabled,
+  saving,
+  saveDisabled,
+  saveError,
+  onChange,
+  onSave,
+}: {
+  clients: AdminClient[];
+  routesMap: NodeRoutesMap;
+  premiumIcon: RoutePremiumIcon;
+  configuredNodeCount: number;
+  enabled: boolean;
+  disabled: boolean;
+  saving: boolean;
+  saveDisabled: boolean;
+  saveError: string | null;
+  onChange: (next: NodeRoutesMap) => void;
+  onSave: () => Promise<boolean>;
+}) {
+  const { tx } = useI18n();
+  const [open, setOpen] = useState(false);
+  const close = useCallback(() => setOpen(false), []);
+
+  return (
+    <>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--hairline)] pt-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 text-[12px] font-medium text-[var(--text-primary)]">
+            <Route size={14} />
+            {tx("按服务器配置三网回程路由", "按伺服器設定三網回程路由", "Configure Return Routes per Node")}
+          </div>
+          <p className="mt-1 text-[11px] text-[var(--text-tertiary)]">
+            {tx(
+              `${configuredNodeCount} / ${clients.length} 台已配置；卡片回程标签当前${enabled ? "显示" : "隐藏"}`,
+              `${configuredNodeCount} / ${clients.length} 台已設定；卡片回程標籤目前${enabled ? "顯示" : "隱藏"}`,
+              `${configuredNodeCount} / ${clients.length} configured · Route pills are ${enabled ? "shown" : "hidden"}`,
+            )}
+          </p>
+        </div>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setOpen(true)}
+          className="theme-manage-button is-compact"
+        >
+          <Route size={13} />
+          {tx("配置回程路由", "設定回程路由", "Configure Routes")}
+        </button>
+      </div>
+
+      {open && (
+        <NodeRouteConfigPanel
+          open
+          clients={clients}
+          routesMap={routesMap}
+          premiumIcon={premiumIcon}
+          saving={saving}
+          saveDisabled={saveDisabled}
+          saveError={saveError}
+          onChange={onChange}
+          onClose={close}
+          onSave={onSave}
+        />
+      )}
+    </>
+  );
+});
+
 export function ThemeManage() {
+  const { resolvedLanguage, tx } = useI18n();
   const isMobileViewport = useMediaQuery(MOBILE_VIEWPORT_QUERY, true);
   const now = useHourlyClock();
   const adminEntryPath = useAdminEntryPath();
@@ -896,6 +1006,7 @@ export function ThemeManage() {
   const [accessRevoked, setAccessRevoked] = useState(false);
   const savingDraftRef = useRef<ThemeDraft | null>(null);
   const editVersionRef = useRef(0);
+  const importInputRef = useRef<HTMLInputElement | null>(null);
 
   // 单字段更新收口,所有表单控件都走它。值未变时原样返回 prev,保留旧的独立 useState
   // 在同值 set 时不触发重渲染的行为。
@@ -1176,6 +1287,8 @@ export function ThemeManage() {
         rest.homepageMultiPingNodeTaskIds,
       ),
       nodeMerchantLinks: normalizeNodeMerchantLinks(rest.nodeMerchantLinks),
+      brandLogoUrl: normalizeBrandLogoUrl(rest.brandLogoUrl),
+      nodeRoutes: normalizeNodeRoutes(rest.nodeRoutes),
       trafficRatingLabels: ratingLabels.traffic,
       bandwidthRatingLabels: ratingLabels.bandwidth,
       assetRatingLabels: ratingLabels.asset,
@@ -1202,6 +1315,79 @@ export function ThemeManage() {
     sourceThemeSettings.backgroundVideo,
     sourceThemeSettings.backgroundVideoDark,
   ]);
+
+  const patchNodeRoutes = useCallback((next: NodeRoutesMap) => {
+    editVersionRef.current += 1;
+    const normalized = normalizeNodeRoutes(next);
+    setDraft((prev) =>
+      JSON.stringify(prev.nodeRoutes) === JSON.stringify(normalized)
+        ? prev
+        : { ...prev, nodeRoutes: normalized },
+    );
+  }, []);
+
+  const routeConfiguredNodeCount = useMemo(
+    () =>
+      sortedClients.filter((client) => {
+        const entry = draft.nodeRoutes[client.uuid];
+        return Boolean(entry && ROUTE_CARRIER_KEYS.some((k) => Boolean(entry[k]?.label.trim())));
+      }).length,
+    [draft.nodeRoutes, sortedClients],
+  );
+
+  const handleExportJson = useCallback(() => {
+    try {
+      const json = JSON.stringify(draftThemeSettings, null, 2);
+      const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const date = localDateInputMax();
+      anchor.href = url;
+      anchor.download = `luminaplus-theme-settings-${date}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      setError(null);
+      setMessage(tx("已导出主题配置 JSON。", "已匯出主題設定 JSON。", "Exported theme settings JSON."));
+    } catch {
+      setError(tx("导出失败，请重试。", "匯出失敗，請重試。", "Export failed."));
+    }
+  }, [draftThemeSettings, tx]);
+
+  const handleImportJson = useCallback(
+    async (file: File) => {
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text) as unknown;
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          throw new Error("invalid");
+        }
+        const normalized = normalizeThemeSettings(
+          parsed as ThemeSettings & Record<string, unknown>,
+        );
+        editVersionRef.current += 1;
+        seedDrafts(normalized);
+        setError(null);
+        setMessage(
+          tx(
+            "已导入配置到草稿，确认无误后点击「保存设置」生效。",
+            "已匯入設定到草稿，確認無誤後點擊「儲存設定」生效。",
+            "Imported into draft. Click Save Settings to apply.",
+          ),
+        );
+      } catch {
+        setError(
+          tx(
+            "导入失败：请选择有效的 LuminaPlus 配置 JSON 文件。",
+            "匯入失敗：請選擇有效的 LuminaPlus 設定 JSON 檔案。",
+            "Import failed: please select a valid theme settings JSON file.",
+          ),
+        );
+      }
+    },
+    [seedDrafts, tx],
+  );
 
   // 只比较本页实际管理的设置。enableAdminButton/showPingChart 这类隐藏设置会通过
   // baseSettings 在保存时保留,但不该让表单永远显示为 dirty。
@@ -1397,9 +1583,40 @@ export function ThemeManage() {
         <div className="theme-masthead-topline">
           <Link to="/" className="instance-page-back">
             <ArrowLeft size={14} />
-            返回首页
+            {tx("返回首页", "返回首頁", "Back to Home")}
           </Link>
           <div className="theme-manage-toolbar-actions">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                if (file) void handleImportJson(file);
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleExportJson}
+              disabled={saving}
+              className="theme-manage-button"
+              title={tx("导出当前主题配置为 JSON 备份", "匯出目前主題設定為 JSON 備份", "Export settings JSON")}
+            >
+              <Download size={14} />
+              <span>{tx("导出", "匯出", "Export")}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              disabled={saving}
+              className="theme-manage-button"
+              title={tx("从 JSON 文件导入主题配置", "從 JSON 檔案匯入主題設定", "Import settings JSON")}
+            >
+              <Upload size={14} />
+              <span>{tx("导入", "匯入", "Import")}</span>
+            </button>
             <button
               type="button"
               onClick={handleReset}
@@ -1407,7 +1624,7 @@ export function ThemeManage() {
               className="theme-manage-button"
             >
               <RefreshCw size={14} />
-              <span>重置</span>
+              <span>{tx("重置", "重設", "Reset")}</span>
             </button>
             <button
               type="button"
@@ -1416,28 +1633,42 @@ export function ThemeManage() {
               className="theme-manage-button is-primary"
             >
               {saving ? <Spinner size={14} /> : <Save size={14} />}
-              <span>{saving ? "保存中" : "保存设置"}</span>
+              <span>
+                {saving
+                  ? tx("保存中", "儲存中", "Saving")
+                  : tx("保存设置", "儲存設定", "Save Settings")}
+              </span>
             </button>
           </div>
         </div>
         <div className="theme-masthead-main">
           <div className="theme-masthead-headings">
-            <span className="theme-masthead-kicker">LUMINAPLUS · 主题控制台</span>
-            <h1 className="theme-masthead-title">主题设置</h1>
+            <span className="theme-masthead-kicker">
+              {tx("LUMINAPLUS · 主题控制台", "LUMINAPLUS · 主題控制台", "LUMINAPLUS · CONSOLE")}
+            </span>
+            <h1 className="theme-masthead-title">{tx("主题设置", "主題設定", "Theme Settings")}</h1>
             <p className="theme-masthead-desc">
-              集中调整 LuminaPlus 的展示偏好与首页延迟绑定；保存后立即应用到当前站点。
+              {tx(
+                "集中调整 LuminaPlus 的展示偏好、三网回程与首页延迟绑定；保存后立即应用到当前站点。",
+                "集中調整 LuminaPlus 的顯示偏好、三網回程與首頁延遲綁定；儲存後立即套用到目前站點。",
+                "Configure LuminaPlus appearance, return routes, currency, and Ping bindings.",
+              )}
             </p>
           </div>
           <dl className="theme-masthead-meta">
             <div>
-              <dt>主题</dt>
+              <dt>{tx("主题", "主題", "Theme")}</dt>
               <dd>{config?.theme || "Komari-Theme-LuminaPlus"}</dd>
             </div>
             <div>
-              <dt>已绑定 Ping</dt>
+              <dt>{tx("已绑定 Ping", "已綁定 Ping", "Ping Bindings")}</dt>
               <dd>
                 {draft.enableHomepageMultiPing
-                  ? `三网覆盖 ${multiPingConfiguredNodeCount} 台`
+                  ? tx(
+                      `三网覆盖 ${multiPingConfiguredNodeCount} 台`,
+                      `三網覆蓋 ${multiPingConfiguredNodeCount} 台`,
+                      `Multi-Ping: ${multiPingConfiguredNodeCount}`,
+                    )
                   : `${assignedNodeCount} / ${sortedClients.length}`}
               </dd>
             </div>
@@ -1469,11 +1700,219 @@ export function ThemeManage() {
               role="alert"
               className="rounded-[12px] border border-[color-mix(in_srgb,var(--status-offline)_28%,transparent)] bg-[color-mix(in_srgb,var(--status-offline)_11%,var(--surface))] px-4 py-3 text-[13px] text-[var(--status-offline)]"
             >
-              无法读取后台 Ping 任务或节点列表: {adminError}
+              {tx("无法读取后台 Ping 任务或节点列表: ", "無法讀取後台 Ping 任務或節點列表: ", "Failed to load admin tasks or nodes: ")}
+              {adminError}
             </div>
           )}
         </div>
       )}
+
+      <InstancePanel
+        kicker={
+          <>
+            <span className="instance-panel-kicker-num">00</span>
+            {tx("增强", "增強", "Plus")}
+          </>
+        }
+        title={tx("品牌 LOGO、币别、刷新与三网回程", "品牌 LOGO、幣別、刷新與三網回程", "Logo, Currency, Refresh & Return Routes")}
+        description={tx(
+          "调整左上角站点 LOGO、资产默认显示币别、实时状态轮询间隔、三网回程路由样式与实用工具开关。",
+          "調整左上角站點 LOGO、資產預設顯示幣別、即時狀態輪詢間隔、三網回程路由樣式與實用工具開關。",
+          "Customize brand logo, default asset currency, refresh frequency, return route pills, and utility toggles.",
+        )}
+        aside={<Sparkles size={16} />}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="grid gap-3 md:grid-cols-2">
+            <ToggleRow
+              field="showBrandLogo"
+              title={tx("显示左上角站点 LOGO", "顯示左上角站點 LOGO", "Show Top-Left Site Logo")}
+              desc={tx(
+                "默认自动读取 Komari 站点 /favicon.ico 图标；下方可填写自定义图片地址覆盖。",
+                "預設自動讀取 Komari 站點 /favicon.ico 圖示；下方可填寫自訂圖片網址覆蓋。",
+                "Uses /favicon.ico by default, or enter a custom URL below.",
+              )}
+              checked={draft.showBrandLogo}
+              onPatch={patch}
+            />
+            <label className="surface-inset flex flex-col justify-center gap-1.5 px-4 py-3">
+              <span className="text-[12px] font-medium text-[var(--text-primary)]">
+                {tx("自定义 LOGO 图片地址（选填）", "自訂 LOGO 圖片網址（選填）", "Custom Logo URL (Optional)")}
+              </span>
+              <input
+                type="text"
+                value={draft.brandLogoUrl}
+                onChange={(event) => patch("brandLogoUrl", event.target.value)}
+                disabled={!draft.showBrandLogo}
+                placeholder="/favicon.ico"
+                className="h-8 rounded-lg border border-[var(--hairline)] bg-[var(--surface-a)] px-2.5 text-[12px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-500)] disabled:opacity-50"
+              />
+            </label>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="surface-inset flex flex-col gap-2 px-4 py-3">
+              <span className="text-[13px] font-medium text-[var(--text-primary)]">
+                {tx("资产概览默认币别", "資產概覽預設幣別", "Default Asset Currency")}
+              </span>
+              <span className="text-[11px] text-[var(--text-tertiary)]">
+                {tx(
+                  "「跟随语言/地区」会依据访客浏览器自动切换 TWD / CNY / USD / HKD 等，访客也可在资产卡片随时切换。",
+                  "「跟隨語言/地區」會依據訪客瀏覽器自動切換 TWD / CNY / USD / HKD 等，訪客也可在資產卡片隨時切換。",
+                  "Auto detects TWD/CNY/USD/HKD etc. from browser locale/region.",
+                )}
+              </span>
+              <select
+                value={draft.defaultCostCurrency}
+                onChange={(event) =>
+                  patch("defaultCostCurrency", event.target.value as CurrencyPreference)
+                }
+                className="h-9 rounded-lg border border-[var(--hairline)] bg-[var(--surface-a)] px-2.5 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-500)]"
+              >
+                <option value="auto">
+                  {tx("跟随语言 / 地区（推荐）", "跟隨語言 / 地區（推薦）", "Auto (Follow Browser Locale/Region)")}
+                </option>
+                {DISPLAY_CURRENCIES.map((code) => (
+                  <option key={code} value={code}>
+                    {getCurrencyLabel(code, resolvedLanguage)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="surface-inset flex flex-col gap-2 px-4 py-3">
+              <span className="text-[13px] font-medium text-[var(--text-primary)]">
+                {tx("默认实时刷新频率", "預設即時刷新頻率", "Default Live Refresh Interval")}
+              </span>
+              <span className="text-[11px] text-[var(--text-tertiary)]">
+                {tx(
+                  "默认 2 秒；访客也可以在首页右上角快捷栏自行调整或暂停。",
+                  "預設 2 秒；訪客也可以在首頁右上角快捷列自行調整或暫停。",
+                  "Default 2s. Visitors can override or pause in floating controls.",
+                )}
+              </span>
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
+                {REFRESH_INTERVAL_OPTIONS.map((ms: RefreshIntervalOption) => {
+                  const active = draft.refreshIntervalMs === ms;
+                  return (
+                    <button
+                      key={ms}
+                      type="button"
+                      onClick={() => patch("refreshIntervalMs", ms)}
+                      aria-pressed={active}
+                      className={clsx(
+                        "rounded-lg border px-2.5 py-1 text-[12px] font-semibold transition-colors",
+                        active
+                          ? "border-[var(--accent-500)] bg-[color-mix(in_srgb,var(--accent-500)_14%,var(--surface-a))] text-[var(--accent-500)]"
+                          : "border-[var(--hairline)] bg-[var(--surface-a)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
+                      )}
+                    >
+                      {ms === 0 ? tx("暂停", "暫停", "Paused") : `${ms / 1000}s`}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="surface-inset px-4 py-4">
+            <div className="flex flex-col gap-3">
+              <ToggleRow
+                field="showNodeRoutes"
+                title={tx("显示卡片三网回程路由（电 / 联 / 移 / 互）", "顯示卡片三網回程路由（電 / 聯 / 移 / 互）", "Show Return Route Pills (CT / CU / CM / IX)")}
+                desc={tx(
+                  "精品线路（CN2 GIA / 9929 / CMIN2 / IEPL 等）自动附带发光边框与流光效果，一般线路保持低调试样；也支持从节点 tags 写入 ct:CMIN2;cu:9929;cm:CMIN2;ix:BGP。",
+                  "精品線路（CN2 GIA / 9929 / CMIN2 / IEPL 等）自動附帶發光邊框與流光效果，一般線路保持低調樣式；也支援在節點 tags 寫入 ct:CMIN2;cu:9929;cm:CMIN2;ix:BGP。",
+                  "Premium routes get luminous borders and sheen; standard routes stay matte.",
+                )}
+                checked={draft.showNodeRoutes}
+                onPatch={patch}
+              />
+
+              <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                <div>
+                  <div className="text-[12px] font-medium text-[var(--text-primary)]">
+                    {tx("精品线路徽标图标", "精品線路徽標圖示", "Premium Route Badge Icon")}
+                  </div>
+                  <div className="text-[11px] text-[var(--text-tertiary)]">
+                    {tx("自定义精品线路右侧显示的发光小图标。", "自訂精品線路右側顯示的發光小圖示。", "Choose the glowing icon shown on premium routes.")}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {ROUTE_PREMIUM_ICONS.map((iconKey) => {
+                    const active = draft.routePremiumIcon === iconKey;
+                    const label =
+                      iconKey === "zap"
+                        ? tx("闪电", "閃電", "Bolt")
+                        : iconKey === "sparkle"
+                          ? tx("星芒", "星芒", "Sparkle")
+                          : iconKey === "crown"
+                            ? tx("皇冠", "皇冠", "Crown")
+                            : iconKey === "flame"
+                              ? tx("烈焰", "烈焰", "Flame")
+                              : tx("仅发光无图标", "僅發光無圖示", "Glow only");
+                    return (
+                      <button
+                        key={iconKey}
+                        type="button"
+                        onClick={() => patch("routePremiumIcon", iconKey)}
+                        aria-pressed={active}
+                        className={clsx(
+                          "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold transition-colors",
+                          active
+                            ? "border-[var(--accent-500)] bg-[color-mix(in_srgb,var(--accent-500)_14%,var(--surface-a))] text-[var(--accent-500)]"
+                            : "border-[var(--hairline)] bg-[var(--surface-a)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
+                        )}
+                      >
+                        <RoutePremiumBadgeIcon icon={iconKey} size={13} />
+                        <span>{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <NodeRouteConfigControl
+              clients={sortedClients}
+              routesMap={draft.nodeRoutes}
+              premiumIcon={draft.routePremiumIcon}
+              configuredNodeCount={routeConfiguredNodeCount}
+              enabled={draft.showNodeRoutes}
+              disabled={clientsLoading || sortedClients.length === 0}
+              saving={saving}
+              saveDisabled={saveDisabled}
+              saveError={error}
+              onChange={patchNodeRoutes}
+              onSave={handleSave}
+            />
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            <ToggleRow
+              field="showHomeSearchBar"
+              title={tx("首页快速搜索与状态筛选", "首頁快速搜尋與狀態篩選", "Home Search & Status Filter")}
+              desc={tx("支持按 / 快捷键搜索节点、地区、标签和回程线路，并筛选在线/离线。", "支援按 / 快捷鍵搜尋節點、地區、標籤與回程線路，並篩選在線/離線。", "Press / to search nodes and filter Online/Offline.")}
+              checked={draft.showHomeSearchBar}
+              onPatch={patch}
+            />
+            <ToggleRow
+              field="showCardTags"
+              title={tx("显示卡片彩色标签", "顯示卡片彩色標籤", "Show Colored Card Tags")}
+              desc={tx("支持 Komari 节点标签 <color> 配色显示（如 三网CMIN2<purple>）。", "支援 Komari 節點標籤 <color> 配色顯示（如 三網CMIN2<purple>）。", "Displays colored Komari node tags on cards.")}
+              checked={draft.showCardTags}
+              onPatch={patch}
+            />
+            <ToggleRow
+              field="enablePrivacyModeToggle"
+              title={tx("启用隐私截图模式按钮", "啟用隱私截圖模式按鈕", "Privacy Screenshot Toggle")}
+              desc={tx("在右上角快捷栏提供眼睛开关，一键隐藏资产金额与节点价格方便截图。", "在右上角快捷列提供眼睛開關，一鍵隱藏資產金額與節點價格方便截圖。", "Adds an eye button to mask amounts & prices for screenshots.")}
+              checked={draft.enablePrivacyModeToggle}
+              onPatch={patch}
+            />
+          </div>
+        </div>
+      </InstancePanel>
 
       <InstancePanel
         kicker={<><span className="instance-panel-kicker-num">01</span>外观</>}

@@ -181,6 +181,24 @@ export interface ThemeSettings {
     | "leaves"
     | "confetti"
     | "fireworks";
+  showBrandLogo?: boolean;
+  brandLogoUrl?: string;
+  defaultCostCurrency?: string;
+  refreshIntervalMs?: number;
+  showNodeRoutes?: boolean;
+  routePremiumIcon?: "zap" | "sparkle" | "crown" | "flame" | "none";
+  nodeRoutes?: Record<
+    string,
+    {
+      ct?: { label?: string; tier?: "auto" | "premium" | "optimized" | "standard" };
+      cu?: { label?: string; tier?: "auto" | "premium" | "optimized" | "standard" };
+      cm?: { label?: string; tier?: "auto" | "premium" | "optimized" | "standard" };
+      ix?: { label?: string; tier?: "auto" | "premium" | "optimized" | "standard" };
+    }
+  >;
+  showHomeSearchBar?: boolean;
+  showCardTags?: boolean;
+  enablePrivacyModeToggle?: boolean;
 }
 
 export const PublicConfigSchema = z

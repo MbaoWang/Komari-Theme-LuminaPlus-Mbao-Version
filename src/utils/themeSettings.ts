@@ -36,6 +36,49 @@ import {
   normalizeNodeMerchantLinks,
   type NodeMerchantLinks,
 } from "@/utils/merchantLinks";
+import {
+  normalizeCurrencyPreference,
+  type CurrencyPreference,
+} from "@/utils/currency";
+import {
+  normalizeNodeRoutes,
+  normalizeRoutePremiumIcon,
+  type NodeRoutesMap,
+  type RoutePremiumIcon,
+} from "@/utils/nodeRoutes";
+
+export const REFRESH_INTERVAL_OPTIONS = [1000, 2000, 3000, 5000, 10000, 30000, 0] as const;
+export type RefreshIntervalOption = (typeof REFRESH_INTERVAL_OPTIONS)[number];
+
+export function normalizeRefreshIntervalMs(
+  value: unknown,
+  fallback: RefreshIntervalOption = 2000,
+): RefreshIntervalOption {
+  const num =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number(value)
+        : Number.NaN;
+  if (REFRESH_INTERVAL_OPTIONS.includes(num as RefreshIntervalOption)) {
+    return num as RefreshIntervalOption;
+  }
+  return fallback;
+}
+
+export function normalizeBrandLogoUrl(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("/") && !trimmed.startsWith("//")) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.href;
+    }
+  } catch {}
+  return "";
+}
 
 export type Appearance = "system" | "light" | "dark";
 export type NodeViewMode = "large" | "compact" | "mini" | "list";
@@ -113,6 +156,16 @@ export interface ResolvedThemeSettings {
   surfaceOpacity: number;
   enableAmbientEffect: boolean;
   ambientEffect: AmbientEffect;
+  showBrandLogo: boolean;
+  brandLogoUrl: string;
+  defaultCostCurrency: CurrencyPreference;
+  refreshIntervalMs: RefreshIntervalOption;
+  showNodeRoutes: boolean;
+  routePremiumIcon: RoutePremiumIcon;
+  nodeRoutes: NodeRoutesMap;
+  showHomeSearchBar: boolean;
+  showCardTags: boolean;
+  enablePrivacyModeToggle: boolean;
 }
 
 export const DEFAULT_THEME_SETTINGS: ResolvedThemeSettings = {
@@ -171,6 +224,16 @@ export const DEFAULT_THEME_SETTINGS: ResolvedThemeSettings = {
   surfaceOpacity: DEFAULT_SURFACE_OPACITY,
   enableAmbientEffect: false,
   ambientEffect: "sakura",
+  showBrandLogo: true,
+  brandLogoUrl: "",
+  defaultCostCurrency: "auto",
+  refreshIntervalMs: 2000,
+  showNodeRoutes: true,
+  routePremiumIcon: "zap",
+  nodeRoutes: {},
+  showHomeSearchBar: true,
+  showCardTags: true,
+  enablePrivacyModeToggle: true,
 };
 
 export function isAppearance(value: unknown): value is Appearance {
@@ -353,5 +416,15 @@ export function normalizeThemeSettings(
     // 环境动效默认关闭；保存的预设仍会保留，方便站长关闭后再次开启。
     enableAmbientEffect: settings?.enableAmbientEffect === true,
     ambientEffect: normalizeAmbientEffect(settings?.ambientEffect),
+    showBrandLogo: enabledUnlessFalse(settings?.showBrandLogo),
+    brandLogoUrl: normalizeBrandLogoUrl(settings?.brandLogoUrl),
+    defaultCostCurrency: normalizeCurrencyPreference(settings?.defaultCostCurrency, "auto"),
+    refreshIntervalMs: normalizeRefreshIntervalMs(settings?.refreshIntervalMs, 2000),
+    showNodeRoutes: enabledUnlessFalse(settings?.showNodeRoutes),
+    routePremiumIcon: normalizeRoutePremiumIcon(settings?.routePremiumIcon, "zap"),
+    nodeRoutes: normalizeNodeRoutes(settings?.nodeRoutes),
+    showHomeSearchBar: enabledUnlessFalse(settings?.showHomeSearchBar),
+    showCardTags: enabledUnlessFalse(settings?.showCardTags),
+    enablePrivacyModeToggle: enabledUnlessFalse(settings?.enablePrivacyModeToggle),
   };
 }

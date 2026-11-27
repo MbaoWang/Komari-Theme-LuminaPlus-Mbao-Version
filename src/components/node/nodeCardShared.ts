@@ -1,5 +1,6 @@
 // 大卡与紧凑卡共享的格式化和命中逻辑。
 
+import { txStatic } from "@/i18n";
 import { formatUptimeDays, trimFixed } from "@/utils/format";
 import { latencyHeatColor, lossHeatColor } from "@/utils/metricTone";
 import type { PingOverviewBucket } from "@/types/komari";
@@ -18,15 +19,21 @@ export function formatCompactPercent(value: number) {
 
 /** 卡片到期文案:"余 X天";无到期时 "余 --"。 */
 export function formatCompactExpire({ value, unit }: { value: string; unit: string }) {
-  if (value === "—") return "余 --";
-  return unit ? `余 ${value}${unit}` : value;
+  if (value === "—") return txStatic("余 --", "餘 --", "Left --");
+  return unit
+    ? txStatic(`余 ${value}${unit}`, `餘 ${value}${unit}`, `${value}${unit} left`)
+    : value;
 }
 
 /** 非法或非正时长返回空串。 */
 export function formatCompactUptime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds <= 0) return "";
   const uptime = formatUptimeDays(seconds);
-  return `在线：${uptime.value}${uptime.unit}`;
+  return txStatic(
+    `在线：${uptime.value}${uptime.unit}`,
+    `在線：${uptime.value}${uptime.unit}`,
+    `Up ${uptime.value}${uptime.unit}`,
+  );
 }
 
 /** 区分已绑定但无样本与未配置 Ping。 */
@@ -36,14 +43,26 @@ export function pingEmptyLabels(
   pingError = false,
 ): { title: string; text: string } {
   if (hasHomepagePingBinding && pingLoading) {
-    return { title: "正在加载首页 Ping", text: "加载中" };
+    return {
+      title: txStatic("正在加载首页 Ping", "正在載入首頁 Ping", "Loading homepage Ping"),
+      text: txStatic("加载中", "載入中", "Loading"),
+    };
   }
   if (hasHomepagePingBinding && pingError) {
-    return { title: "首页 Ping 加载失败", text: "加载失败" };
+    return {
+      title: txStatic("首页 Ping 加载失败", "首頁 Ping 載入失敗", "Homepage Ping failed"),
+      text: txStatic("加载失败", "載入失敗", "Failed"),
+    };
   }
   return hasHomepagePingBinding
-    ? { title: "暂无有效样本", text: "无样本" }
-    : { title: "未配置首页 Ping", text: "未配置" };
+    ? {
+        title: txStatic("暂无有效样本", "暫無有效樣本", "No valid samples"),
+        text: txStatic("无样本", "無樣本", "No data"),
+      }
+    : {
+        title: txStatic("未配置首页 Ping", "未設定首頁 Ping", "Homepage Ping not configured"),
+        text: txStatic("未配置", "未設定", "Unset"),
+      };
 }
 
 /** 生成“Debian 12”这类简短系统标签。 */
@@ -56,8 +75,12 @@ export function formatOsLabel(osName: string, rawOs?: string | null): string {
 /** 节点卡片头部"查看实例详情"链接的 title 和 aria-label。 */
 export function nodeDetailLinkLabels(name: string, osName: string) {
   return {
-    title: `${osName} · 查看详情`,
-    ariaLabel: `查看 ${name} 详情，系统 ${osName}`,
+    title: txStatic(`${osName} · 查看详情`, `${osName} · 查看詳情`, `${osName} · Details`),
+    ariaLabel: txStatic(
+      `查看 ${name} 详情，系统 ${osName}`,
+      `查看 ${name} 詳情，系統 ${osName}`,
+      `View ${name} details, OS ${osName}`,
+    ),
   };
 }
 
