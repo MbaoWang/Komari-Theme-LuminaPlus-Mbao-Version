@@ -834,8 +834,6 @@
   display: flex;
   overflow-x: auto;
   align-items: center;
-  justify-content: center;
-  justify-content: safe center;
   gap: 8px;
 }
 
@@ -843,6 +841,7 @@
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   min-height: 32px;
   padding: 0 10px;
@@ -953,7 +952,6 @@ html.home-filter-sorting * {
   .home-region-chips {
     flex-wrap: wrap;
     overflow-x: visible;
-    justify-content: center;
   }
 
   .home-region-chip {

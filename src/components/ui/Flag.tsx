@@ -16,8 +16,8 @@ export function Flag({ region, size = 14 }: FlagProps) {
         aria-hidden
         className="inline-block rounded-[3px] shrink-0"
         style={{
-          width: size + 8,
-          height: size,
+          width: size,
+          height: Math.round(size * 0.72),
           background: "var(--border-subtle)",
         }}
       />
@@ -36,8 +36,8 @@ export function Flag({ region, size = 14 }: FlagProps) {
         className="inline-block rounded-[3px] shrink-0"
         title={alt}
         style={{
-          width: size + 8,
-          height: size,
+          width: size,
+          height: Math.round(size * 0.72),
           background: "var(--border-subtle)",
         }}
       />
@@ -46,9 +46,9 @@ export function Flag({ region, size = 14 }: FlagProps) {
 
   return (
     <span
-      className="inline-flex items-center shrink-0"
+      className="inline-flex items-center justify-center shrink-0"
       style={{
-        width: size + 8,
+        width: size,
         height: size,
         lineHeight: 0,
       }}
