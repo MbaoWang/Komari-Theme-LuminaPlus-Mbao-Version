@@ -42,8 +42,8 @@
   border: 0;
   background: #1e293b;
   box-shadow:
-    0 4px 16px -4px rgba(59, 130, 246, 0.48),
-    0 2px 10px -3px rgba(244, 63, 94, 0.34);
+    0 0 14px -3px rgba(59, 130, 246, 0.44),
+    0 0 8px -2px rgba(244, 63, 94, 0.3);
 }
 
 .node-route-strip.has-premium[data-effect="beam"]:not(.is-detail)::before {
@@ -142,8 +142,8 @@
   border: 0;
   background: color-mix(in srgb, var(--hairline) 75%, #dbeafe);
   box-shadow:
-    0 4px 16px -4px rgba(37, 99, 235, 0.36),
-    0 2px 8px -3px rgba(20, 184, 166, 0.26);
+    0 0 14px -3px rgba(37, 99, 235, 0.32),
+    0 0 8px -2px rgba(20, 184, 166, 0.24);
 }
 
 :root[data-appearance="dark"]
@@ -230,7 +230,7 @@
   );
   box-shadow:
     0 0 0 1px rgba(15, 23, 42, 0.08),
-    0 6px 18px -6px rgba(59, 130, 246, 0.3),
+    0 0 14px -4px rgba(59, 130, 246, 0.28),
     inset 0 1.5px 0 rgba(255, 255, 255, 0.98),
     inset 0 -1px 2px rgba(15, 23, 42, 0.06);
 }
@@ -244,7 +244,7 @@
     rgba(15, 23, 42, 0.92) 100%
   );
   box-shadow:
-    0 6px 20px -6px rgba(56, 189, 248, 0.32),
+    0 0 16px -4px rgba(56, 189, 248, 0.3),
     inset 0 1.5px 0 rgba(255, 255, 255, 0.22),
     inset 0 -1px 2px rgba(0, 0, 0, 0.45);
 }
@@ -323,8 +323,8 @@
     #f59e0b 100%
   );
   box-shadow:
-    0 4px 16px -4px rgba(245, 158, 11, 0.4),
-    0 2px 10px -4px rgba(168, 85, 247, 0.32);
+    0 0 14px -3px rgba(245, 158, 11, 0.36),
+    0 0 8px -3px rgba(168, 85, 247, 0.28);
 }
 
 .node-route-strip.has-premium[data-effect="svip"]:not(.is-detail) .node-route-inner {
@@ -407,7 +407,7 @@
     #4a3a1d 76%,
     #f3d58d 100%
   );
-  box-shadow: 0 4px 14px -4px rgba(15, 23, 42, 0.55);
+  box-shadow: 0 0 12px -3px rgba(15, 23, 42, 0.45);
 }
 
 .node-route-strip.has-premium[data-effect="brushed-gold"]:not(.is-detail)
@@ -484,7 +484,7 @@
 .node-route-strip.has-premium[data-effect="sheen"]:not(.is-detail) {
   border-color: color-mix(in srgb, var(--accent-500) 52%, var(--hairline));
   box-shadow:
-    0 3px 14px -4px color-mix(in srgb, var(--accent-500) 42%, transparent),
+    0 0 12px -3px color-mix(in srgb, var(--accent-500) 38%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
@@ -538,11 +538,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   gap: 4px;
   min-width: 0;
   height: 30px;
-  padding: 0 7px;
+  padding: 0 6px;
   border: 0;
   background: transparent;
   color: var(--text-primary);
@@ -560,19 +560,28 @@
   border-left-color: rgba(255, 255, 255, 0.1);
 }
 
-/* 4 條路線同時顯示時微調間距與字級，確保在緊湊卡片單行完整不截字 */
+/* 4 條路線等寬均分時微調內距與字距，讓中線正中對齊且長名稱（如 CN2 GIA）仍完整顯示 */
 .node-route-strip.is-compact[data-count="4"] .node-route-pill {
-  padding: 0 5px;
-  gap: 3px;
-  font-size: 10.5px;
+  padding: 0 2px;
+  gap: 2px;
+  font-size: 10px;
+}
+
+.node-route-strip.is-compact[data-count="4"] .node-route-name {
+  letter-spacing: -0.025em;
+}
+
+.node-route-strip.is-compact[data-count="4"] .node-route-premium-icon {
+  width: 10px;
+  height: 10px;
 }
 
 .node-route-strip.is-compact[data-count="4"] .node-route-carrier {
-  min-width: 16px;
-  height: 16px;
-  padding: 0 2.5px;
-  border-radius: 4.5px;
-  font-size: 9.5px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 2px;
+  border-radius: 4px;
+  font-size: 9px;
 }
 
 .node-route-strip.is-large .node-route-pill {
@@ -695,15 +704,15 @@
 }
 
 .node-route-strip.is-compact[data-count="4"] .node-route-carrier.is-logo {
-  width: 17px;
-  min-width: 17px;
-  height: 17px;
-}
-
-.node-route-strip.is-compact[data-count="4"] .node-route-carrier.is-outline {
   width: 15px;
   min-width: 15px;
   height: 15px;
+}
+
+.node-route-strip.is-compact[data-count="4"] .node-route-carrier.is-outline {
+  width: 13.5px;
+  min-width: 13.5px;
+  height: 13.5px;
 }
 
 .node-route-name {

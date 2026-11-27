@@ -141,14 +141,15 @@ export const NodeCard = memo(function NodeCard({
           />
 
           {showNodeRoutes && routes.length > 0 && (
-            <NodeRoutePills
-              routes={routes}
-              premiumIcon={themeSettings.routePremiumIcon}
-              premiumEffect={themeSettings.routePremiumEffect}
-              badgeStyle={themeSettings.routeBadgeStyle}
-              density="large"
-              className="card-metric-section"
-            />
+            <div className="card-metric-section">
+              <NodeRoutePills
+                routes={routes}
+                premiumIcon={themeSettings.routePremiumIcon}
+                premiumEffect={themeSettings.routePremiumEffect}
+                badgeStyle={themeSettings.routeBadgeStyle}
+                density="large"
+              />
+            </div>
           )}
 
           <NodeTrafficSection
