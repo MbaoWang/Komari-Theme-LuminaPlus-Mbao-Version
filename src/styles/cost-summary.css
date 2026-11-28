@@ -373,6 +373,20 @@
   white-space: nowrap;
 }
 
+.cost-summary-cycle-chip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  border-radius: 6px;
+  background: var(--fill-tertiary);
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 620;
+  line-height: 1.15;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 .cost-summary-premium-chip {
   display: inline-flex;
   flex: 0 0 auto;
@@ -691,10 +705,112 @@
   text-decoration: underline;
 }
 
+.assets-table tfoot td {
+  border-top: 3px double color-mix(in srgb, var(--text-tertiary) 30%, transparent);
+  border-bottom: 0;
+  background: color-mix(in srgb, var(--hover-bg-a) 72%, var(--surface-a));
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+
+.assets-total-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-primary);
+  font-weight: 760;
+}
+
+.assets-total-label small {
+  border-radius: 6px;
+  background: var(--fill-tertiary);
+  color: var(--text-tertiary);
+  padding: 2px 6px;
+  font-size: 10.5px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.assets-total-meta {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 620;
+}
+
 .assets-card-list {
   display: none;
   flex-direction: column;
   gap: 7px;
+}
+
+.assets-total-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 2px;
+  border: 1px solid color-mix(in srgb, var(--text-tertiary) 26%, var(--hairline));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--hover-bg-a) 68%, var(--surface-elev));
+  padding: 12px 13px;
+}
+
+.assets-total-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px double color-mix(in srgb, var(--text-tertiary) 28%, transparent);
+}
+
+.assets-total-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+  margin: 0;
+}
+
+.assets-total-card-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.assets-total-card-grid dt {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.assets-total-card-grid dd {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 1080px) {
+  .assets-table td {
+    padding: 11px 10px;
+  }
+
+  .assets-table th button {
+    padding: 12px 10px;
+  }
+
+  .assets-table th:first-child button,
+  .assets-table td:first-child {
+    padding-left: 14px;
+  }
+
+  .assets-table th:last-child button,
+  .assets-table td:last-child {
+    padding-right: 14px;
+  }
 }
 
 @media (max-width: 860px) {

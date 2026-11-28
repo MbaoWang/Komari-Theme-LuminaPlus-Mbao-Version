@@ -37,6 +37,8 @@ type AssetDetail = ReturnType<typeof calculateCostSummary>["details"][number];
 type AssetsSortField =
   | "weight"
   | "price"
+  | "monthly"
+  | "yearly"
   | "remaining"
   | "premium"
   | "premiumMonthly"
@@ -46,6 +48,8 @@ type AssetsSortDirection = "asc" | "desc";
 const NATURAL_DIRECTION: Record<AssetsSortField, AssetsSortDirection> = {
   weight: "asc",
   price: "desc",
+  monthly: "desc",
+  yearly: "desc",
   remaining: "desc",
   premium: "desc",
   premiumMonthly: "desc",
@@ -58,6 +62,10 @@ function sortValue(detail: AssetDetail, field: AssetsSortField): number {
   switch (field) {
     case "price":
       return detail.priceCny;
+    case "monthly":
+      return detail.monthlyCny;
+    case "yearly":
+      return detail.monthlyCny * 12;
     case "remaining":
       return detail.remainingCny;
     case "premium":
@@ -183,6 +191,26 @@ export function Assets() {
     return rows.map(({ detail }) => detail);
   }, [sortDirection, sortField, summary]);
 
+  const tableTotals = useMemo(() => {
+    if (!summary) return null;
+    let countedNodes = 0;
+    let priceCny = 0;
+    for (const detail of summary.details) {
+      if (!detail.counted) continue;
+      countedNodes += 1;
+      priceCny += detail.priceCny;
+    }
+    return {
+      countedNodes,
+      priceCny,
+      monthlyCny: summary.monthlyCny,
+      yearlyCny: summary.totalCny,
+      remainingCny: summary.remainingCny,
+      premiumCny: summary.premiumTotalCny,
+      premiumMonthlyCny: summary.premiumMonthlyTotalCny,
+    };
+  }, [summary]);
+
   const exchangeRateRows = useMemo(() => {
     if (!rates || !rates[activeCurrency]) return [];
     const targetRate = rates[activeCurrency];
@@ -194,6 +222,8 @@ export function Assets() {
   const tableColumns: Array<{ field: AssetsSortField; label: string; numeric?: boolean }> = [
     { field: "weight", label: tx("节点", "節點", "Node") },
     { field: "price", label: tx("价格", "價格", "Price"), numeric: true },
+    { field: "monthly", label: tx("月付价格", "月付價格", "Monthly"), numeric: true },
+    { field: "yearly", label: tx("年付价格", "年付價格", "Yearly"), numeric: true },
     { field: "remaining", label: tx("剩余价值", "剩餘價值", "Remaining"), numeric: true },
     { field: "premium", label: tx("溢价", "溢價", "Premium"), numeric: true },
     { field: "premiumMonthly", label: tx("溢价月摊", "溢價月攤", "Amort/mo"), numeric: true },
@@ -203,6 +233,7 @@ export function Assets() {
   const mobileSortOptions: Array<{ field: AssetsSortField; label: string }> = [
     { field: "weight", label: tx("权重", "權重", "Weight") },
     { field: "price", label: tx("价格", "價格", "Price") },
+    { field: "monthly", label: tx("月付", "月付", "Monthly") },
     { field: "premium", label: tx("溢价", "溢價", "Premium") },
     { field: "expiry", label: tx("到期", "到期", "Expiry") },
   ];
@@ -508,6 +539,14 @@ export function Assets() {
                             <span className="assets-note-chip">{translateNote(detail.note)}</span>
                           )}
                         </td>
+                        <td data-numeric>
+                          {detail.counted && detail.monthlyCny > 0 ? fmtMoney(detail.monthlyCny) : "—"}
+                        </td>
+                        <td data-numeric>
+                          {detail.counted && detail.monthlyCny > 0
+                            ? fmtMoney(detail.monthlyCny * 12)
+                            : "—"}
+                        </td>
                         <td data-numeric data-strong>
                           {detail.counted ? fmtMoney(detail.remainingCny) : "—"}
                         </td>
@@ -553,6 +592,69 @@ export function Assets() {
                       );
                     })}
                   </tbody>
+                  {tableTotals && detailRows.length > 0 && (
+                    <tfoot>
+                      <tr className="assets-table-total-row">
+                        <td>
+                          <span className="assets-total-label">
+                            {tx("合计", "合計", "Total")}
+                            <small>
+                              {tx(
+                                `${tableTotals.countedNodes} 台计费`,
+                                `${tableTotals.countedNodes} 台計費`,
+                                `${tableTotals.countedNodes} billed`,
+                              )}
+                            </small>
+                          </span>
+                        </td>
+                        <td
+                          data-numeric
+                          data-strong
+                          title={tx(
+                            "各计费节点单期原价加总",
+                            "各計費節點單期原價加總",
+                            "Sum of each billed node's per-cycle price",
+                          )}
+                        >
+                          {fmtMoney(tableTotals.priceCny)}
+                        </td>
+                        <td data-numeric data-strong>
+                          {fmtMoney(tableTotals.monthlyCny)}
+                        </td>
+                        <td data-numeric data-strong>
+                          {fmtMoney(tableTotals.yearlyCny)}
+                        </td>
+                        <td data-numeric data-strong>
+                          {fmtMoney(tableTotals.remainingCny)}
+                        </td>
+                        <td data-numeric data-strong>
+                          {hasPremium ? (
+                            <span
+                              style={{
+                                color: privacyMode ? undefined : premiumTone(tableTotals.premiumCny),
+                              }}
+                            >
+                              {fmtSigned(tableTotals.premiumCny)}
+                            </span>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                        <td data-numeric data-strong>
+                          {tableTotals.premiumMonthlyCny !== 0
+                            ? `${fmtSigned(tableTotals.premiumMonthlyCny)}/${tx("月", "月", "mo")}`
+                            : "—"}
+                        </td>
+                        <td data-numeric className="assets-total-meta">
+                          {tx(
+                            `共 ${detailRows.length} 台`,
+                            `共 ${detailRows.length} 台`,
+                            `${detailRows.length} total`,
+                          )}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
                 </table>
                 </div>
               ) : (
@@ -590,6 +692,16 @@ export function Assets() {
                       </div>
                       <div className="cost-summary-detail-meta">
                         <span className="cost-summary-price-chip">{priceLabel}</span>
+                        {detail.counted && detail.monthlyCny > 0 && (
+                          <>
+                            <span className="cost-summary-cycle-chip">
+                              {tx("月付", "月付", "Mo")} {fmtMoney(detail.monthlyCny)}
+                            </span>
+                            <span className="cost-summary-cycle-chip">
+                              {tx("年付", "年付", "Yr")} {fmtMoney(detail.monthlyCny * 12)}
+                            </span>
+                          </>
+                        )}
                         {detail.premiumCny !== 0 && (
                           <span
                             className="cost-summary-premium-chip"
@@ -616,6 +728,65 @@ export function Assets() {
                     </div>
                   );
                 })}
+                {tableTotals && detailRows.length > 0 && (
+                  <div className="assets-total-card" aria-label={tx("价格合计", "價格合計", "Price totals")}>
+                    <div className="assets-total-card-head">
+                      <span className="assets-total-label">
+                        {tx("合计", "合計", "Total")}
+                        <small>
+                          {tx(
+                            `${tableTotals.countedNodes} 台计费`,
+                            `${tableTotals.countedNodes} 台計費`,
+                            `${tableTotals.countedNodes} billed`,
+                          )}
+                        </small>
+                      </span>
+                      <span className="assets-total-meta">
+                        {tx(
+                          `共 ${detailRows.length} 台`,
+                          `共 ${detailRows.length} 台`,
+                          `${detailRows.length} total`,
+                        )}
+                      </span>
+                    </div>
+                    <dl className="assets-total-card-grid">
+                      <div>
+                        <dt>{tx("价格合计", "價格合計", "Cycle Price")}</dt>
+                        <dd>{fmtMoney(tableTotals.priceCny)}</dd>
+                      </div>
+                      <div>
+                        <dt>{tx("剩余价值", "剩餘價值", "Remaining")}</dt>
+                        <dd>{fmtMoney(tableTotals.remainingCny)}</dd>
+                      </div>
+                      <div>
+                        <dt>{tx("月付价格", "月付價格", "Monthly")}</dt>
+                        <dd>{fmtMoney(tableTotals.monthlyCny)}</dd>
+                      </div>
+                      <div>
+                        <dt>{tx("年付价格", "年付價格", "Yearly")}</dt>
+                        <dd>{fmtMoney(tableTotals.yearlyCny)}</dd>
+                      </div>
+                      {hasPremium && (
+                        <div>
+                          <dt>{tx("溢价合计", "溢價合計", "Premium")}</dt>
+                          <dd
+                            style={{
+                              color: privacyMode ? undefined : premiumTone(tableTotals.premiumCny),
+                            }}
+                          >
+                            {fmtSigned(tableTotals.premiumCny)}
+                          </dd>
+                        </div>
+                      )}
+                      {tableTotals.premiumMonthlyCny !== 0 && (
+                        <div>
+                          <dt>{tx("溢价月摊", "溢價月攤", "Amort/mo")}</dt>
+                          <dd>{fmtSigned(tableTotals.premiumMonthlyCny)}/{tx("月", "月", "mo")}</dd>
+                        </div>
+                      )}
+                    </dl>
+                  </div>
+                )}
                 </div>
               )}
             </>
